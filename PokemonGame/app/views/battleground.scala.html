@@ -1,0 +1,169 @@
+@main("Battleground") {
+<div id="content">
+    <div class="playerPanel">
+        <div class="panel p2 prizePanel"  id="p2PrizePanel">
+             <div class="row row-9-100"></div>
+             <div class="row row-40-100">
+                <div class="col col-1-3">
+                    <div class="cardDisplay" id="p2Prize1"></div>
+                </div>
+                <div class="col col-1-3">
+                    <div class="cardDisplay" id="p2Prize2"></div>
+                </div>
+                <div class="col col-1-3">
+                    <div class="cardDisplay" id="p2Prize3"></div>
+                </div>
+            </div>
+            <div class="row row-9-100"></div>
+            <div class="row row-40-100">
+                <div class="col col-1-3">
+                    <div class="cardDisplay" id="p2Prize4"></div>
+                </div>
+                <div class="col col-1-3">
+                    <div class="cardDisplay" id="p2Prize5"></div>
+                </div>
+                <div class="col col-1-3">
+                    <div class="cardDisplay" id="p2Prize6"></div>
+                </div>
+            </div>
+            <div class="row-2-100"></div>
+        </div>
+        <div class="panel p2 activePanel" id="p2ActivePanel">
+            <div class="row row-9-100"></div>
+            <div class="row row-40-100">
+                <div class="col col-1-5">
+                    <div class="cardDisplay"></div>
+                </div>
+                <div class="col col-1-5">
+                    <div class="cardDisplay"></div>
+                </div>
+                <div class="col col-1-5">
+                    <div class="cardDisplay"></div>
+                </div>
+                <div class="col col-1-5">
+                    <div class="cardDisplay"></div>
+                </div>
+                <div class="col col-1-5">
+                    <div class="cardDisplay"></div>
+                </div>
+            </div>
+            <div class="row row-9-100"></div>
+            <div class="row row-40-100">
+                <div class="col col-2-5"></div>
+                <div class="col col-1-5">
+                    <div class="cardDisplay" id="target">
+                    </div>
+                </div>
+                <div class="col col-2-5"></div>
+            </div>
+            <div class="row-2-100"></div>
+        </div>
+        <div class="panel p2 discardAndDeckPanel" id="p2DeckPanel">
+            <div class="row row-9-100"></div>
+            <div class="row row-40-100">
+                <div class="cardDisplay" id="p2Deck"></div>
+            </div>
+            <div class="row row-9-100">
+            	<div class="descriptor" id="p2DeckDescriptor"></div>
+            </div>
+            <div class="row row-40-100">
+                <div class="cardDisplay"></div>
+            </div>
+            <div class="row row-2-100"></div>
+        </div>
+        <div class="handPanel" id="p2HandPanel">
+        </div>
+
+    </div>
+    
+    
+    <div class="playerPanel">
+        <div class="panel p1 prizePanel"  id="p1PrizePanel">
+            <div class="row row-2-100"></div>
+            <div class="row row-40-100">
+                <div class="col col-1-3">
+                    <div class="cardDisplay" id="p1Prize1"></div>
+                </div>
+                <div class="col col-1-3">
+                    <div class="cardDisplay" id="p1Prize2"></div>
+                </div>
+                <div class="col col-1-3">
+                    <div class="cardDisplay" id="p1Prize3"></div>
+                </div>
+            </div>
+            <div class="row row-9-100"></div>
+            <div class="row row-40-100">
+                <div class="col col-1-3">
+                    <div class="cardDisplay" id="p1Prize4"></div>
+                </div>
+                <div class="col col-1-3">
+                    <div class="cardDisplay" id="p1Prize5"></div>
+                </div>
+                <div class="col col-1-3">
+                    <div class="cardDisplay" id="p1Prize6"></div>
+                </div>
+            </div>
+            <div class="row-9-100"><img height="100%"></div>
+        </div>
+        <div class="panel p1 activePanel" id="p1ActivePanel">
+            <div class="row row-2-100"></div>
+            <div class="row row-40-100">
+                <div class="col col-2-5"></div>
+                <div class="col col-1-5">
+                    <div class="cardDisplay" id="p1Active"></div>
+                </div>
+                <div class="col col-2-5"></div>
+            </div>
+            <div class="row row-9-100"></div>
+            <div class="row row-40-100">
+                <div class="col col-1-5">
+                    <div class="cardDisplay"></div>
+                </div>
+                <div class="col col-1-5">
+                    <div class="cardDisplay">
+                    </div>
+                </div>
+                <div class="col col-1-5">
+                    <div class="cardDisplay"></div>
+                </div>
+                <div class="col col-1-5">
+                    <div class="cardDisplay"></div>
+                </div>
+                <div class="col col-1-5">
+                    <div class="cardDisplay"></div>
+                </div>
+            </div>
+            <div class="row row-9-100">
+            	<div class="col col-1-5">
+            	</div>
+            	<div class="col col-1-5 descriptor">
+            	  50/50
+            	</div>
+            	<div class="col col-1-5">
+            	</div>
+            	<div class="col col-1-5">
+            	</div>
+            	<div class="col col-1-5">
+            	</div>
+            </div>
+        </div>
+        <div class="panel p1 discardAndDeckPanel" id="p1DeckPanel">
+            <div class="row row-2-100"></div>
+            <div class="row row-40-100">
+                <div class="cardDisplay" id="p1Deck"></div>
+            </div>
+            <div class="row row-9-100">
+            	<div class="descriptor" id="p1DeckDescriptor"></div>
+            </div>
+            <div class="row row-40-100">
+                <div class="cardDisplay"></div>
+            </div>
+            <div class="row row-9-100"></div>
+        </div>
+        <div class="handPanel" id="p1HandPanel">
+        </div>
+        
+    </div>
+
+</div>
+}
