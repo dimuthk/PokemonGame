@@ -1,14 +1,28 @@
 package actors
 
+import src.board.Board
+import src.board.MessageEvent
+import src.board.SuperVisor
 import akka.actor._
 
-object PlayerActor {
-  def props(out : ActorRef, id : Int) = Props(new PlayerActor(out, id))
-}
+class PlayerActor(out : ActorRef) extends Actor {
 
-class PlayerActor(out : ActorRef, id : Int) extends Actor {
+  //board.registerActor(this)
+
   def receive = {
-    case msg: String =>
-      out ! ("I received your message: " + msg + ". You are client " + id)
+    case msg : String => 
+      //board.processMessage(msg)
+      context.parent ! msg
+      //out ! ("I received your message: " + msg)
+    //case msgEvent : MessageEvent =>
+    //  out ! ("I received from message via eventBus: " + msgEvent.message)
   }
+
+  def sendMessageToClient(msgEvent : MessageEvent) : Unit = {
+    out ! ("I received your message via eventBus: " + msgEvent.message)
+  }
+
+  // Shouldn't matter
+  def compareTo(other : PlayerActor) : Int = 0
+
 }
