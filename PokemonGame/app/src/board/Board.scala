@@ -4,34 +4,33 @@ import actors.PlayerActor
 import akka.actor.ActorRef
 import akka.actor._
 
-class SuperVisor extends Actor {
+case class BoardCommand(cmd : String)
 
-  def receive = {
-    case p : Props => context.actorOf(p, "p")
-    case _ => ()
-  }
+case class StateCommand(state : String)
 
-}
+case class AddChild(actorRef : ActorRef)
 
 class Board {
 
-  val system = ActorSystem("system")
-  val superVisor = system.actorOf(Props[SuperVisor], "superVisor")
+  val eventBus = new StateEventBus()
+  var cnt = 0
 
-  val eventBus : StateEventBus = new StateEventBus()
-
-  def processMessage(message : String) : Unit = {
-    eventBus.publish(MessageEvent("playerChannel", message))
+  def canAccept() : Boolean = {
+    return cnt < 2
   }
 
   def forkPlayerActor(out : ActorRef) : Props = {
-    val p = Props(new PlayerActor(out))
-    superVisor ! p
+    val p = PlayerActor.props(out, this, cnt)
+    cnt += 1
     return p
   }
 
-  def registerActor(actor : PlayerActor) : Unit = {
-    eventBus.subscribe(actor, "playerChannel")
+  def onTerminateSocket() = {
+    cnt -= 1
+  }
+
+  def echo(m : String) {
+    eventBus.publish(MessageEvent("state", m))
   }
 
 }

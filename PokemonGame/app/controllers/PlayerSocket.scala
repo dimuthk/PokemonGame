@@ -1,5 +1,6 @@
 package controllers
 
+import scala.concurrent.Future
 import src.board.Board
 import actors.PlayerActor
 import play.api._
@@ -10,10 +11,17 @@ class PlayerSocket extends Controller {
 
   val board : Board = new Board()
 
-  def index = WebSocket.acceptWithActor[String, String] {
+  /*def index = WebSocket.acceptWithActor[String, String] {
     request => out => {
       board.forkPlayerActor(out)
     }
+  }*/
+
+  def index = WebSocket.tryAcceptWithActor[String, String] {
+    request => Future.successful(board.canAccept() match {
+      case false => Left(Forbidden)
+      case true => Right(board.forkPlayerActor)
+    })
   }
 
 }
