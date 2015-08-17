@@ -5,12 +5,14 @@ import akka.actor._
 import akka.actor.ActorRef
 import akka.event.{EventBus, LookupClassification}
 
-case class MessageEvent(val channel: String, val message: String)
+import play.api.libs.json._
+
+case class StateEvent(val channel : Integer, val state: JsValue)
 
 class StateEventBus extends EventBus with LookupClassification {
 
-  type Event = MessageEvent
-  type Classifier = String
+  type Event = StateEvent
+  type Classifier = Integer
   type Subscriber = PlayerActor
 
   override protected def mapSize() : Int = 1
@@ -21,8 +23,6 @@ class StateEventBus extends EventBus with LookupClassification {
     subscriber.self ! event
   }
 
-  override protected def compareSubscribers(a : Subscriber, b : Subscriber) : Int = {
-    return a.id - b.id
-  }
+  override protected def compareSubscribers(a : Subscriber, b : Subscriber) : Int = a.compareTo(b)
 
 }
