@@ -11,12 +11,6 @@ class PlayerSocket extends Controller {
 
   val board : Board = new Board()
 
-  /*def index = WebSocket.acceptWithActor[String, String] {
-    request => out => {
-      board.forkPlayerActor(out)
-    }
-  }*/
-
   def index = WebSocket.tryAcceptWithActor[String, String] {
     request => Future.successful(board.canAccept() match {
       case false => Left(Forbidden)

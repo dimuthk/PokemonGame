@@ -3,6 +3,7 @@ package src.board
 import actors.PlayerActor
 import akka.actor.ActorRef
 import akka.actor._
+import play.api.libs.json._
 
 case class BoardCommand(cmd : String)
 
