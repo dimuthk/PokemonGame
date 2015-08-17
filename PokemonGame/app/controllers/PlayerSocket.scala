@@ -9,12 +9,10 @@ import play.api.Play.current
 
 class PlayerSocket extends Controller {
 
-  val board : Board = new Board()
-
   def index = WebSocket.tryAcceptWithActor[String, String] {
-    request => Future.successful(board.canAccept() match {
+    request => Future.successful(Board.canAccept match {
       case false => Left(Forbidden)
-      case true => Right(board.forkPlayerActor)
+      case true => Right(Board.forkPlayerActor)
     })
   }
 
