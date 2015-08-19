@@ -7,8 +7,6 @@ import src.json.Identifier
 import src.json.Jsonable
 
 import play.api.libs.json._
-import scala.reflect.ClassTag
-import scala.collection.mutable.MutableList
 
 class Player extends Jsonable {
 
@@ -21,26 +19,13 @@ class Player extends Jsonable {
 
   var active : Option[PokemonCard] = None
 
-  private def optionCardToJson[T <: Card : ClassTag](oc : Option[T]) : JsObject = oc match {
-  	case Some(c) => c.toJson
-  	case None => Placeholder.toJson
-  }
-
-  private def listToJsArray(list : Seq[Card]) : JsArray = {
-  	return list.foldLeft(new JsArray())((curr, c) => curr.prepend(c.toJson))
-  }
-
-  private def optionListToJsArray[T <: Card : ClassTag](list : Seq[Option[T]]) : JsArray = {
-    return list.foldLeft(new JsArray())((curr, c) => curr.prepend(optionCardToJson(c)))
-  }
-
   override def toJsonImpl = Json.obj(
   	Identifier.ACTIVE.toString -> optionCardToJson(active),
-  	Identifier.DECK.toString -> listToJsArray(deck),
-  	Identifier.HAND.toString -> listToJsArray(hand),
-  	Identifier.GARBAGE.toString -> listToJsArray(garbage),
-  	Identifier.BENCH.toString -> optionListToJsArray[PokemonCard](bench),
-  	Identifier.PRIZES.toString -> optionListToJsArray(prizes))
+  	Identifier.DECK.toString -> cardListToJsArray(deck),
+  	Identifier.HAND.toString -> cardListToJsArray(hand),
+  	Identifier.GARBAGE.toString -> cardListToJsArray(garbage),
+  	Identifier.BENCH.toString -> optionCardListToJsArray[PokemonCard](bench),
+  	Identifier.PRIZES.toString -> optionCardListToJsArray(prizes))
 
   override def getIdentifier = Identifier.PLAYER
 

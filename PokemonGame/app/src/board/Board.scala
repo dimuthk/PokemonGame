@@ -2,10 +2,14 @@ package src.board
 
 import actors.PlayerActor
 
+import scala.util.Random
+
 import src.card.Card
+import src.card.energy._
 import src.card.pokemon._
 import src.player.Player
 
+import play.api.Logger
 import play.api.libs.json._
 
 import akka.actor.ActorRef
@@ -58,12 +62,14 @@ object Board {
 
     def populateMachop : Unit = {
       if (id == 1) {
-        p.deck = List.fill(60)(new Machop())
+        p.deck = List.fill(30)(new Machop()) ++ List.fill(30)(new FireEnergy())
+        p.deck = Random.shuffle(p.deck)
       } else {
-        p.deck = List.fill(60)(new Rattata())
+        p.deck = List.fill(30)(new Rattata()) ++ List.fill(30)(new WaterEnergy())
+        p.deck = Random.shuffle(p.deck)
       }
 
-      distributeInitialCards
+      distributeInitialCards()
       ready = true
       if (bothCorrespondentsReady) {
         broadcastState()
@@ -71,27 +77,44 @@ object Board {
     }
 
     def handToActive(handIndex : Int) {
+      val card : Card = p.hand(handIndex)
+      Logger.debug("handToActive(" + handIndex + "). card: " + card + ", hand: " + p.hand)
       if (p.active.isEmpty) {
-        val card : Card = p.hand(handIndex)
         card match {
           case pc : PokemonCard => {
             p.active = Some(pc)
-            p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.deck.length)
+            p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
           }
+          case _ => ()
+        }
+      } else {
+        val active = p.active.get
+        Logger.debug("active not empty")
+        card match {
+          case ec : EnergyCard => {
+            Logger.debug("energy to active")
+            active.energyCards = active.energyCards ++ List(ec)
+            Logger.debug("before: " + p.hand)
+            p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
+            Logger.debug("after: " + p.hand)
+          }
+          case _ => ()
         }
       }
+
       broadcastState()
     }
 
     /**
      * Takes deck and distributes original cards appropriately.
      */
-    def distributeInitialCards : Unit = {
+    def distributeInitialCards() : Unit = {
       for (i <- 0 until 6) {
         p.prizes(i) = Some(p.deck(i))
       }
       p.deck = p.deck.slice(6, 60)
       p.hand = p.deck.slice(0, 7)
+      Logger.debug("init hand: " + p.hand)
       p.deck = p.deck.slice(7, 54)
     }
 
