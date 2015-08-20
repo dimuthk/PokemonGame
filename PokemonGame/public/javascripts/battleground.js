@@ -169,6 +169,36 @@ function showNonActionPopUp(item) {
     })
 }
 
+function energyDisplayStringForPopup(item) {
+	var res = "<table border=\"1\">" +
+		"<tr>" +
+	        "<td>" + energyTag.replace("[IMG_NAME]", "Lightning-Symbol.png") + "</td>" +
+	              "<td>x2</td>" +
+	              "<td>" + energyTag.replace("[IMG_NAME]", "Fire-Symbol.png") + "</td>" +
+	              "<td>x2</td>" +
+	            "</tr>" +
+	            "<tr>" +
+	              "<td>" + energyTag.replace("[IMG_NAME]", "Water-Symbol.png") + "</td>" +
+	              "<td>x2</td>" +
+	              "<td>" + energyTag.replace("[IMG_NAME]", "Grass-Symbol.png") + "</td>" +
+	              "<td>x2</td>" +
+	            "</tr>" +
+	            "<tr>" +
+	              "<td>" + energyTag.replace("[IMG_NAME]", "Fighting-Symbol.png") + "</td>" +
+	              "<td>x2</td>" +
+	              "<td>" + energyTag.replace("[IMG_NAME]", "Psychic-Symbol.png") + "</td>" +
+	              "<td>x2</td>" +
+	            "</tr>" +
+	            "<tr>" +
+	              "<td>" + energyTag.replace("[IMG_NAME]", "Colorless-Symbol.png") + "</td>" +
+	              "<td>x2</td>" +
+	              "<td></td>" +
+	              "<td></td>" +
+	            "</tr>" +
+	            "</table>"
+	return res
+}
+
 function showPopUpActive(item) {
 	var popUp = "<div style=\"background-color: #888888;\">" +
 	      "<div class=\"col col-3-5\">" +
@@ -183,30 +213,17 @@ function showPopUpActive(item) {
 	        "<div class=\"row row-1-10\"></div>" +
 	      "</div>" +
 	      "<div class=\"col col-2-5\">" +
-	        "<div class=\"row row-1-2\" style=\"color: white; text-align: center;\">" +
-	          item.CURR_HP + "/" + item.MAX_HP +
-	          "<table border=\"1\">" +
-	            "<tr>" +
-	              "<td>" + energyTag.replace("[IMG_NAME]", "Colorless-Symbol.png") + "</td>" +
-	              "<td>x2</td>" +
-	              "<td>" + energyTag.replace("[IMG_NAME]", "Colorless-Symbol.png") + "</td>" +
-	              "<td>x2</td>" +
-	            "</tr>" +
-	            "<tr>" +
-	              "<td>" + energyTag.replace("[IMG_NAME]", "Colorless-Symbol.png") + "</td>" +
-	              "<td>x2</td>" +
-	              "<td>" + energyTag.replace("[IMG_NAME]", "Colorless-Symbol.png") + "</td>" +
-	              "<td>x2</td>" +
-	            "</tr>" +
-	            "<tr>" +
-	              "<td>" + energyTag.replace("[IMG_NAME]", "Colorless-Symbol.png") + "</td>" +
-	              "<td>x2</td>" +
-	              "<td>" + energyTag.replace("[IMG_NAME]", "Colorless-Symbol.png") + "</td>" +
-	              "<td>x2</td>" +
-	            "</tr>" +
-	          "</table>" +
- 	        "</div>" +
-	        "<div class=\"row row-1-2\">" +
+	        "<div class=\"row row-1-3\" style=\"background-color: green\">" +
+	            "<br><br><br>Current HP: " + item.CURR_HP + "/" + item.MAX_HP + "<br>" +
+	            "Status Condition: None <br>" +
+	            "Other Conditions: None" +
+	        "</div>" +
+	        "<div class=\"row row-1-3\" style=\"background-color: red\">" +
+	            energyDisplayStringForPopup(item) +	            
+	        "</div>" +
+	        "<div class=\"row row-1-3\" style=\"background-color: blue\">" +
+	          "<button>Move One</button><br><br>" +
+	          "<button>Move Two</button>" +
 	        "</div>" +
 	      "</div>" +
 	    "</div>"
