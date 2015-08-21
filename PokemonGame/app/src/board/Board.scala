@@ -50,6 +50,8 @@ object Board {
     }
   }
 
+  def getOpponent(p : Player) : Player = return if (p == c1.get.p) c2.get.p else c1.get.p
+
   class Correspondent(val eventBus : StateEventBus, val id : Int) {
 
     val p : Player = new Player()
@@ -74,6 +76,15 @@ object Board {
       if (bothCorrespondentsReady) {
         broadcastState()
       }
+    }
+
+    def attack(moveNum : Int) {
+      Logger.debug("attack " + moveNum)
+      val activeCard = p.active.get
+      if (moveNum == 1) {
+        activeCard.firstMove.get.perform(p, getOpponent(p))
+      }
+      broadcastState()
     }
 
     def handToActive(handIndex : Int) {

@@ -16,7 +16,7 @@ abstract class EnergyCard(
     displayName : String,
     imgName : String,
     identifier : Identifier.Value,
-    eType : EnergyType.Value,
+    val eType : EnergyType.Value,
     val energyCount : Int = 1) extends Card(displayName, imgName) {
 
   override def toJsonImpl() = Json.obj(

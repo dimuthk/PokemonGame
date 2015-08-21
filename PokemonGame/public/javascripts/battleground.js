@@ -9,6 +9,8 @@ var popUpTag = "<img src=" + srcTag + " height=\"70%\" width=\"60%\" id=\"[ID]\"
 function establishConnection() {
 	var socket = new WebSocket("ws://localhost:9000/socket")
 
+	$("#content").data("socket", socket)
+
 	socket.onopen = function() {
 		socket.send("BUILD_MACHOP")
 	}
@@ -83,8 +85,9 @@ function repaintForPlayer(data, p1Orient) {
 		  addImageOfItem(active, $("#" + tag), true)
           $("#" + tag + "Descriptor").html(active.CURR_HP + "/" + active.MAX_HP)
           energyDescription("#" + tag + "EnergyIcon", active)
+          $("#" + tag).unbind('click')
           $("#" + tag).click(function() {
-				showPopUpActive($(this).data("card_data"))
+				showPopUpActive($(this).data("card_data"), $(this).attr("id"))
 		  })
 		}
 	}
@@ -111,15 +114,6 @@ function energyDescription(tag, card) {
   }
 
   $(tag).html(energyIcons)
-  //$(tag).html("<font color='red'>&#9679;<br>&#9679;</font>")
-  /*$(tag).html(
-    imgTag.replace("[IMG_NAME]", "Colorless-Symbol.png") +
-    imgTag.replace("[IMG_NAME]", "Fire-Symbol.png") +
-    imgTag.replace("[IMG_NAME]", "Water-Symbol.png") +
-    imgTag.replace("[IMG_NAME]", "Fighting-Symbol.png") +
-    imgTag.replace("[IMG_NAME]", "Grass-Symbol.png") +
-    imgTag.replace("[IMG_NAME]", "Psychic-Symbol.png") +
-    imgTag.replace("[IMG_NAME]", "Lightning-Symbol.png"))*/
 }
 
 
@@ -169,29 +163,42 @@ function showNonActionPopUp(item) {
     })
 }
 
-function energyDisplayStringForPopup(item) {
+function energyDisplayStringForPopup(card) {
+	var energyCnts = {colorless:0, fire:0, water:0, fighting:0, grass:0, psychic:0, thunder:0}
+	for (var i=0; i<card.ENERGY_CARDS.length; i++) {
+    	var energyCard = card.ENERGY_CARDS[i]
+   	 	switch (energyCard.ENERGY_TYPE) {
+      		case "COLORLESS": energyCnts.colorless += 1; break;
+      		case "FIRE": energyCnts.fire += 1; break;
+      		case "WATER": energyCnts.water += 1; break;
+      		case "FIGHTING": energyCnts.fighting += 1; break;
+      		case "GRASS": energyCnts.grass += 1; break;
+     		case "PSYCHIC": energyCnts.psychic += 1; break;
+      		case "THUNDER": energyCnts.thunder += 1; break;
+    	}
+    }
 	var res = "<table border=\"1\">" +
 		"<tr>" +
 	        "<td>" + energyTag.replace("[IMG_NAME]", "Lightning-Symbol.png") + "</td>" +
-	              "<td>x2</td>" +
+	              "<td>x" + energyCnts.thunder + "</td>" +
 	              "<td>" + energyTag.replace("[IMG_NAME]", "Fire-Symbol.png") + "</td>" +
-	              "<td>x2</td>" +
+	              "<td>x" + energyCnts.fire + "</td>" +
 	            "</tr>" +
 	            "<tr>" +
 	              "<td>" + energyTag.replace("[IMG_NAME]", "Water-Symbol.png") + "</td>" +
-	              "<td>x2</td>" +
+	              "<td>x" + energyCnts.water + "</td>" +
 	              "<td>" + energyTag.replace("[IMG_NAME]", "Grass-Symbol.png") + "</td>" +
-	              "<td>x2</td>" +
+	              "<td>x" + energyCnts.grass + "</td>" +
 	            "</tr>" +
 	            "<tr>" +
 	              "<td>" + energyTag.replace("[IMG_NAME]", "Fighting-Symbol.png") + "</td>" +
-	              "<td>x2</td>" +
+	              "<td>x" + energyCnts.fighting + "</td>" +
 	              "<td>" + energyTag.replace("[IMG_NAME]", "Psychic-Symbol.png") + "</td>" +
-	              "<td>x2</td>" +
+	              "<td>x" + energyCnts.psychic + "</td>" +
 	            "</tr>" +
 	            "<tr>" +
 	              "<td>" + energyTag.replace("[IMG_NAME]", "Colorless-Symbol.png") + "</td>" +
-	              "<td>x2</td>" +
+	              "<td>x" + energyCnts.colorless + "</td>" +
 	              "<td></td>" +
 	              "<td></td>" +
 	            "</tr>" +
@@ -199,8 +206,27 @@ function energyDisplayStringForPopup(item) {
 	return res
 }
 
-function showPopUpActive(item) {
-	var popUp = "<div style=\"background-color: #888888;\">" +
+function useAttack(moveNum) {
+	var socket = $("#content").data("socket")
+	socket.send("ATTACK<>" + moveNum)
+	$(".popUp").dialog("close")
+}
+
+function drawMoveButtons(card, tag) {
+	var res = ""
+	if (card.MOVE_ONE_NAME != "NO_MOVE_NAME") {
+		res += "<button class=\"actionButton\" socket=\"socket\" " + card.MOVE_ONE_ENABLED
+		    + " onclick=\"useAttack('one');\">" + card.MOVE_ONE_NAME + "</button><br><br>"
+	}
+	if (card.MOVE_TWO_NAME != "NO_MOVE_NAME") {
+		res += "<button class=\"actionButton\" " + card.MOVE_TWO_ENABLED
+		    + " onclick=\"useAttack('two')\">" + card.MOVE_TWO_NAME + "</button>"
+	}
+	return res
+}
+
+function showPopUpActive(item, tag) {
+	var popUp = "<div style=\"background-color: #888888;\" class=\"popUp\">" +
 	      "<div class=\"col col-3-5\">" +
 	        "<div class=\"row row-1-10\"></div>" +
 	        "<div class=\"row row-8-10\">" +
@@ -212,18 +238,17 @@ function showPopUpActive(item) {
 	        "</div>" +
 	        "<div class=\"row row-1-10\"></div>" +
 	      "</div>" +
-	      "<div class=\"col col-2-5\">" +
-	        "<div class=\"row row-1-3\" style=\"background-color: green\">" +
-	            "<br><br><br>Current HP: " + item.CURR_HP + "/" + item.MAX_HP + "<br>" +
-	            "Status Condition: None <br>" +
+	      "<div class=\"col col-2-5\" style=\"color: white;\">" +
+	        "<div class=\"row row-1-3\" style=\"font-size: 12px;\">" +
+	            "<br><br><br>Current HP: " + item.CURR_HP + "/" + item.MAX_HP + "<br><br>" +
+	            "Status Condition: None <br><br>" +
 	            "Other Conditions: None" +
 	        "</div>" +
-	        "<div class=\"row row-1-3\" style=\"background-color: red\">" +
+	        "<div class=\"row row-1-3\">" +
 	            energyDisplayStringForPopup(item) +	            
 	        "</div>" +
-	        "<div class=\"row row-1-3\" style=\"background-color: blue\">" +
-	          "<button>Move One</button><br><br>" +
-	          "<button>Move Two</button>" +
+	        "<div class=\"row row-1-3\">" +
+	        	drawMoveButtons(item, tag) +
 	        "</div>" +
 	      "</div>" +
 	    "</div>"
