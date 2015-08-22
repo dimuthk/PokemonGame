@@ -12,7 +12,6 @@ class Rattata extends PokemonCard(
 	id = 19,
 	maxHp = 30,
 	firstMove = Some(new Bite()),
-	secondMove = None,
 	energyType = EnergyType.COLORLESS,
 	weakness = Some(EnergyType.FIGHTING),
 	resistance = Some(EnergyType.PSYCHIC),
@@ -24,6 +23,8 @@ class Rattata extends PokemonCard(
 private class Bite extends Move(
 	"Bite",
 	1,
-	Map(),
-	(owner : Player, opp : Player) =>
-	  standardAttack(owner, opp, 20))
+	Map()) {
+
+  override def perform(owner : Player, opp : Player) = standardAttack(owner, opp, 20)
+
+}

@@ -7,6 +7,8 @@ import scala.util.Random
 import src.card.Card
 import src.card.energy._
 import src.card.pokemon._
+import src.move.Move
+import src.move.Status
 import src.player.Player
 
 import play.api.Logger
@@ -64,7 +66,7 @@ object Board {
 
     def populateMachop : Unit = {
       if (id == 1) {
-        p.deck = List.fill(30)(new Machop()) ++ List.fill(30)(new FireEnergy())
+        p.deck = List.fill(20)(new Bulbasaur()) ++ List.fill(20)(new GrassEnergy()) ++ List.fill(20)(new Venusaur())
         p.deck = Random.shuffle(p.deck)
       } else {
         p.deck = List.fill(30)(new Rattata()) ++ List.fill(30)(new WaterEnergy())
@@ -81,9 +83,17 @@ object Board {
     def attack(moveNum : Int) {
       Logger.debug("attack " + moveNum)
       val activeCard = p.active.get
-      if (moveNum == 1) {
-        activeCard.firstMove.get.perform(p, getOpponent(p))
+      val move = if (moveNum == 1) activeCard.firstMove.get else activeCard.secondMove.get
+      if (move.isActivatable) {
+        move.status match {
+          case Status.ACTIVATABLE => move.status = Status.ACTIVATED
+          case Status.ACTIVATED => move.status = Status.ACTIVATABLE
+          case _ => ()
+        }
+      } else {
+        move.perform(p, getOpponent(p))
       }
+      updateMoveStatuses()
       broadcastState()
     }
 
@@ -91,23 +101,36 @@ object Board {
       val card : Card = p.hand(handIndex)
       if (p.active.isEmpty) {
         card match {
+          // Moving basic pokemon from hand to active slot.
           case pc : PokemonCard => {
-            p.active = Some(pc)
-            p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
+            if (pc.evolutionStage == EvolutionStage.BASIC) {
+              p.active = Some(pc)
+              p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
+            }
           }
           case _ => ()
         }
       } else {
         val active = p.active.get
         card match {
+          // Attaching energy card to active pokemon.
           case ec : EnergyCard => {
             active.energyCards = active.energyCards ++ List(ec)
             p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
+          }
+          // Evolving active pokemon.
+          case pc : PokemonCard => {
+            if (pc.isEvolutionOf(active)) {
+              pc.preEvolution = Some(active)
+              p.active = Some(pc)
+              p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
+            }
           }
           case _ => ()
         }
       }
 
+      updateMoveStatuses()
       broadcastState()
     }
 
@@ -117,8 +140,11 @@ object Board {
       if (p.bench(benchIndex).isEmpty) {
         card match {
           case pc : PokemonCard => {
-            p.bench(benchIndex) = Some(pc)
-            p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
+            // Moving basic pokemon to empty bench slot.
+            if (pc.evolutionStage == EvolutionStage.BASIC) {
+              p.bench(benchIndex) = Some(pc)
+              p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
+            }
           }
           case _ => ()
         }
@@ -129,9 +155,18 @@ object Board {
             benchCard.energyCards = benchCard.energyCards ++ List(ec)
             p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
           }
+          // Evolving this bench pokemon.
+          case pc : PokemonCard => {
+            if (pc.isEvolutionOf(benchCard)) {
+              pc.preEvolution = Some(benchCard)
+              p.bench(benchIndex) = Some(pc)
+              p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
+            }
+          }
           case _ => ()
         }
       }
+      updateMoveStatuses()
       broadcastState()
     }
 
@@ -152,9 +187,48 @@ object Board {
 
   }
 
+  def updateMoveStatuses() {
+    Logger.debug("CORRESPONDENTS: " + c1 + ", " + c2)
+    for (p : Player <- List[Player](c1.get.p, c2.get.p)) {
+    //List(c1.get.p, c2.get.p).foreach {
+      if (p.active.isDefined) {
+        val active = p.active.get
+        for (m <- List(p.active.get.firstMove, p.active.get.secondMove)) {
+          if (m.isDefined) {
+            if (m.get.isActivatable) {
+              if (m.get.status != Status.ACTIVATED && active.statusCondition.isEmpty) {
+                m.get.status = Status.ACTIVATABLE
+              }
+            } else {
+            // Active pokemon with non-activatable moves should be enabled if there's enough energy.
+              m.get.status =
+                  if (m.get.hasEnoughEnergy(active.energyCards)) Status.ENABLED else Status.DISABLED
+            }
+          }
+        }
+      }
+
+      for (pc : Option[PokemonCard] <- p.bench) {
+        if (pc.isDefined) {
+          for (m <- List[Option[Move]](pc.get.firstMove, pc.get.secondMove)) {
+            if (m.isDefined) {
+              if (m.get.isActivatable) {
+                if (m.get.status != Status.ACTIVATED && pc.get.statusCondition.isEmpty) {
+                  m.get.status = Status.ACTIVATABLE
+                }
+              } else {
+              // Benched pokemon cannot use non-activatable moves.
+                m.get.status = Status.DISABLED
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   def bothCorrespondentsReady =
       !c1.isEmpty && !c2.isEmpty && c1.get.ready && c2.get.ready
-
 
   def broadcastState() {
     eventBus.publish(StateEvent(

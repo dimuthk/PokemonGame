@@ -1,19 +1,19 @@
 package src.move
 
+import play.api.libs.json._
 import src.card.energy.EnergyCard
 import src.card.energy.EnergyType
+import src.json.Identifier
+import src.json.Jsonable
 import src.player.Player
 
 abstract class Move(
 	val name : String,
 	val totalEnergyReq : Int,
 	val specialEnergyReq : Map[EnergyType.Value, Int],
-	private val action : (Player, Player) => Unit) {
+  val isActivatable : Boolean = false) extends Jsonable {
 
-	/**
-	 * Flag marking that this move is disabled for reasons outside of energy requirements.
-	 */
-	var disabled = false
+  var status : Status.Value = Status.DISABLED
 
 	def hasEnoughEnergy(energyCards : Seq[EnergyCard]) : Boolean = {
 		val total = energyCards.map { card => card.energyCount }.sum
@@ -36,16 +36,32 @@ abstract class Move(
     return hasEnoughEnergy(owner.active.get.energyCards)
   }
   
-  /**
-   * Used to perform the attack. This will make preliminary checks such as
-   * that the board is setup properly, etc.
-   */
-  def perform(owner : Player, opp : Player) : Unit = {
-    if (opp.active.isEmpty || owner.active.isEmpty) {
-      // throw exception, this should never happen
-      return;
-    }
-    action(owner, opp)
-  }
+  def perform(owner : Player, opp : Player) : Unit
 
+  override def toJsonImpl() = Json.obj(
+    Identifier.MOVE_NAME.toString -> name,
+    Identifier.MOVE_STATUS.toString -> status)
+
+  override def getIdentifier() = Identifier.MOVE
+
+}
+
+/**
+ * Enabled: corresponding to a general clickable action which does something and
+ *   then terminates.
+ * Disabled: corresponding to a state where the action is clickable, but currently
+ *   disabled for whatever reason.
+ * Activatable: corresponding to a clickable action which will activate something
+ *   on the board which persists.
+ * Activated: corresponding to a state where some persistent background state has
+ *   been activated. You should be able to click this and revert the state to
+ *   activatable.
+ * Passive: corresponding to a persistent background effect which by default is
+ *   activated. It may still be disabled, however.
+ */
+object Status extends Enumeration {
+
+  type Status = Value
+
+  val ENABLED, DISABLED, ACTIVATABLE, ACTIVATED, PASSIVE = Value
 }

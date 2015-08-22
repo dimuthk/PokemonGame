@@ -28,20 +28,64 @@ function repaintBoard(data, socket) {
 	repaintForPlayer(data.player1, true)
 	repaintForPlayer(data.player2, false)
 	
-	$("#p1Active").droppable({
+	$("#p1ActiveDisplay").droppable({
 				accept: "*",
 				drop: function(event, ui) {
-					handToActive(event, ui, $(this), socket)
+          var handTag = $(ui.draggable).attr("id")
+          var handIndex = handTag.charAt(handTag.length - 1)
+					handToActive(handIndex)
 				} });
 
   for (var i = 1; i < 6; i++) {
-    $("#p1Bench" + i).droppable({
+    $("#p1BenchDisplay" + i).droppable({
         accept: "*",
         drop : function(event, ui) {
-          handToBench(event, ui, $(this).attr("id"), socket)
+          var handTag = $(ui.draggable).attr("id")
+          var handIndex = handTag.charAt(handTag.length - 1)
+          var benchTag = $(this).attr("id")
+          var benchIndex = benchTag.charAt(benchTag.length - 1)
+          handToBench(handIndex, benchIndex)
         }
     })
   }
+
+  colorBoardIfActivated(data)
+}
+
+function colorBoardIfActivated(data) {
+  if (colorBoardIfActivatedForCard(data.player1.ACTIVE)) {
+    return
+  }
+  for (var i=0; i<data.player1.BENCH.length; i++) {
+    if (colorBoardIfActivatedForCard(data.player1.BENCH[i])) {
+      return
+    }
+  }
+  if (colorBoardIfActivatedForCard(data.player2.ACTIVE)) {
+    return
+  }
+  for (var i=0; i<data.player2.BENCH.length; i++) {
+    if (colorBoardIfActivatedForCard(data.player2.BENCH[i])) {
+      return
+    }
+  }
+  // revert the board to original color if no power took place.
+  $("#content").animate({backgroundColor: "gray"}, 2000)
+}
+
+function colorBoardIfActivatedForCard(card) {
+  if (isPlaceholder(card)) {
+    return
+  }
+  for (var i=0; i<card.MOVES.length; i++) {
+    if (!isPlaceholder(card.MOVES[i])) {
+      if (card.MOVES[i].MOVE_STATUS == "ACTIVATED") {
+        $("#content").animate({backgroundColor: "green"}, 2000)
+        return true
+      }
+    }
+  }
+  return false
 }
 
 function repaintForPlayer(data, p1Orient) {
@@ -49,14 +93,14 @@ function repaintForPlayer(data, p1Orient) {
 		var prizes = data.PRIZES
 		for (var i = 0; i < prizes.length; i++) {
 			var tag = (p1Orient ? "p1Prize" : "p2Prize") + (i+1)
-			addImageOfItem(prizes[i], $("#" + tag), false)
+			addImageOfItem(prizes[i], $("#" + tag), "", false)
 		}
 	}
 	if ('DECK' in data) {
 		var deck = data.DECK
 		if (deck.length > 0) {
 			var tag = p1Orient ? "p1Prize" : "p2Prize"
-			addImageOfItem(deck[0], $("#" + tag), false)
+			addImageOfItem(deck[0], $("#" + tag), "", false)
 			$("#p1DeckDescriptor").html("Cards left: " + deck.length);
 		}
 	}
@@ -92,7 +136,12 @@ function repaintForPlayer(data, p1Orient) {
       if(!isPlaceholder(bench[i])) {
         var tagWithoutIndex = p1Orient ? "p1Bench" : "p2Bench"
         var tag = tagWithoutIndex + (i+1)
-        addImageOfItem(bench[i], $("#" + tag), true)
+        addImageOfItem(bench[i], $("#" + tagWithoutIndex + "Display" + (i+1)), tagWithoutIndex + (i+1), true)
+        energyDescription("#" + tagWithoutIndex + "EnergyIcon" + (i+1), bench[i])
+        $("#" + tag).unbind('click')
+        $("#" + tag).click(function() {
+				  showPopUpActive($(this).data("card_data"), $(this).attr("id"))
+		    })
         $("#" + tagWithoutIndex + "Descriptor" + (i+1)).html(bench[i].CURR_HP + "/" + bench[i].MAX_HP)
       }
     }
@@ -102,15 +151,36 @@ function repaintForPlayer(data, p1Orient) {
 		var active = data.ACTIVE
 		if (active.IDENTIFIER != "PLACEHOLDER") {
       var tag = p1Orient ? "p1Active" : "p2Active"
-		  addImageOfItem(active, $("#" + tag), true)
-      $("#" + tag + "Descriptor").html(active.CURR_HP + "/" + active.MAX_HP)
+		  addImageOfItem(active, $("#" + tag + "Display"), tag, true)
+      $("#" + tag + "Descriptor").html(populateDescriptor(active))
       energyDescription("#" + tag + "EnergyIcon", active)
       $("#" + tag).unbind('click')
       $("#" + tag).click(function() {
-				showPopUpActive($(this).data("card_data"), $(this).attr("id"))
+				if ($(this).hasClass("noClick")) {
+					$(this).removeClass("noClick")
+				} else {
+				  //showPopUpActive($(this).data("card_data"), $(this).attr("id"))
+          //alert($(this).attr("id"))
+				  showPopUpActive($(this).data("card_data"), $(this).attr("id"))
+        }
 		  })
+		  $("#" + tag).draggable({
+			  start: function (event, ui) {
+				  $(this).addClass("noClick")
+        },
+			  revert: true,
+				cursor: 'move'
+      })
 		}
 	}
+}
+
+function populateDescriptor(card) {
+  var res = card.CURR_HP + "/" + card.MAX_HP
+  if (card.POISON_STATUS != "None") {
+    res += "<font color='purple'> &#9679;</font>"
+  }
+  return res
 }
 
 function energyDescription(tag, card) {
@@ -137,12 +207,12 @@ function energyDescription(tag, card) {
 }
 
 
-function handToActive(event, ui, handItem, socket) {
-	socket.send("HAND_TO_ACTIVE<>" + $(ui.draggable).attr("id"))
+function handToActive(handIndex) {
+  $("#content").data("socket").send("HAND_TO_ACTIVE<>" + handIndex)
 }
 
-function handToBench(event, ui, benchId, socket) {
-  socket.send("HAND_TO_BENCH<>" + $(ui.draggable).attr("id") + "<>" + benchId)
+function handToBench(handIndex, benchIndex) {
+  $("#content").data("socket").send("HAND_TO_BENCH<>" + handIndex + "<>" + benchIndex)
 }
 
 function isPlaceholder(item) {
@@ -157,12 +227,13 @@ function addCardToHand(item, location, idName, showFront) {
 	$("#" + idName).data("card_data", item)
 }
 
-function addImageOfItem(item, location, showFront) {
+function addImageOfItem(item, location, idName, showFront) {
 	if (!isPlaceholder(item)) {
 		location.html(
-			imgTag.replace("[IMG_NAME]", showFront ? item.IMG_NAME : cardBackImg),
-			imgTag.replace("[ID]", location))
-        $(location).data("card_data", item)
+			imgTag.replace("[IMG_NAME]", showFront ? item.IMG_NAME : cardBackImg)
+			      .replace("[ID]", idName))
+    $("#" + idName).data("card_data", item)
+    $("#" + idName).effect("highlight", {color:"#669966"}, 3000)
 	}
 }
 
@@ -211,7 +282,7 @@ function energyDisplayStringForPopup(card) {
       		case "WATER": energyCnts.water += 1; break;
       		case "FIGHTING": energyCnts.fighting += 1; break;
       		case "GRASS": energyCnts.grass += 1; break;
-     		case "PSYCHIC": energyCnts.psychic += 1; break;
+     		  case "PSYCHIC": energyCnts.psychic += 1; break;
       		case "THUNDER": energyCnts.thunder += 1; break;
     	}
     }
@@ -252,15 +323,35 @@ function useAttack(moveNum) {
 
 function drawMoveButtons(card, tag) {
 	var res = ""
-	if (card.MOVE_ONE_NAME != "NO_MOVE_NAME") {
-		res += "<button class=\"actionButton\" socket=\"socket\" " + card.MOVE_ONE_ENABLED
-		    + " onclick=\"useAttack('one');\">" + card.MOVE_ONE_NAME + "</button><br><br>"
-	}
-	if (card.MOVE_TWO_NAME != "NO_MOVE_NAME") {
-		res += "<button class=\"actionButton\" " + card.MOVE_TWO_ENABLED
-		    + " onclick=\"useAttack('two')\">" + card.MOVE_TWO_NAME + "</button>"
-	}
+  for (var i=0; i<card.MOVES.length; i++) {
+    if (!isPlaceholder(card.MOVES[i])) {
+      var move = card.MOVES[i]
+      var name = ""
+      switch (move.MOVE_STATUS) {
+        case "ACTIVATABLE":
+          name = "<font style=\"color:red;\">Activate " + move.MOVE_NAME + "</font>"
+          break;
+        case "ACTIVATED":
+          name = "<font style=\"color:red;\">Deactivate " + move.MOVE_NAME + "</font>"
+          break;
+        default:
+          name = move.MOVE_NAME
+          break;
+      }
+      var disabledStr = move.MOVE_STATUS == "DISABLED" ? "disabled" : ""
+		  res += "<button class=\"actionButton\" " + disabledStr
+		    + " onclick=\"useAttack('one');\">" + name + "</button><br><br>"
+    }
+  }
 	return res
+}
+
+function statusConditionTag(item) {
+  if (item.POISON_STATUS != "None") {
+    return "<font style=\"color: purple;\">" + item.POISON_STATUS + "</font>"
+  } else {
+    return item.POISON_STATUS
+  }
 }
 
 function showPopUpActive(item, tag) {
@@ -279,7 +370,7 @@ function showPopUpActive(item, tag) {
 	      "<div class=\"col col-2-5\" style=\"color: white;\">" +
 	        "<div class=\"row row-1-3\" style=\"font-size: 12px;\">" +
 	            "<br><br><br>Current HP: " + item.CURR_HP + "/" + item.MAX_HP + "<br><br>" +
-	            "Status Condition: None <br><br>" +
+	            "Status Condition: " + statusConditionTag(item) + "<br><br>" +
 	            "Other Conditions: None" +
 	        "</div>" +
 	        "<div class=\"row row-1-3\">" +

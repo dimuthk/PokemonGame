@@ -34,8 +34,8 @@ class PlayerActor(out : ActorRef, var correspondent : Correspondent) extends Act
       Logger.debug("Incoming message: " + m)
       val contents = m.split("<>")
       contents(0) match {
-        case "HAND_TO_ACTIVE" => correspondent.handToActive(contents(1).split("Hand")(1).toInt)
-        case "HAND_TO_BENCH" => correspondent.handToBench(contents(1).split("Hand")(1).toInt, contents(2).split("Bench")(1).toInt - 1)
+        case "HAND_TO_ACTIVE" => correspondent.handToActive(contents(1).toInt)
+        case "HAND_TO_BENCH" => correspondent.handToBench(contents(1).toInt, contents(2).toInt - 1)
         case "ATTACK" => correspondent.attack(if (contents(1) == "one") 1 else 2)
       }
     }

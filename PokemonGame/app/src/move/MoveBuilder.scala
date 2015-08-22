@@ -1,6 +1,7 @@
 package src.move
 
 import src.card.pokemon.PokemonCard
+import src.card.pokemon.PoisonStatus
 import src.player.Player;
 
 /**
@@ -44,7 +45,7 @@ object MoveBuilder {
    */
   def poisonAttack(owner : Player, opp : Player, baseDmg : Int) : Unit = {
     standardAttack(owner, opp, baseDmg)
-    //opp.active.get.poisonStatus = PoisonStatus.POISONED
+    opp.active.get.poisonStatus = Some(PoisonStatus.POISONED)
   }
   
 }

@@ -12,10 +12,8 @@ class Machop extends PokemonCard(
 	id = 66,
 	maxHp = 50,
 	firstMove = Some(new LowKick()),
-	secondMove = None,
 	energyType = EnergyType.FIGHTING,
 	weakness = Some(EnergyType.PSYCHIC),
-	resistance = None,
 	retreatCost = 1) {
 
 	override def getIdentifier() = Identifier.MACHOP
@@ -24,6 +22,8 @@ class Machop extends PokemonCard(
 private class LowKick extends Move(
     "Low Kick",
     1,
-    Map(EnergyType.FIGHTING -> 1),
-    (owner : Player, opp : Player) =>
-      standardAttack(owner, opp, 20))
+    Map(EnergyType.FIGHTING -> 1)) {
+
+  override def perform(owner : Player, opp : Player) = standardAttack(owner, opp, 20)
+
+}
