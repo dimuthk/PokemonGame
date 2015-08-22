@@ -89,6 +89,14 @@ body {
     height: 9%;
 }
 
+.row-10-100 {
+    height: 10%;
+}
+
+.row-90-100 {
+    height: 90%;
+}
+
 .row-2-100 {
     height: 2%;
 }
@@ -114,6 +122,10 @@ body {
 
 .col-2-5 {
     width: 40%;
+}
+
+.col-3-5 {
+    width: 60%;
 }
 
 .col-1-5 {
@@ -171,4 +183,10 @@ body {
 
 .energyNorth {
   margin-left: 5px;
+}
+
+.ui-dialog-success-dialog {
+  border-radius: 10px;
+  position: relative;
+  background-color: green;
 }

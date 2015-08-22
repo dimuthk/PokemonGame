@@ -27,6 +27,9 @@ function repaintBoard(data, socket) {
 				drop: function(event, ui) {
 					handToActive(event, ui, $(this), socket)
 				} });
+  $("#p1Active").mouseover(function() {
+    closeUp("#p1Active")
+  })
 }
 
 function repaintForPlayer(data, p1Orient) {
@@ -90,15 +93,6 @@ function energyDescription(tag, card) {
   }
 
   $(tag).html(energyIcons)
-  //$(tag).html("<font color='red'>&#9679;<br>&#9679;</font>")
-  /*$(tag).html(
-    imgTag.replace("[IMG_NAME]", "Colorless-Symbol.png") +
-    imgTag.replace("[IMG_NAME]", "Fire-Symbol.png") +
-    imgTag.replace("[IMG_NAME]", "Water-Symbol.png") +
-    imgTag.replace("[IMG_NAME]", "Fighting-Symbol.png") +
-    imgTag.replace("[IMG_NAME]", "Grass-Symbol.png") +
-    imgTag.replace("[IMG_NAME]", "Psychic-Symbol.png") +
-    imgTag.replace("[IMG_NAME]", "Lightning-Symbol.png"))*/
 }
 
 
@@ -121,4 +115,19 @@ function addImageOfItem(item, location, showFront) {
 	if (!isPlaceholder(item)) {
 		location.html(imgTag.replace("[IMG_NAME]", showFront ? item.IMG_NAME : cardBackImg))
 	}
+}
+
+function closeUp(tag) {
+  var popUpDiv = "<div>" +
+      "<div class=\"row row-10-100\" style=\"background-color: green;\"></div>" +
+      "<div class=\"row row-90-100\" style=\"background-color: purple;\">" +
+        "<div class=\"col col-3-5\" style=\"background-color: red;\"></div>" +
+        "<div class=\"col col-2-5\" style=\"background-color: blue;\"></div>" +
+      "</div>" +
+      "</div>"
+
+  $(popUpDiv).dialog({
+    height: 500,
+    width: 350
+  })
 }
