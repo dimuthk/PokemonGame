@@ -1,88 +1,51 @@
+@prizeIndex(i : Int, j : Int) = @{
+  (i * 3) + j
+}
+
 @main("Battleground") {
+
 <div id="content">
     <div class="playerPanel">
         <div class="panel p2 prizePanel"  id="p2PrizePanel">
-             <div class="row row-9-100"></div>
-             <div class="row row-40-100">
-                <div class="col col-1-3">
-                    <div class="cardDisplay" id="p2Prize1"></div>
-                </div>
-                <div class="col col-1-3">
-                    <div class="cardDisplay" id="p2Prize2"></div>
-                </div>
-                <div class="col col-1-3">
-                    <div class="cardDisplay" id="p2Prize3"></div>
-                </div>
-            </div>
+          @for(i <- 0 to 1) {
             <div class="row row-9-100"></div>
             <div class="row row-40-100">
+              @for(j <- 1 to 3) {
                 <div class="col col-1-3">
-                    <div class="cardDisplay" id="p2Prize4"></div>
+                  <div class="cardDisplay" id="p2Prize@prizeIndex(i,j)" ></div>
                 </div>
-                <div class="col col-1-3">
-                    <div class="cardDisplay" id="p2Prize5"></div>
-                </div>
-                <div class="col col-1-3">
-                    <div class="cardDisplay" id="p2Prize6"></div>
-                </div>
+              }
             </div>
-            <div class="row-2-100"></div>
+          }
+          <div class="row-2-100"></div>
         </div>
         <div class="panel p2 activePanel" id="p2ActivePanel">
-            <div class="row row-9-100"></div>
+            <div class="row row-9-100">
+              @for(i <- 1 to 5) {
+            	  <div class="col col-1-5 descriptorNorth" id="p2BenchDescriptor@i"></div>
+              }
+            </div>
             <div class="row row-40-100">
+              @for(i <- 1 to 5) {
                 <div class="col col-1-5">
                   <div class="col col-1-10">
-                    <div class="energyPanel energyNorth"></div>
+                    <div class="energyPanel energyNorth" id="p2BenchEnergyIcon@i"></div>
                   </div>
                   <div class="col col-9-10">
-                    <div class="cardDisplay"></div>
+                    <div class="cardDisplay" id="p2Bench@i"></div>
                   </div>
                 </div>
-                <div class="col col-1-5">
-                  <div class="col col-1-10">
-                    <div class="energyPanel energyNorth"></div>
-                  </div>
-                  <div class="col col-9-10">
-                    <div class="cardDisplay"></div>
-                  </div>
-                </div>
-                <div class="col col-1-5">
-                  <div class="col col-1-10">
-                    <div class="energyPanel energyNorth"></div>
-                  </div>
-                  <div class="col col-9-10">
-                    <div class="cardDisplay"></div>
-                  </div>
-                </div>
-                <div class="col col-1-5">
-                  <div class="col col-1-10">
-                    <div class="energyPanel energyNorth"></div>
-                  </div>
-                  <div class="col col-9-10">
-                    <div class="cardDisplay"></div>
-                  </div>
-                </div>
-                <div class="col col-1-5">
-                  <div class="col col-1-10">
-                    <div class="energyPanel energyNorth"></div>
-                  </div>
-                  <div class="col col-9-10">
-                    <div class="cardDisplay"></div>
-                  </div>
-                </div>
+              }
             </div>
             <div class="row row-9-100">
-                <div class="col col-1-5"></div>
-                <div class="col col-1-5"></div>
+                <div class="col col-2-5"></div>
             	  <div class="col col-1-5">
                   <div class="col col-1-10"></div>
                   <div class="col col-9-10">
                     <div class="descriptorNorth" id="p2ActiveDescriptor"></div>
                   </div>
                 </div>
-                <div class="col col-1-5"></div>
-                <div class="col col-1-5"></div>
+                <div class="col col-2-5"></div>
             </div>
             <div class="row row-40-100">
                 <div class="col col-2-5"></div>
@@ -111,8 +74,7 @@
             </div>
             <div class="row row-2-100"></div>
         </div>
-        <div class="handPanel" id="p2HandPanel">
-        </div>
+        <div class="handPanel" id="p2HandPanel"></div>
 
     </div>
     
@@ -120,30 +82,16 @@
     <div class="playerPanel">
         <div class="panel p1 prizePanel"  id="p1PrizePanel">
             <div class="row row-2-100"></div>
-            <div class="row row-40-100">
-                <div class="col col-1-3">
-                    <div class="cardDisplay" id="p1Prize1"></div>
+              @for(i <- 0 to 1) {
+                <div class="row row-40-100">
+                  @for(j <- 1 to 3) {
+                    <div class="col col-1-3">
+                      <div class="cardDisplay" id="p1Prize@prizeIndex(i,j)" ></div>
+                    </div>
+                  }
                 </div>
-                <div class="col col-1-3">
-                    <div class="cardDisplay" id="p1Prize2"></div>
-                </div>
-                <div class="col col-1-3">
-                    <div class="cardDisplay" id="p1Prize3"></div>
-                </div>
-            </div>
-            <div class="row row-9-100"></div>
-            <div class="row row-40-100">
-                <div class="col col-1-3">
-                    <div class="cardDisplay" id="p1Prize4"></div>
-                </div>
-                <div class="col col-1-3">
-                    <div class="cardDisplay" id="p1Prize5"></div>
-                </div>
-                <div class="col col-1-3">
-                    <div class="cardDisplay" id="p1Prize6"></div>
-                </div>
-            </div>
-            <div class="row-9-100"><img height="100%"></div>
+                <div class="row row-9-100"></div>
+              }
         </div>
         <div class="panel p1 activePanel" id="p1ActivePanel">
             <div class="row row-2-100"></div>
@@ -160,70 +108,31 @@
                 <div class="col col-2-5"></div>
             </div>
             <div class="row row-9-100">
-            	<div class="col col-1-5"></div>
-            	<div class="col col-1-5"></div>
+            	<div class="col col-2-5"></div>
             	<div class="col col-1-5">
                 <div class="col col-9-10">
                   <div class="descriptorSouth" id="p1ActiveDescriptor"></div>
                 </div>
                 <div class="col col-1-10"></div>
             	</div>
-            	<div class="col col-1-5"></div>
-            	<div class="col col-1-5"></div>
+            	<div class="col col-2-5"></div>
             </div>
             <div class="row row-40-100">
+              @for(i <- 1 to 5) {
                 <div class="col col-1-5">
-                    <div class="col col-9-10">
-                      <div class="cardDisplay"></div>
-                    </div>
-                    <div class="col col-1-10">
-                        <div class="energyPanel energySouth"></div>
-                    </div>
+                  <div class="col col-9-10">
+                    <div class="cardDisplay" id="p1Bench@i"></div>
+                  </div>
+                  <div class="col col-1-10">
+                    <div class="energyPanel energySouth" id="p1BenchEnergyIcon@i"></div>
+                  </div>
                 </div>
-                <div class="col col-1-5">
-                    <div class="col col-9-10">
-                      <div class="cardDisplay"></div>
-                    </div>
-                    <div class="col col-1-10">
-                        <div class="energyPanel energySouth"></div>
-                    </div>
-                </div>
-                <div class="col col-1-5">
-                    <div class="col col-9-10">
-                      <div class="cardDisplay"></div>
-                    </div>
-                    <div class="col col-1-10">
-                        <div class="energyPanel energySouth"></div>
-                    </div>
-                </div>
-                <div class="col col-1-5">
-                    <div class="col col-9-10">
-                      <div class="cardDisplay"></div>
-                    </div>
-                    <div class="col col-1-10">
-                        <div class="energyPanel energySouth"></div>
-                    </div>
-                </div>
-                <div class="col col-1-5">
-                    <div class="col col-9-10">
-                      <div class="cardDisplay"></div>
-                    </div>
-                    <div class="col col-1-10">
-                        <div class="energyPanel energySouth"></div>
-                    </div>
-                </div>
+              }
             </div>
             <div class="row row-9-100">
-            	<div class="col col-1-5">
-            	</div>
-            	<div class="col col-1-5 descriptor">
-            	</div>
-            	<div class="col col-1-5">
-            	</div>
-            	<div class="col col-1-5">
-            	</div>
-            	<div class="col col-1-5">
-            	</div>
+              @for(i <- 1 to 5) {
+            	  <div class="col col-1-5 descriptorSouth" id="p1BenchDescriptor@i"></div>
+              }
             </div>
         </div>
         <div class="panel p1 discardAndDeckPanel" id="p1DeckPanel">

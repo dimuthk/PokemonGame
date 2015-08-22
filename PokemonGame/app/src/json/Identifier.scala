@@ -1,6 +1,6 @@
 package src.json
 
-// next id: 26
+// next id: 31
 object Identifier extends Enumeration {
 
   type Identifier = Value
@@ -45,6 +45,15 @@ object Identifier extends Enumeration {
   val MAX_HP = Value(4)
   val CURR_HP = Value(5)
   val ENERGY_CARDS = Value(24)
+
+  /*
+   * MOVE ATTRIBUTES
+   */
+  val MOVE_ONE_NAME = Value(26)
+  val MOVE_TWO_NAME = Value(27)
+  val MOVE_ONE_ENABLED = Value(29)
+  val MOVE_TWO_ENABLED = Value(30)
+  val NO_MOVE_NAME = Value(28)
    
   /*
    * POKEMON

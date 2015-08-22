@@ -1,9 +1,15 @@
 var cardBackImg = "Card-Back.jpg"
 var srcTag = "/assets/images/[IMG_NAME]"
-var imgTag = "<img src=" + srcTag + " height=\"100%\" width=\"100%\" id=[ID]>" 
+var imgTag = "<img src=" + srcTag + " height=\"100%\" width=\"100%\" id=[ID] dat=\"[DAT]\"></img>" 
+var energyTag = "<img src=" + srcTag + " height=\"50%\" width=\"50%\" id=[ID] dat=\"[DAT]\"></img>" 
+
+var popUpTag = "<img src=" + srcTag + " height=\"70%\" width=\"60%\" id=\"[ID]\" dat=\"[DAT]\">" 
+
 
 function establishConnection() {
 	var socket = new WebSocket("ws://localhost:9000/socket")
+
+	$("#content").data("socket", socket)
 
 	socket.onopen = function() {
 		socket.send("BUILD_MACHOP")
@@ -27,9 +33,15 @@ function repaintBoard(data, socket) {
 				drop: function(event, ui) {
 					handToActive(event, ui, $(this), socket)
 				} });
-  $("#p1Active").mouseover(function() {
-    closeUp("#p1Active")
-  })
+
+  for (var i = 1; i < 6; i++) {
+    $("#p1Bench" + i).droppable({
+        accept: "*",
+        drop : function(event, ui) {
+          handToBench(event, ui, $(this).attr("id"), socket)
+        }
+    })
+  }
 }
 
 function repaintForPlayer(data, p1Orient) {
@@ -55,19 +67,48 @@ function repaintForPlayer(data, p1Orient) {
 		for (var i = 0; i < hand.length; i++) {
 			var tag = (p1Orient ? "p1Hand" : "p2Hand") + i
 			addCardToHand(hand[i], loc, tag, p1Orient)
-			$("#" + tag).draggable({revert: true, cursor: 'move'})
+			if (p1Orient) {
+				$("#" + tag).click(function() {
+					if ($(this).hasClass("noClick")) {
+						$(this).removeClass("noClick")
+					} else {
+					showNonActionPopUp($(this).data("card_data"))	
+					}
+				})
+				$("#" + tag).draggable({
+					start: function (event, ui) {
+						$(this).addClass("noClick")
+					},
+					revert: true,
+					cursor: 'move'
+				})
+			}
+			
 		}
 	}
+  if ('BENCH' in data) {
+    var bench = data.BENCH
+    for (var i = 0; i < bench.length; i++) {
+      if(!isPlaceholder(bench[i])) {
+        var tagWithoutIndex = p1Orient ? "p1Bench" : "p2Bench"
+        var tag = tagWithoutIndex + (i+1)
+        addImageOfItem(bench[i], $("#" + tag), true)
+        $("#" + tagWithoutIndex + "Descriptor" + (i+1)).html(bench[i].CURR_HP + "/" + bench[i].MAX_HP)
+      }
+    }
+  }
 	
 	if ('ACTIVE' in data) {
 		var active = data.ACTIVE
 		if (active.IDENTIFIER != "PLACEHOLDER") {
-          var tag = p1Orient ? "p1Active" : "p2Active"
+      var tag = p1Orient ? "p1Active" : "p2Active"
 		  addImageOfItem(active, $("#" + tag), true)
       $("#" + tag + "Descriptor").html(active.CURR_HP + "/" + active.MAX_HP)
-      //$("#" + tag + "EnergyIcon").html(imgTag.replace("[IMG_NAME]", "Fire-Symbol.png") + imgTag.replace("[IMG_NAME]", "Fire-Symbol.png"))
       energyDescription("#" + tag + "EnergyIcon", active)
-      //$("#" + tag + "EnergyDescriptor").html("<font color='white'>x1<br>x2</font>")
+      $("#" + tag).unbind('click')
+      $("#" + tag).click(function() {
+				showPopUpActive($(this).data("card_data"), $(this).attr("id"))
+		  })
 		}
 	}
 }
@@ -100,6 +141,10 @@ function handToActive(event, ui, handItem, socket) {
 	socket.send("HAND_TO_ACTIVE<>" + $(ui.draggable).attr("id"))
 }
 
+function handToBench(event, ui, benchId, socket) {
+  socket.send("HAND_TO_BENCH<>" + $(ui.draggable).attr("id") + "<>" + benchId)
+}
+
 function isPlaceholder(item) {
 	return item.IDENTIFIER == "PLACEHOLDER"
 }
@@ -109,11 +154,15 @@ function addCardToHand(item, location, idName, showFront) {
 			+ imgTag.replace("[IMG_NAME]", showFront ? item.IMG_NAME : cardBackImg)
 			        .replace("[ID]", idName)
 			+ "</div>")
+	$("#" + idName).data("card_data", item)
 }
 
 function addImageOfItem(item, location, showFront) {
 	if (!isPlaceholder(item)) {
-		location.html(imgTag.replace("[IMG_NAME]", showFront ? item.IMG_NAME : cardBackImg))
+		location.html(
+			imgTag.replace("[IMG_NAME]", showFront ? item.IMG_NAME : cardBackImg),
+			imgTag.replace("[ID]", location))
+        $(location).data("card_data", item)
 	}
 }
 
@@ -130,4 +179,121 @@ function closeUp(tag) {
     height: 500,
     width: 350
   })
+}
+
+function showNonActionPopUp(item) {
+	var popUp = "<div style=\"background-color: #888888;\">" +
+	        "<div class=\"row row-1-10\"></div>" +
+	        "<div class=\"row row-8-10\">" +
+	          "<div class=\"col col-1-5\"></div>" +
+	          "<div class=\"col col-3-5\">" +
+	            imgTag.replace("[IMG_NAME]", item.IMG_NAME) +
+	          "</div>" +
+	          "<div class=\"col col-1-5\"></div>" +
+	        "</div>" +
+	        "<div class=\"row row-1-10\"></div>" +
+	    "</div>"
+    $(popUp).dialog({
+    	modal: true,
+        height: 400,
+        width: 350,
+        title: item.DISPLAY_NAME
+    })
+}
+
+function energyDisplayStringForPopup(card) {
+	var energyCnts = {colorless:0, fire:0, water:0, fighting:0, grass:0, psychic:0, thunder:0}
+	for (var i=0; i<card.ENERGY_CARDS.length; i++) {
+    	var energyCard = card.ENERGY_CARDS[i]
+   	 	switch (energyCard.ENERGY_TYPE) {
+      		case "COLORLESS": energyCnts.colorless += 1; break;
+      		case "FIRE": energyCnts.fire += 1; break;
+      		case "WATER": energyCnts.water += 1; break;
+      		case "FIGHTING": energyCnts.fighting += 1; break;
+      		case "GRASS": energyCnts.grass += 1; break;
+     		case "PSYCHIC": energyCnts.psychic += 1; break;
+      		case "THUNDER": energyCnts.thunder += 1; break;
+    	}
+    }
+	var res = "<table border=\"1\">" +
+		"<tr>" +
+	        "<td>" + energyTag.replace("[IMG_NAME]", "Lightning-Symbol.png") + "</td>" +
+	              "<td>x" + energyCnts.thunder + "</td>" +
+	              "<td>" + energyTag.replace("[IMG_NAME]", "Fire-Symbol.png") + "</td>" +
+	              "<td>x" + energyCnts.fire + "</td>" +
+	            "</tr>" +
+	            "<tr>" +
+	              "<td>" + energyTag.replace("[IMG_NAME]", "Water-Symbol.png") + "</td>" +
+	              "<td>x" + energyCnts.water + "</td>" +
+	              "<td>" + energyTag.replace("[IMG_NAME]", "Grass-Symbol.png") + "</td>" +
+	              "<td>x" + energyCnts.grass + "</td>" +
+	            "</tr>" +
+	            "<tr>" +
+	              "<td>" + energyTag.replace("[IMG_NAME]", "Fighting-Symbol.png") + "</td>" +
+	              "<td>x" + energyCnts.fighting + "</td>" +
+	              "<td>" + energyTag.replace("[IMG_NAME]", "Psychic-Symbol.png") + "</td>" +
+	              "<td>x" + energyCnts.psychic + "</td>" +
+	            "</tr>" +
+	            "<tr>" +
+	              "<td>" + energyTag.replace("[IMG_NAME]", "Colorless-Symbol.png") + "</td>" +
+	              "<td>x" + energyCnts.colorless + "</td>" +
+	              "<td></td>" +
+	              "<td></td>" +
+	            "</tr>" +
+	            "</table>"
+	return res
+}
+
+function useAttack(moveNum) {
+	var socket = $("#content").data("socket")
+	socket.send("ATTACK<>" + moveNum)
+	$(".popUp").dialog("close")
+}
+
+function drawMoveButtons(card, tag) {
+	var res = ""
+	if (card.MOVE_ONE_NAME != "NO_MOVE_NAME") {
+		res += "<button class=\"actionButton\" socket=\"socket\" " + card.MOVE_ONE_ENABLED
+		    + " onclick=\"useAttack('one');\">" + card.MOVE_ONE_NAME + "</button><br><br>"
+	}
+	if (card.MOVE_TWO_NAME != "NO_MOVE_NAME") {
+		res += "<button class=\"actionButton\" " + card.MOVE_TWO_ENABLED
+		    + " onclick=\"useAttack('two')\">" + card.MOVE_TWO_NAME + "</button>"
+	}
+	return res
+}
+
+function showPopUpActive(item, tag) {
+	var popUp = "<div style=\"background-color: #888888;\" class=\"popUp\">" +
+	      "<div class=\"col col-3-5\">" +
+	        "<div class=\"row row-1-10\"></div>" +
+	        "<div class=\"row row-8-10\">" +
+	          "<div class=\"col col-1-5\"></div>" +
+	          "<div class=\"col col-3-5\">" +
+	            imgTag.replace("[IMG_NAME]", item.IMG_NAME) +
+	          "</div>" +
+	          "<div class=\"col col-1-5\"></div>" +
+	        "</div>" +
+	        "<div class=\"row row-1-10\"></div>" +
+	      "</div>" +
+	      "<div class=\"col col-2-5\" style=\"color: white;\">" +
+	        "<div class=\"row row-1-3\" style=\"font-size: 12px;\">" +
+	            "<br><br><br>Current HP: " + item.CURR_HP + "/" + item.MAX_HP + "<br><br>" +
+	            "Status Condition: None <br><br>" +
+	            "Other Conditions: None" +
+	        "</div>" +
+	        "<div class=\"row row-1-3\">" +
+	            energyDisplayStringForPopup(item) +	            
+	        "</div>" +
+	        "<div class=\"row row-1-3\">" +
+	        	drawMoveButtons(item, tag) +
+	        "</div>" +
+	      "</div>" +
+	    "</div>"
+    $(popUp).dialog({
+    	modal: true,
+        height: 400,
+        width: 550,
+        title: item.DISPLAY_NAME
+    })
 }

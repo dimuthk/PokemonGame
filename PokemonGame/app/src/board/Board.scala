@@ -50,6 +50,8 @@ object Board {
     }
   }
 
+  def getOpponent(p : Player) : Player = return if (p == c1.get.p) c2.get.p else c1.get.p
+
   class Correspondent(val eventBus : StateEventBus, val id : Int) {
 
     val p : Player = new Player()
@@ -76,9 +78,17 @@ object Board {
       }
     }
 
+    def attack(moveNum : Int) {
+      Logger.debug("attack " + moveNum)
+      val activeCard = p.active.get
+      if (moveNum == 1) {
+        activeCard.firstMove.get.perform(p, getOpponent(p))
+      }
+      broadcastState()
+    }
+
     def handToActive(handIndex : Int) {
       val card : Card = p.hand(handIndex)
-      Logger.debug("handToActive(" + handIndex + "). card: " + card + ", hand: " + p.hand)
       if (p.active.isEmpty) {
         card match {
           case pc : PokemonCard => {
@@ -89,19 +99,39 @@ object Board {
         }
       } else {
         val active = p.active.get
-        Logger.debug("active not empty")
         card match {
           case ec : EnergyCard => {
-            Logger.debug("energy to active")
             active.energyCards = active.energyCards ++ List(ec)
-            Logger.debug("before: " + p.hand)
             p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
-            Logger.debug("after: " + p.hand)
           }
           case _ => ()
         }
       }
 
+      broadcastState()
+    }
+
+    def handToBench(handIndex : Int, benchIndex : Int) {
+      Logger.debug("handToBench(" + handIndex + ", " + benchIndex + ")")
+      val card : Card = p.hand(handIndex)
+      if (p.bench(benchIndex).isEmpty) {
+        card match {
+          case pc : PokemonCard => {
+            p.bench(benchIndex) = Some(pc)
+            p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
+          }
+          case _ => ()
+        }
+      } else {
+        val benchCard = p.bench(benchIndex).get
+        card match {
+          case ec : EnergyCard => {
+            benchCard.energyCards = benchCard.energyCards ++ List(ec)
+            p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
+          }
+          case _ => ()
+        }
+      }
       broadcastState()
     }
 
