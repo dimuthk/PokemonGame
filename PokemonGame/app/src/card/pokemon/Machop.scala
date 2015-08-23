@@ -9,15 +9,13 @@ import src.card.energy.EnergyType
 class Machop extends PokemonCard(
 	"Machop",
 	"Machop-Base-Set-52.jpg",
+	Identifier.MACHOP,
 	id = 66,
 	maxHp = 50,
 	firstMove = Some(new LowKick()),
 	energyType = EnergyType.FIGHTING,
 	weakness = Some(EnergyType.PSYCHIC),
-	retreatCost = 1) {
-
-	override def getIdentifier() = Identifier.MACHOP
-}
+	retreatCost = 1)
 
 private class LowKick extends Move(
     "Low Kick",

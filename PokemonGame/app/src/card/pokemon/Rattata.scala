@@ -9,16 +9,14 @@ import src.card.energy.EnergyType
 class Rattata extends PokemonCard(
 	"Rattata",
 	"Rattata-Base-Set-61.jpg",
+	Identifier.RATTATA,
 	id = 19,
 	maxHp = 30,
 	firstMove = Some(new Bite()),
 	energyType = EnergyType.COLORLESS,
 	weakness = Some(EnergyType.FIGHTING),
 	resistance = Some(EnergyType.PSYCHIC),
-	retreatCost = 0) {
-
-	override def getIdentifier() = Identifier.RATTATA
-}
+	retreatCost = 0)
 
 private class Bite extends Move(
 	"Bite",

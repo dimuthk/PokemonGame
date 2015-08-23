@@ -1,8 +1,13 @@
 package src.move
 
 import src.card.pokemon.PokemonCard
-import src.card.pokemon.PoisonStatus
-import src.player.Player;
+import src.card.condition.GeneralCondition
+import src.card.condition.PoisonStatus
+import src.card.condition.StatusCondition
+import src.card.energy.EnergyType
+import src.player.Player
+
+import scala.util.Random
 
 /**
  * A library of helper methods to help compose attacks; this will reduce
@@ -29,6 +34,13 @@ object MoveBuilder {
       modifiedDmg -= 30
     }
 
+    if (attacker.generalCondition.isDefined) {
+      modifiedDmg = attacker.generalCondition.get.modifyOffensive(owner, opp, modifiedDmg)
+    }
+    if (defender.generalCondition.isDefined) {
+      modifiedDmg = defender.generalCondition.get.modifyDefensive(owner, opp, modifiedDmg)
+    }
+
     return math.max(modifiedDmg, 0)
   }
   
@@ -39,7 +51,23 @@ object MoveBuilder {
     var dmg = calculateDmg(owner, opp, baseDmg)
     opp.active.get.takeDamage(dmg)
   }
-  
+
+  def standardAttackPlusExtra(
+      owner : Player,
+      opp : Player,
+      baseDmg : Int,
+      eType : EnergyType.Value,
+      initialReq : Int) : Unit = {
+    var newDmg = baseDmg
+    val eCount = owner.active.get.getTotalEnergy(Some(eType))
+    if (eCount - initialReq > 1) {
+      newDmg = baseDmg + 20
+    } else if (eCount - initialReq > 0) {
+      newDmg = baseDmg + 10
+    }
+    standardAttack(owner, opp, newDmg)
+  }
+
   /**
    * Does standard damage along with inflicting poison status.
    */
@@ -47,5 +75,35 @@ object MoveBuilder {
     standardAttack(owner, opp, baseDmg)
     opp.active.get.poisonStatus = Some(PoisonStatus.POISONED)
   }
+
+  def energyDiscardAttack(
+        owner : Player,
+        opp : Player,
+        baseDmg : Int,
+        eType : EnergyType.Value,
+        cnt : Int = 1) : Unit = {
+    standardAttack(owner, opp, baseDmg)
+    val discardedCards = owner.active.get.discardEnergy(eType, cnt)
+    owner.garbage = owner.garbage ++ discardedCards   
+  }
+
+  def paralyzeChanceAttack(owner : Player, opp : Player, baseDmg : Int) : Unit = {
+    standardAttack(owner, opp, baseDmg)
+    if (flippedHeads()) {
+      opp.active.get.statusCondition = Some(StatusCondition.PARALYZED)
+      opp.notify(opp.active.get.displayName + " is paralyzed!")
+    }
+  }
+
+  def setGeneralConditionChance(owner : Player, opp : Player, condition : GeneralCondition) : Unit = {
+    if (flippedHeads()) {
+      owner.active.get.generalCondition = Some(condition)
+      owner.notify(condition.name + " successful!")
+    } else {
+      owner.notify(condition.name + " failed")
+    }
+  }
+
+  def flippedHeads() = Random.nextBoolean()
   
 }

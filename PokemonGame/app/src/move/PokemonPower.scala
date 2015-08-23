@@ -12,9 +12,9 @@ abstract class PokemonPower(
 
   var activated = false
 
-  override def canUse(owner : Player, opp : Player) : Boolean = {
+  /*override def canUse(owner : Player, opp : Player) : Boolean = {
     return true
-  }
+  }*/
 
   override def perform(owner : Player, opp : Player) : Unit = {
     if (isActivatable) {

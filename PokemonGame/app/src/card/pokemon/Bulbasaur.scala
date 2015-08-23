@@ -9,17 +9,14 @@ import src.card.energy.EnergyType
 class Bulbasaur extends PokemonCard(
     "Bulbasaur",
     "Bulbasaur-Base-Set-44.jpg",
+    Identifier.BULBASAUR,
     id = 1,
     maxHp = 40,
     firstMove = Some(new LeechSeed()),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.FIRE),
     resistance = None,
-    retreatCost = 1) {
-
-  override def getIdentifier() = Identifier.BULBASAUR
-
-}
+    retreatCost = 1)
 
 private class LeechSeed extends Move(
     "Leech Seed",
@@ -32,5 +29,4 @@ private class LeechSeed extends Move(
     }
     standardAttack(owner, opp, 20)
   }
-
 }

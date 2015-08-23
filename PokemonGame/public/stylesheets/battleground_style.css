@@ -249,3 +249,12 @@ span {
 button:disabled {
   opacity: 0.5;
 }
+
+.notification {
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+  color: white;
+  font-size: 20px;
+  text-align: center;
+}

@@ -1,6 +1,6 @@
 package src.json
 
-// next id: 38
+// next id: 47
 object Identifier extends Enumeration {
 
   type Identifier = Value
@@ -26,6 +26,7 @@ object Identifier extends Enumeration {
   val DECK = Value(11)
   val GARBAGE = Value(12)
   val PRIZES = Value(13)
+  val NOTIFICATION = Value(44)
 
   /*
    * ENERGY CARD ATTRIBUTES
@@ -59,6 +60,8 @@ object Identifier extends Enumeration {
    * STATUS ATTRIBUTES
    */
   val POISON_STATUS = Value(33)
+  val STATUS_CONDITION = Value(45)
+  val GENERAL_CONDITION = Value(46)
    
   /*
    * POKEMON
@@ -68,5 +71,11 @@ object Identifier extends Enumeration {
   val BULBASAUR = Value(31)
   val IVYSAUR = Value(32)
   val VENUSAUR = Value(34) 
+  val CHARMANDER = Value(38)
+  val CHARMELEON = Value(39)
+  val CHARIZARD = Value(40)
+  val SQUIRTLE = Value(41)
+  val WARTORTLE = Value(42)
+  val BLASTOISE = Value(43)
      
 }

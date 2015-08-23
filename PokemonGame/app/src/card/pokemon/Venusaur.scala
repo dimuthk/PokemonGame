@@ -11,17 +11,15 @@ import src.card.energy.EnergyType
 class Venusaur extends PokemonCard(
     "Venusaur",
     "Venusaur-Base-Set-15.jpg",
+    Identifier.VENUSAUR,
     id = 3,
     maxHp = 100,
     firstMove = Some(new EnergyTrans()),
     secondMove = Some(new Solarbeam()),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.FIRE),
-    retreatCost = 2) {
-    //evolutionStage = EvolutionStage.STAGE_TWO) {
-
-
-  override def getIdentifier() = Identifier.VENUSAUR
+    retreatCost = 2,
+    evolutionStage = EvolutionStage.STAGE_TWO) {
 
   override def isEvolutionOf(pokemon : PokemonCard) = pokemon.id == 2
 

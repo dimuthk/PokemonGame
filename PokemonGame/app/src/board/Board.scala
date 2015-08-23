@@ -67,10 +67,10 @@ object Board {
 
     def populateMachop : Unit = {
       if (id == 1) {
-        p.deck = List.fill(20)(new Bulbasaur()) ++ List.fill(20)(new GrassEnergy()) ++ List.fill(20)(new Venusaur())
+        p.deck = List.fill(20)(new Blastoise()) ++ List.fill(20)(new WaterEnergy())
         p.deck = Random.shuffle(p.deck)
       } else {
-        p.deck = List.fill(30)(new Rattata()) ++ List.fill(30)(new WaterEnergy())
+        p.deck = List.fill(20)(new Bulbasaur()) ++ List.fill(20)(new Ivysaur()) ++ List.fill(20)(new Venusaur())
         p.deck = Random.shuffle(p.deck)
       }
 
@@ -221,7 +221,7 @@ object Board {
           // Evolving active pokemon.
           case pc : PokemonCard => {
             if (pc.isEvolutionOf(active)) {
-              pc.preEvolution = Some(active)
+              pc.evolveOver(active)
               p.active = Some(pc)
               p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
             }
@@ -257,7 +257,7 @@ object Board {
           // Evolving this bench pokemon.
           case pc : PokemonCard => {
             if (pc.isEvolutionOf(benchCard)) {
-              pc.preEvolution = Some(benchCard)
+              pc.evolveOver(benchCard)
               p.bench(benchIndex) = Some(pc)
               p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
             }
@@ -285,9 +285,7 @@ object Board {
   }
 
   def updateMoveStatuses() {
-    Logger.debug("CORRESPONDENTS: " + c1 + ", " + c2)
     for (p : Player <- List[Player](c1.get.p, c2.get.p)) {
-    //List(c1.get.p, c2.get.p).foreach {
       if (p.active.isDefined) {
         val active = p.active.get
         for (m <- List(p.active.get.firstMove, p.active.get.secondMove)) {
@@ -297,9 +295,15 @@ object Board {
                 m.get.status = Status.ACTIVATABLE
               }
             } else {
-            // Active pokemon with non-activatable moves should be enabled if there's enough energy.
-              m.get.status =
-                  if (m.get.hasEnoughEnergy(active.energyCards)) Status.ENABLED else Status.DISABLED
+              m.get match {
+                // Passive powers
+                case power : PokemonPower => power.status =
+                  if (active.statusCondition.isEmpty) Status.PASSIVE else Status.DISABLED
+                 // Active pokemon with non-activatable moves should be enabled if there's enough energy.
+                case move : Move => move.status =
+                  if (move.hasEnoughEnergy(p, active.energyCards)) Status.ENABLED else Status.DISABLED
+              }
+            
             }
           }
         }
@@ -314,8 +318,10 @@ object Board {
                   m.get.status = Status.ACTIVATABLE
                 }
               } else {
-              // Benched pokemon cannot use non-activatable moves.
-                m.get.status = Status.DISABLED
+                m.get match {
+                  case power : PokemonPower => power.status = Status.PASSIVE
+                  case move : Move => move.status = Status.DISABLED
+                }
               }
             }
           }
@@ -332,6 +338,8 @@ object Board {
       1, JsObject(Seq("player1" -> c1.get.p.toJson, "player2" -> c2.get.p.toJson))))
     eventBus.publish(StateEvent(
       2, JsObject(Seq("player1" -> c2.get.p.toJson, "player2" -> c1.get.p.toJson))))
+    c1.get.p.notification = None
+    c2.get.p.notification = None
   }
 
 }

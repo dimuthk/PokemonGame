@@ -15,7 +15,7 @@ abstract class Move(
 
   var status : Status.Value = Status.DISABLED
 
-	def hasEnoughEnergy(energyCards : Seq[EnergyCard]) : Boolean = {
+	def hasEnoughEnergy(p : Player, energyCards : Seq[EnergyCard]) : Boolean = {
 		val total = energyCards.map { card => card.energyCount }.sum
 		if (total < totalEnergyReq) {
 			return false
@@ -32,9 +32,9 @@ abstract class Move(
     	return true
   }
   
-  def canUse(owner : Player, opp : Player) : Boolean = {
-    return hasEnoughEnergy(owner.active.get.energyCards)
-  }
+  //def canUse(owner : Player, opp : Player) : Boolean = {
+  //  return hasEnoughEnergy(owner.active.get.energyCards)
+ // }
   
   def perform(owner : Player, opp : Player) : Unit
 

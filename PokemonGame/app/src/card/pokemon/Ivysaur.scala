@@ -9,6 +9,7 @@ import src.card.energy.EnergyType
 class Ivysaur extends PokemonCard(
     "Ivysaur",
     "Ivysaur-Base-Set-30.jpg",
+    Identifier.IVYSAUR,
     id = 2,
     maxHp = 60,
     firstMove = Some(new VineWhip()),
@@ -17,8 +18,6 @@ class Ivysaur extends PokemonCard(
     weakness = Some(EnergyType.FIRE),
     retreatCost = 1,
     evolutionStage = EvolutionStage.STAGE_ONE) {
-
-  override def getIdentifier() = Identifier.IVYSAUR
 
   override def isEvolutionOf(pokemon : PokemonCard) = pokemon.id == 1
 

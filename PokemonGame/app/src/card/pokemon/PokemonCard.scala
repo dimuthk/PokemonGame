@@ -2,6 +2,9 @@ package src.card.pokemon
 
 import play.api.libs.json._
 import src.card.Card
+import src.card.condition.GeneralCondition
+import src.card.condition.PoisonStatus
+import src.card.condition.StatusCondition
 import src.card.energy.EnergyCard
 import src.card.energy.EnergyType
 import src.json.Identifier
@@ -10,6 +13,7 @@ import src.move.Move
 abstract class PokemonCard(
 	displayName : String,
 	imgName : String,
+  val identifier : Identifier.Value,
 	val id : Int,
 	val maxHp : Int,
 	val firstMove: Option[Move] = None,
@@ -30,20 +34,58 @@ abstract class PokemonCard(
 
   var statusCondition : Option[StatusCondition.Value] = None
 
+  var generalCondition : Option[GeneralCondition] = None
+
+  override def getIdentifier() = identifier
+
 	override def toJsonImpl() = Json.obj(
 		Identifier.DISPLAY_NAME.toString -> displayName,
 		Identifier.MAX_HP.toString -> maxHp,
 		Identifier.CURR_HP.toString -> currHp,
 		Identifier.IMG_NAME.toString -> imgName,
     Identifier.ENERGY_CARDS.toString -> cardListToJsArray(energyCards),
+    Identifier.ENERGY_TYPE.toString -> energyType,
     Identifier.MOVES.toString -> optionMoveListToJsArray(List(firstMove, secondMove)),
     Identifier.POISON_STATUS.toString -> (poisonStatus match {
       case Some(p : PoisonStatus.Value) => p.toString
       case None => "None"
+    }),
+    Identifier.STATUS_CONDITION.toString -> (statusCondition match {
+      case Some(s : StatusCondition.Value) => s.toString
+      case None => "None"
+    }),
+    Identifier.GENERAL_CONDITION.toString -> (generalCondition match {
+      case Some(g : GeneralCondition) => g.name
+      case None => "None"
     }))
 
-  def getTotalEnergy() : Int = {
-    return energyCards.length
+  def getTotalEnergy(oEType : Option[EnergyType.Value] = None) : Int = {
+    oEType match {
+      case Some(eType) => return energyCards.filter(_.eType == eType).length
+      case None => return energyCards.length
+    }
+  }
+
+  def evolveOver(pc : PokemonCard) {
+    energyCards = pc.energyCards
+    pc.energyCards = Nil
+    preEvolution = Some(pc)
+  }
+
+  def discardEnergy(eType : EnergyType.Value, cnt : Int = 1) : Seq[EnergyCard] = {
+    var discardedCards : Seq[EnergyCard] = List()
+    var currentCnt = cnt
+    for (i <- 0 until energyCards.length) {
+      if (eType == EnergyType.COLORLESS || energyCards(i).eType == eType) {
+        discardedCards = discardedCards ++ List(energyCards(i))
+        currentCnt = currentCnt - 1
+      }
+      if (currentCnt == 0) {
+        energyCards = energyCards diff discardedCards
+        return discardedCards
+      }
+    }
+    throw new Exception("Not enough energy for discarding")
   }
 
 	def takeDamage(amount : Int) : Unit = {
@@ -69,19 +111,4 @@ object EvolutionStage extends Enumeration {
   type EvolutionStage = Value
 
   val BASIC, STAGE_ONE, STAGE_TWO = Value
-}
-
-object StatusCondition extends Enumeration {
-
-  type StatusCondition = Value
-
-  val PARALYZED, CONFUSED, ASLEEP = Value
-}
-
-object PoisonStatus extends Enumeration {
-
-  type PoisonStatus = Value
-
-  val POISONED= Value("Poisoned")
-  val TOXIC = Value("Toxic")
 }

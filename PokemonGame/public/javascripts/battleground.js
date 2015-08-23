@@ -101,7 +101,15 @@ function colorBoardIfActivatedForCard(card) {
   for (var i=0; i<card.MOVES.length; i++) {
     if (!isPlaceholder(card.MOVES[i])) {
       if (card.MOVES[i].MOVE_STATUS == "ACTIVATED") {
-        $("#content").animate({backgroundColor: "green"}, 2000)
+        switch (card.ENERGY_TYPE) {
+          case "GRASS":
+            $("#content").animate({backgroundColor: "green"}, 2000);
+            break;
+          case "WATER":
+            $("#content").animate({backgroundColor: "blue"}, 2000);
+            break;
+          default: break;
+        }
         return true
       }
     }
@@ -125,6 +133,16 @@ function repaintForPlayer(data, p1Orient) {
 			$("#p1DeckDescriptor").html("Cards left: " + deck.length);
 		}
 	}
+  if ('NOTIFICATION' in data) {
+    var tag = p1Orient ? "p1Notification" : "p2Notification"
+    $("#" + tag).empty()
+    $("#" + tag).css({opacity: 100})
+    var notification = data.NOTIFICATION
+    if (!isPlaceholder(notification)) {
+      $("#" + tag).html(notification)
+      $("#" + tag).animate({opacity: 0}, 1000)
+    }
+  }
 	if ('HAND' in data) {
 		var hand = data.HAND
 		var loc = $(p1Orient ? "#p1HandPanel" : "#p2HandPanel")
@@ -205,17 +223,27 @@ function repaintForPlayer(data, p1Orient) {
 			  start: function (event, ui) {
 				  $(this).addClass("noClick")
         },
-			  //revert: true,
 				cursor: 'move'
       })
 		}
 	}
+  if ('GARBAGE' in data) {
+    var garbage = data.GARBAGE
+    var tag = p1Orient ? "p1Garbage" : "p2Garbage"
+    $("#" + tag + "Display").empty()
+    for (var i = 0; i < garbage.length; i++) {
+      addImageOfItem(garbage[garbage.length -1], $("#" + tag + "Display"), tag, true)
+    }
+  }
 }
 
 function populateDescriptor(card) {
   var res = card.CURR_HP + "/" + card.MAX_HP
   if (card.POISON_STATUS != "None") {
     res += "<font color='purple'> &#9679;</font>"
+  }
+  if (card.STATUS_CONDITION != "None") {
+    res += "<font color='yellow'> &#9679;</font>"
   }
   return res
 }
@@ -387,11 +415,14 @@ function drawMoveButtons(card, tag) {
         case "ACTIVATED":
           name = "<font style=\"color:red;\">Deactivate " + move.MOVE_NAME + "</font>"
           break;
+        case "PASSIVE":
+          name = "<font style=\"color:blue;\">" + move.MOVE_NAME + "</font>"
+          break;
         default:
           name = move.MOVE_NAME
           break;
       }
-      var disabledStr = move.MOVE_STATUS == "DISABLED" ? "disabled" : ""
+      var disabledStr = (move.MOVE_STATUS == "DISABLED" || move.MOVE_STATUS == "PASSIVE") ? "disabled" : ""
 		  res += "<button class=\"actionButton\" " + disabledStr
 		    + " onclick=\"useAttack('" + (i+1) + "', '" + tag + "');\">" + name + "</button><br><br>"
     }
@@ -402,8 +433,18 @@ function drawMoveButtons(card, tag) {
 function statusConditionTag(item) {
   if (item.POISON_STATUS != "None") {
     return "<font style=\"color: purple;\">" + item.POISON_STATUS + "</font>"
+  } else if (item.STATUS_CONDITION != "None") {
+    return "<font style=\"color: yellow;\">" + item.STATUS_CONDITION + "</font>"
   } else {
     return item.POISON_STATUS
+  }
+}
+
+function generalConditionTag(item) {
+  if (item.GENERAL_CONDITION != "None") {
+    return "<font style=\"color: blue;\">" + item.GENERAL_CONDITION + "</font>"
+  } else {
+    return item.GENERAL_CONDITION
   }
 }
 
@@ -424,7 +465,7 @@ function showPopUpActive(item, tag) {
 	        "<div class=\"row row-1-3\" style=\"font-size: 12px;\">" +
 	            "<br><br><br>Current HP: " + item.CURR_HP + "/" + item.MAX_HP + "<br><br>" +
 	            "Status Condition: " + statusConditionTag(item) + "<br><br>" +
-	            "Other Conditions: None" +
+	            "Other Conditions: " + generalConditionTag(item) +
 	        "</div>" +
 	        "<div class=\"row row-1-3\">" +
 	            energyDisplayStringForPopup(item) +	            
