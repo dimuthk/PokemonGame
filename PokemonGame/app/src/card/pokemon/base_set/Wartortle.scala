@@ -4,13 +4,15 @@ import src.json.Identifier
 import src.move.Move
 import src.move.MoveBuilder._
 import src.player.Player
-import src.card.condition.GeneralCondition
-import src.card.condition.WithdrawCondition
+import src.card.condition.PreventDamageCondition
 import src.card.energy.EnergyType
+import src.card.pokemon._
+import src.card.Deck
 
 class Wartortle extends PokemonCard(
     "Wartortle",
     "Wartortle-Base-Set-42.jpg",
+    Deck.BASE_SET,
     Identifier.IVYSAUR,
     id = 8,
     maxHp = 70,
@@ -31,7 +33,7 @@ private class WithdrawWortortle extends Move(
   Map(EnergyType.WATER -> 1)) {
 
   override def perform(owner : Player, opp : Player) =
-      setGeneralConditionChance(owner, opp, new WithdrawCondition())
+      setGeneralConditionChance(owner, opp, new PreventDamageCondition("Withdraw"))
 }
 
 private class WartortleBite extends Move(

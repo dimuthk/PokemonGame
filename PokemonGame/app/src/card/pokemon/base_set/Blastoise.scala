@@ -1,5 +1,7 @@
-package src.card.pokemon
+package src.card.pokemon.base_set
 
+import src.card.Deck
+import src.card.pokemon._
 import src.json.Identifier
 import src.move.Move
 import src.move.MoveBuilder._
@@ -12,6 +14,7 @@ import src.card.energy.WaterEnergy
 class Blastoise extends PokemonCard(
     "Blastoise",
     "Blastoise-Base-Set-2.jpg",
+    Deck.BASE_SET,
     Identifier.BLASTOISE,
     id = 9,
     maxHp = 100,

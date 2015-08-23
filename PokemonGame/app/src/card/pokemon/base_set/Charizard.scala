@@ -7,10 +7,13 @@ import src.move.PokemonPower
 import src.player.Player
 import src.card.energy.EnergyCard
 import src.card.energy.EnergyType
+import src.card.pokemon._
+import src.card.Deck
 
 class Charizard extends PokemonCard(
     "Charizard",
     "Charizard-Base-Set-4.jpg",
+    Deck.BASE_SET,
     Identifier.CHARIZARD,
     id = 6,
     maxHp = 120,

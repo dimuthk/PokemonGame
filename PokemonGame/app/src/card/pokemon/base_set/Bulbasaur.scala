@@ -1,14 +1,17 @@
-package src.card.pokemon
+package src.card.pokemon.base_set
 
 import src.json.Identifier
 import src.move.Move
 import src.move.MoveBuilder._
 import src.player.Player
 import src.card.energy.EnergyType
+import src.card.Deck
+import src.card.pokemon._
 
 class Bulbasaur extends PokemonCard(
     "Bulbasaur",
     "Bulbasaur-Base-Set-44.jpg",
+    Deck.BASE_SET,
     Identifier.BULBASAUR,
     id = 1,
     maxHp = 40,

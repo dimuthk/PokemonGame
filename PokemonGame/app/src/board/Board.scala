@@ -67,10 +67,10 @@ object Board {
 
     def populateMachop : Unit = {
       if (id == 1) {
-        p.deck = List.fill(20)(new Blastoise()) ++ List.fill(20)(new WaterEnergy())
+        p.deck = List.fill(20)(new Squirtle()) ++ List.fill(20)(new WaterEnergy())
         p.deck = Random.shuffle(p.deck)
       } else {
-        p.deck = List.fill(20)(new Bulbasaur()) ++ List.fill(20)(new Ivysaur()) ++ List.fill(20)(new Venusaur())
+        p.deck = List.fill(20)(new Caterpie()) ++ List.fill(20)(new Metapod()) ++ List.fill(20)(new GrassEnergy())
         p.deck = Random.shuffle(p.deck)
       }
 

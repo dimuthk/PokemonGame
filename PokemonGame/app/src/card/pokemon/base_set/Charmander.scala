@@ -5,10 +5,13 @@ import src.move.Move
 import src.move.MoveBuilder._
 import src.player.Player
 import src.card.energy.EnergyType
+import src.card.pokemon._
+import src.card.Deck
 
 class Charmander extends PokemonCard(
 	"Charmander",
 	"Charmander-Base-Set-46.jpg",
+	Deck.BASE_SET,
 	Identifier.CHARMANDER,
 	id = 4,
 	maxHp = 50,

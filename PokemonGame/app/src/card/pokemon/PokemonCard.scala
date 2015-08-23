@@ -2,6 +2,7 @@ package src.card.pokemon
 
 import play.api.libs.json._
 import src.card.Card
+import src.card.Deck
 import src.card.condition.GeneralCondition
 import src.card.condition.PoisonStatus
 import src.card.condition.StatusCondition
@@ -13,6 +14,7 @@ import src.move.Move
 abstract class PokemonCard(
 	displayName : String,
 	imgName : String,
+  deck : Deck.Value,
   val identifier : Identifier.Value,
 	val id : Int,
 	val maxHp : Int,
@@ -22,7 +24,7 @@ abstract class PokemonCard(
 	val weakness : Option[EnergyType.Value] = None,
   val resistance : Option[EnergyType.Value] = None,
   val retreatCost : Int,
-  val evolutionStage : EvolutionStage.Value = EvolutionStage.BASIC) extends Card(displayName, imgName) {
+  val evolutionStage : EvolutionStage.Value = EvolutionStage.BASIC) extends Card(displayName, imgName, deck) {
 
   var currHp : Int = maxHp
 

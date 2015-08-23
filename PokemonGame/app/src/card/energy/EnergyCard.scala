@@ -1,6 +1,7 @@
 package src.card.energy
 
 import src.card.Card
+import src.card.Deck
 import src.json.Identifier
 
 import play.api.libs.json._
@@ -17,7 +18,8 @@ abstract class EnergyCard(
     imgName : String,
     identifier : Identifier.Value,
     val eType : EnergyType.Value,
-    val energyCount : Int = 1) extends Card(displayName, imgName) {
+    val energyCount : Int = 1,
+    deck : Deck.Value = Deck.BASE_SET) extends Card(displayName, imgName, deck) {
 
   override def toJsonImpl() = Json.obj(
       Identifier.DISPLAY_NAME.toString -> displayName,

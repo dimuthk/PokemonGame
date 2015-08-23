@@ -7,10 +7,13 @@ import src.move.PokemonPower
 import src.player.Player
 import src.card.energy.EnergyCard
 import src.card.energy.EnergyType
+import src.card.pokemon._
+import src.card.Deck
 
 class Venusaur extends PokemonCard(
     "Venusaur",
     "Venusaur-Base-Set-15.jpg",
+    Deck.BASE_SET,
     Identifier.VENUSAUR,
     id = 3,
     maxHp = 100,
