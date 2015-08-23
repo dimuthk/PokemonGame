@@ -22,5 +22,7 @@ abstract class PokemonPower(
     }
   }
 
+  def handleMove(owner : Player, opp : Player, moveName : String, itemMap : Map[String, Int]) : Unit = ()
+
 }
 

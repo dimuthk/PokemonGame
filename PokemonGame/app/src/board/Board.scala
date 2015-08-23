@@ -8,6 +8,7 @@ import src.card.Card
 import src.card.energy._
 import src.card.pokemon._
 import src.move.Move
+import src.move.PokemonPower
 import src.move.Status
 import src.player.Player
 
@@ -80,10 +81,12 @@ object Board {
       }
     }
 
-    def attack(moveNum : Int) {
-      Logger.debug("attack " + moveNum)
-      val activeCard = p.active.get
-      val move = if (moveNum == 1) activeCard.firstMove.get else activeCard.secondMove.get
+    def rebroadcastState() {
+      broadcastState()
+    }
+
+    def attackUsing(pc : PokemonCard, moveNum : Int) {
+      val move = if (moveNum == 1) pc.firstMove.get else pc.secondMove.get
       if (move.isActivatable) {
         move.status match {
           case Status.ACTIVATABLE => move.status = Status.ACTIVATED
@@ -97,7 +100,104 @@ object Board {
       broadcastState()
     }
 
-    def handToActive(handIndex : Int) {
+    def attackFromActive(moveNum : Int) {
+      Logger.debug("attack " + moveNum)
+      attackUsing(p.active.get, moveNum)
+    }
+
+    def attackFromBench(moveNum : Int, benchIndex : Int) {
+      attackUsing(p.bench(benchIndex).get, moveNum)
+    }
+
+    def handleMove(
+      move : (Map[String, Int]) => Unit,
+      itemMap : Map[String, Int],
+      moveName : String) {
+        if (!allowMoveExceptions(moveName, itemMap)) {
+          move(itemMap)
+        }
+        updateMoveStatuses()
+        broadcastState()
+    }
+
+  def allowMoveExceptions(moveName : String, itemMap : Map[String, Int]) : Boolean = {
+    if (p.active.isDefined) {
+      for (m <- List(p.active.get.firstMove, p.active.get.secondMove)) {
+        if (m.isDefined && m.get.status == Status.ACTIVATED) {
+          // delegate move handle to pokemon with activated power
+          m.get match {
+            case power : PokemonPower => power.handleMove(p, getOpponent(p), moveName, itemMap)
+            case _ => ()
+          }
+          return true
+        }
+      }
+    }
+    for (obc : Option[PokemonCard] <- p.bench) {
+      if (obc.isDefined) {
+        for (m <- List(obc.get.firstMove, obc.get.secondMove)) {
+          if (m.isDefined && m.get.status == Status.ACTIVATED) {
+            m.get match {
+              case power : PokemonPower => power.handleMove(p, getOpponent(p), moveName, itemMap)
+              case _ => ()
+            }
+            return true
+          }
+        }
+      }
+    }
+    return false
+  }
+
+    def benchToBench(itemMap : Map[String, Int]) {
+      val benchIndex1 = itemMap.getOrElse("drag", -1)
+      val benchIndex2 = itemMap.getOrElse("drop", -1)
+      val benchOne = p.bench(benchIndex1).get
+      if (p.bench(benchIndex2).isDefined) {
+        p.bench(benchIndex1) = Some(p.bench(benchIndex2).get)
+        p.bench(benchIndex2) = Some(benchOne)
+      } else {
+        p.bench(benchIndex2) = Some(benchOne)
+        p.bench(benchIndex1) = None
+      }
+    }
+
+    def benchToActive(itemMap : Map[String, Int]) {
+      val benchIndex = itemMap.getOrElse("drag", -1)
+      if (p.active.isDefined) {
+        swapActiveAndBench(benchIndex)
+      } else {
+        p.active = Some(p.bench(benchIndex).get)
+        p.bench(benchIndex) = None
+      }
+    }
+
+    def activeToBench(itemMap : Map[String, Int]) {
+      val benchIndex = itemMap.getOrElse("drop", -1)
+      if (p.bench(benchIndex).isDefined) {
+        swapActiveAndBench(benchIndex)
+      } else {
+        val active = p.active.get
+        if (active.getTotalEnergy() >= active.retreatCost) {
+          active.energyCards = active.energyCards.dropRight(active.retreatCost)
+          p.bench(benchIndex) = Some(active)
+          p.active = None
+        }
+      }
+    }
+
+    def swapActiveAndBench(benchIndex : Int) {
+      val active = p.active.get
+      val benchCard = p.bench(benchIndex).get
+      if (active.getTotalEnergy() >= active.retreatCost) {
+        active.energyCards = active.energyCards.dropRight(active.retreatCost)
+        p.active = Some(benchCard)
+        p.bench(benchIndex) = Some(active)
+      }
+    }
+
+    def handToActive(itemMap : Map[String, Int]) {
+      val handIndex = itemMap.getOrElse("drag", -1)
       val card : Card = p.hand(handIndex)
       if (p.active.isEmpty) {
         card match {
@@ -129,12 +229,11 @@ object Board {
           case _ => ()
         }
       }
-
-      updateMoveStatuses()
-      broadcastState()
     }
 
-    def handToBench(handIndex : Int, benchIndex : Int) {
+    def handToBench(itemMap : Map[String, Int]) {
+      val handIndex = itemMap.getOrElse("drag", -1)
+      val benchIndex = itemMap.getOrElse("drop", -1)
       Logger.debug("handToBench(" + handIndex + ", " + benchIndex + ")")
       val card : Card = p.hand(handIndex)
       if (p.bench(benchIndex).isEmpty) {
@@ -166,8 +265,6 @@ object Board {
           case _ => ()
         }
       }
-      updateMoveStatuses()
-      broadcastState()
     }
 
     /**

@@ -42,6 +42,10 @@ abstract class PokemonCard(
       case None => "None"
     }))
 
+  def getTotalEnergy() : Int = {
+    return energyCards.length
+  }
+
 	def takeDamage(amount : Int) : Unit = {
     	if (amount <= 0) {
       		return  

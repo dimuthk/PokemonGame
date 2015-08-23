@@ -34,9 +34,26 @@ class PlayerActor(out : ActorRef, var correspondent : Correspondent) extends Act
       Logger.debug("Incoming message: " + m)
       val contents = m.split("<>")
       contents(0) match {
-        case "HAND_TO_ACTIVE" => correspondent.handToActive(contents(1).toInt)
-        case "HAND_TO_BENCH" => correspondent.handToBench(contents(1).toInt, contents(2).toInt - 1)
-        case "ATTACK" => correspondent.attack(if (contents(1) == "one") 1 else 2)
+        case "ACTIVE_TO_ACTIVE" => correspondent.rebroadcastState()
+        case "ACTIVE_TO_BENCH" => correspondent.handleMove(correspondent.activeToBench, Map(
+            "drop" -> (contents(1).toInt - 1)),
+            "ACTIVE_TO_BENCH")
+        case "BENCH_TO_ACTIVE" => correspondent.handleMove(correspondent.benchToActive, Map(
+            "drag" -> (contents(1).toInt - 1)),
+            "BENCH_TO_ACTIVE")
+        case "BENCH_TO_BENCH" => correspondent.handleMove(correspondent.benchToBench, Map(
+            "drag" -> (contents(1).toInt - 1),
+            "drop" -> (contents(2).toInt - 1)),
+            "BENCH_TO_BENCH")
+        case "HAND_TO_ACTIVE" => correspondent.handleMove(correspondent.handToActive, Map(
+            "drag" -> (contents(1).toInt)),
+            "HAND_TO_ACTIVE")
+        case "HAND_TO_BENCH" => correspondent.handleMove(correspondent.handToBench, Map(
+            "drag" -> (contents(1).toInt),
+            "drop" -> (contents(2).toInt - 1)),
+            "HAND_TO_BENCH")
+        case "ATTACK_FROM_ACTIVE" => correspondent.attackFromActive(contents(1).toInt)
+        case "ATTACK_FROM_BENCH" => correspondent.attackFromBench(contents(2).toInt, contents(1).toInt - 1)
       }
     }
     case StateEvent(_, state) => out ! state.toString

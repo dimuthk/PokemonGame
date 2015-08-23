@@ -29,22 +29,43 @@ function repaintBoard(data, socket) {
 	repaintForPlayer(data.player2, false)
 	
 	$("#p1ActiveDisplay").droppable({
-				accept: "*",
-				drop: function(event, ui) {
-          var handTag = $(ui.draggable).attr("id")
-          var handIndex = handTag.charAt(handTag.length - 1)
-					handToActive(handIndex)
-				} });
+			accept: "*",
+			drop: function(event, ui) {
+          var tag = $(ui.draggable).attr("id")
+          if (tag.includes("Active")) {
+          	// active to active
+          } else if (tag.includes("Bench")) {
+          	// bench to active
+            var benchIndex = tag.charAt(tag.length - 1)
+            benchToActive(benchIndex)
+          } else if (tag.includes("Hand")) {
+          	// hand to active
+          	var handIndex = tag.charAt(tag.length - 1)
+		  	    handToActive(handIndex)
+          }
+          
+		} });
 
   for (var i = 1; i < 6; i++) {
     $("#p1BenchDisplay" + i).droppable({
         accept: "*",
         drop : function(event, ui) {
-          var handTag = $(ui.draggable).attr("id")
-          var handIndex = handTag.charAt(handTag.length - 1)
+          var tag = $(ui.draggable).attr("id")
           var benchTag = $(this).attr("id")
           var benchIndex = benchTag.charAt(benchTag.length - 1)
-          handToBench(handIndex, benchIndex)
+          if (tag.includes("Active")) {
+          	// active to bench
+            activeToBench(benchIndex)
+          } else if (tag.includes("Bench")) {
+          	// bench to bench
+            var benchIndex2 = tag.charAt(tag.length - 1)
+            benchToBench(benchIndex2, benchIndex)
+          } else if (tag.includes("Hand")) {
+          	// hand to bench
+          	var handIndex = tag.charAt(tag.length - 1)
+          	handToBench(handIndex, benchIndex)
+          }
+          
         }
     })
   }
@@ -123,7 +144,7 @@ function repaintForPlayer(data, p1Orient) {
 					start: function (event, ui) {
 						$(this).addClass("noClick")
 					},
-					revert: true,
+					//revert: true,
 					cursor: 'move'
 				})
 			}
@@ -133,15 +154,30 @@ function repaintForPlayer(data, p1Orient) {
   if ('BENCH' in data) {
     var bench = data.BENCH
     for (var i = 0; i < bench.length; i++) {
+      var tagWithoutIndex = p1Orient ? "p1Bench" : "p2Bench"
+      var tag = tagWithoutIndex + (i+1)
+      $("#" + tagWithoutIndex + "Display" + (i+1)).empty()
+      $("#" + tagWithoutIndex + "Descriptor" + (i+1)).empty()
+      $("#" + tagWithoutIndex + "EnergyIcon" + (i+1)).empty()
       if(!isPlaceholder(bench[i])) {
-        var tagWithoutIndex = p1Orient ? "p1Bench" : "p2Bench"
-        var tag = tagWithoutIndex + (i+1)
         addImageOfItem(bench[i], $("#" + tagWithoutIndex + "Display" + (i+1)), tagWithoutIndex + (i+1), true)
         energyDescription("#" + tagWithoutIndex + "EnergyIcon" + (i+1), bench[i])
         $("#" + tag).unbind('click')
         $("#" + tag).click(function() {
-				  showPopUpActive($(this).data("card_data"), $(this).attr("id"))
+          if ($(this).hasClass("noClick")) {
+            $(this).removeClass("noClick")
+          } else {
+            showPopUpActive($(this).data("card_data"), $(this).attr("id"))            
+          }
+
 		    })
+        $("#" + tag).draggable({
+          start: function (event, ui) {
+            $(this).addClass("noClick")
+          },
+          //revert: true,
+          cursor: 'move'
+        })
         $("#" + tagWithoutIndex + "Descriptor" + (i+1)).html(bench[i].CURR_HP + "/" + bench[i].MAX_HP)
       }
     }
@@ -149,8 +185,11 @@ function repaintForPlayer(data, p1Orient) {
 	
 	if ('ACTIVE' in data) {
 		var active = data.ACTIVE
+    var tag = p1Orient ? "p1Active" : "p2Active"
+    $("#" + tag + "Display").empty()
+      $("#" + tag + "Descriptor").empty()
+      $("#" + tag + "EnergyIcon").empty()
 		if (active.IDENTIFIER != "PLACEHOLDER") {
-      var tag = p1Orient ? "p1Active" : "p2Active"
 		  addImageOfItem(active, $("#" + tag + "Display"), tag, true)
       $("#" + tag + "Descriptor").html(populateDescriptor(active))
       energyDescription("#" + tag + "EnergyIcon", active)
@@ -159,8 +198,6 @@ function repaintForPlayer(data, p1Orient) {
 				if ($(this).hasClass("noClick")) {
 					$(this).removeClass("noClick")
 				} else {
-				  //showPopUpActive($(this).data("card_data"), $(this).attr("id"))
-          //alert($(this).attr("id"))
 				  showPopUpActive($(this).data("card_data"), $(this).attr("id"))
         }
 		  })
@@ -168,7 +205,7 @@ function repaintForPlayer(data, p1Orient) {
 			  start: function (event, ui) {
 				  $(this).addClass("noClick")
         },
-			  revert: true,
+			  //revert: true,
 				cursor: 'move'
       })
 		}
@@ -206,13 +243,24 @@ function energyDescription(tag, card) {
   $(tag).html(energyIcons)
 }
 
-
 function handToActive(handIndex) {
   $("#content").data("socket").send("HAND_TO_ACTIVE<>" + handIndex)
 }
 
 function handToBench(handIndex, benchIndex) {
   $("#content").data("socket").send("HAND_TO_BENCH<>" + handIndex + "<>" + benchIndex)
+}
+
+function benchToBench(benchIndex1, benchIndex2) {
+  $("#content").data("socket").send("BENCH_TO_BENCH<>" + benchIndex1 + "<>" + benchIndex2)
+}
+
+function benchToActive(benchIndex) {
+	$("#content").data("socket").send("BENCH_TO_ACTIVE<>" + benchIndex)
+}
+
+function activeToBench(benchIndex) {
+  $("#content").data("socket").send("ACTIVE_TO_BENCH<>" + benchIndex)
 }
 
 function isPlaceholder(item) {
@@ -315,9 +363,14 @@ function energyDisplayStringForPopup(card) {
 	return res
 }
 
-function useAttack(moveNum) {
-	var socket = $("#content").data("socket")
-	socket.send("ATTACK<>" + moveNum)
+function useAttack(moveNum, tag) {
+  var socket = $("#content").data("socket")
+  if (tag.includes("Bench")) {
+    var benchIndex = tag.charAt(tag.length - 1)
+    socket.send("ATTACK_FROM_BENCH<>" + benchIndex + "<>" + moveNum)
+  } else if (tag.includes("Active")) {
+    socket.send("ATTACK_FROM_ACTIVE<>" + moveNum)
+  }
 	$(".popUp").dialog("close")
 }
 
@@ -340,7 +393,7 @@ function drawMoveButtons(card, tag) {
       }
       var disabledStr = move.MOVE_STATUS == "DISABLED" ? "disabled" : ""
 		  res += "<button class=\"actionButton\" " + disabledStr
-		    + " onclick=\"useAttack('one');\">" + name + "</button><br><br>"
+		    + " onclick=\"useAttack('" + (i+1) + "', '" + tag + "');\">" + name + "</button><br><br>"
     }
   }
 	return res
