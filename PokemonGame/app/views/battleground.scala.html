@@ -1,5 +1,5 @@
 @prizeIndex(i : Int, j : Int) = @{
-  (i * 3) + j
+  (i * 3) + j - 1
 }
 
 @main("Battleground") {
@@ -12,7 +12,7 @@
             <div class="row row-40-100">
               @for(j <- 1 to 3) {
                 <div class="col col-1-3">
-                  <div class="cardDisplay" id="p2Prize@prizeIndex(i,j)" ></div>
+                  <div class="cardDisplay" id="p2PrizeDisplay@prizeIndex(i,j)" ></div>
                 </div>
               }
             </div>
@@ -48,8 +48,7 @@
                 <div class="col col-2-5"></div>
             </div>
             <div class="row row-40-100">
-                <div class="col col-2-5 notification" id="p2Notification">
-                </div>
+                <div class="col col-2-5 notification" id="p2Notification"></div>
                 <div class="col col-1-5">
                   <div class="col col-1-10">
                     <div class="energyPanel energyNorth" id="p2ActiveEnergyIcon"></div>
@@ -58,14 +57,15 @@
                     <div class="cardDisplay" id="p2ActiveDisplay"></div>
                   </div>
                 </div>
-                <div class="col col-2-5"></div>
+                <div class="col col-2-5">
+                </div>
             </div>
             <div class="row-2-100"></div>
         </div>
         <div class="panel p2 discardAndDeckPanel" id="p2DeckPanel">
             <div class="row row-9-100"></div>
             <div class="row row-40-100">
-                <div class="cardDisplay" id="p2Deck"></div>
+                <div class="cardDisplay" id="p2DeckDisplay"></div>
             </div>
             <div class="row row-9-100">
             	<div class="descriptor" id="p2DeckDescriptor"></div>
@@ -76,6 +76,17 @@
             <div class="row row-2-100"></div>
         </div>
         <div class="handPanel" id="p2HandPanel"></div>
+        <div class="turnPanel" id="p2TurnPanel">
+          <div class="row row-45-100"></div>
+          <div class="row row-1-10">
+            <div class="col col-2-5"></div>
+            <div class="col col-1-5">
+              <div class="turnMarker" id="p2TurnMarker"></div>
+            </div>
+            <div class="col col-45-100"></div>
+          </div>
+          <div class="row row-2-5"></div>
+        </div>
 
     </div>
     
@@ -87,7 +98,7 @@
                 <div class="row row-40-100">
                   @for(j <- 1 to 3) {
                     <div class="col col-1-3">
-                      <div class="cardDisplay" id="p1Prize@prizeIndex(i,j)" ></div>
+                      <div class="cardDisplay" id="p1PrizeDisplay@prizeIndex(i,j)" ></div>
                     </div>
                   }
                 </div>
@@ -107,7 +118,8 @@
                         <div class="energyPanel energySouth" id="p1ActiveEnergyIcon"></div>
                     </div>
                 </div>
-                <div class="col col-2-5"></div>
+                <div class="col col-2-5">
+                </div>
             </div>
             <div class="row row-9-100">
             	<div class="col col-2-5"></div>
@@ -140,7 +152,7 @@
         <div class="panel p1 discardAndDeckPanel" id="p1DeckPanel">
             <div class="row row-2-100"></div>
             <div class="row row-40-100">
-                <div class="cardDisplay" id="p1Deck"></div>
+                <div class="cardDisplay" id="p1DeckDisplay"></div>
             </div>
             <div class="row row-9-100">
             	<div class="descriptor" id="p1DeckDescriptor"></div>
@@ -151,6 +163,17 @@
             <div class="row row-9-100"></div>
         </div>
         <div class="handPanel" id="p1HandPanel">
+        </div>
+        <div class="turnPanel" id="p1TurnPanel">
+          <div class="row row-45-100"></div>
+          <div class="row row-1-10">
+            <div class="col col-2-5"></div>
+            <div class="col col-1-5">
+              <div class="turnMarker" id="p1TurnMarker"></div>
+            </div>
+            <div class="col col-45-100"></div>
+          </div>
+          <div class="row row-2-5"></div>
         </div>
         
     </div>

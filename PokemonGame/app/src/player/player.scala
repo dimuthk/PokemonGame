@@ -22,8 +22,10 @@ class Player extends Jsonable {
 
   var notification : Option[String] = None
 
+  var isTurn : Boolean = false
+
   def notify(msg : String) {
-    notification = Some( msg)
+    notification = Some(msg)
   }
 
   def removeCardFromHand(handIndex : Int) {
@@ -43,7 +45,8 @@ class Player extends Jsonable {
   	   Identifier.GARBAGE.toString -> cardListToJsArray(garbage),
   	   Identifier.BENCH.toString -> optionCardListToJsArray[PokemonCard](bench),
   	   Identifier.PRIZES.toString -> optionCardListToJsArray(prizes),
-       Identifier.NOTIFICATION.toString -> notifyJson)
+       Identifier.NOTIFICATION.toString -> notifyJson,
+       Identifier.IS_TURN.toString -> JsBoolean(isTurn))
   }
 
   override def getIdentifier = Identifier.PLAYER

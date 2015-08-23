@@ -72,6 +72,18 @@ body {
     top: 0%;
 }
 
+.turnPanel {
+  position: absolute;
+  height: 30%;
+  width: 5%;
+} #p1TurnPanel {
+  right: 0%;
+  bottom: 0%;
+} #p2TurnPanel {
+  left : 0%;
+  top: 0%;
+}
+
 .row {
 	position: relative;
 	width: 100%;
@@ -115,6 +127,10 @@ body {
 
 .row-2-100 {
     height: 2%;
+}
+
+.row-45-100 {
+    height: 45%;
 }
 
 .col {
@@ -257,4 +273,18 @@ button:disabled {
   color: white;
   font-size: 20px;
   text-align: center;
+}
+
+.turnMarker {
+  position: relative;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%; 
+
+  background: #c4b668;
+  background-image: -webkit-linear-gradient(top, #c4b668, #d1bb4b);
+  background-image: -moz-linear-gradient(top, #c4b668, #d1bb4b);
+  background-image: -ms-linear-gradient(top, #c4b668, #d1bb4b);
+  background-image: -o-linear-gradient(top, #c4b668, #d1bb4b);
+  background-image: linear-gradient(to bottom, #c4b668, #d1bb4b);
 }

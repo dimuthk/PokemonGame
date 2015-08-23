@@ -40,7 +40,7 @@ abstract class PokemonCard(
 
   override def getIdentifier() = identifier
 
-	override def toJsonImpl() = Json.obj(
+	override def toJsonImpl() = super.toJsonImpl() ++ Json.obj(
 		Identifier.DISPLAY_NAME.toString -> displayName,
 		Identifier.MAX_HP.toString -> maxHp,
 		Identifier.CURR_HP.toString -> currHp,

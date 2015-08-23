@@ -7,6 +7,8 @@ import scala.util.Random
 import src.card.Card
 import src.card.energy._
 import src.card.pokemon._
+import src.card.pokemon.base_set._
+import src.card.pokemon.jungle._
 import src.move.Move
 import src.move.PokemonPower
 import src.move.Status
@@ -69,9 +71,19 @@ object Board {
       if (id == 1) {
         p.deck = List.fill(20)(new Squirtle()) ++ List.fill(20)(new WaterEnergy())
         p.deck = Random.shuffle(p.deck)
+        p.active = Some(new Venusaur())
+        p.active.get.isFaceUp = true
+        p.active.get.isClickable = true
+        p.active.get.isUsable = true
+        p.isTurn = true
       } else {
         p.deck = List.fill(20)(new Caterpie()) ++ List.fill(20)(new Metapod()) ++ List.fill(20)(new GrassEnergy())
         p.deck = Random.shuffle(p.deck)
+        p.bench(2) = Some(new Charizard())
+        p.bench(2).get.isFaceUp = true
+        p.bench(2).get.isClickable = true
+        p.bench(2).get.isUsable = true
+        p.isTurn = false
       }
 
       distributeInitialCards()
@@ -95,6 +107,10 @@ object Board {
         }
       } else {
         move.perform(p, getOpponent(p))
+      }
+      move match {
+        case power : PokemonPower => ()
+        case _ => flipTurn()
       }
       updateMoveStatuses()
       broadcastState()
@@ -328,6 +344,11 @@ object Board {
         }
       }
     }
+  }
+
+  def flipTurn() : Unit = {
+    c1.get.p.isTurn = !c1.get.p.isTurn
+    c2.get.p.isTurn = !c2.get.p.isTurn
   }
 
   def bothCorrespondentsReady =

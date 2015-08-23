@@ -117,123 +117,114 @@ function colorBoardIfActivatedForCard(card) {
   return false
 }
 
-function repaintForPlayer(data, p1Orient) {
-	if ('PRIZES' in data) {
-		var prizes = data.PRIZES
-		for (var i = 0; i < prizes.length; i++) {
-			var tag = (p1Orient ? "p1Prize" : "p2Prize") + (i+1)
-			addImageOfItem(prizes[i], $("#" + tag), "", false)
-		}
-	}
-	if ('DECK' in data) {
-		var deck = data.DECK
-		if (deck.length > 0) {
-			var tag = p1Orient ? "p1Prize" : "p2Prize"
-			addImageOfItem(deck[0], $("#" + tag), "", false)
-			$("#p1DeckDescriptor").html("Cards left: " + deck.length);
-		}
-	}
-  if ('NOTIFICATION' in data) {
-    var tag = p1Orient ? "p1Notification" : "p2Notification"
-    $("#" + tag).empty()
-    $("#" + tag).css({opacity: 100})
-    var notification = data.NOTIFICATION
-    if (!isPlaceholder(notification)) {
-      $("#" + tag).html(notification)
-      $("#" + tag).animate({opacity: 0}, 1000)
+function repaintForPlayer(player, p1Orient) {
+  var isTurn = player.IS_TURN
+  $("#" + (p1Orient ? "p1TurnMarker" : "p2TurnMarker")).css("display", (player.IS_TURN ? "block" : "none"))
+  var notification = player.NOTIFICATION
+  var notifyTag = p1Orient ? "p1Notification" : "p2Notification"
+  $("#" + notifyTag).empty()
+  $("#" + notifyTag).css({opacity: 100})
+  if (!isPlaceholder(notification)) {
+    $("#" + notifyTag).html(notification)
+    $("#" + notifyTag).animate({opacity: 0}, 1000)
+  }
+
+  var deck = player.DECK
+  var deckTag = p1Orient ? "p1Deck" : "p2Deck"
+  $("#" + deckTag + "Descriptor").empty()
+  if (deck.length > 0) {
+    $("#" + deckTag + "Descriptor").html("Cards left: " + deck.length) 
+    processCard(deck[0], deckTag + "Display", deckTag, false)
+  }
+
+  var garbage = player.GARBAGE
+  var garbageTag = p1Orient ? "p1Garbage" : "p2Garbage"
+  $("#" + garbageTag + "Display").empty()
+  if (garbage.length > 0) {
+    processCard(garbage[garbage.length] - 1, garbageTag + "Display", garbageTag, false)
+  }
+
+  var prizes = player.PRIZES
+  var prizeTag = p1Orient ? "p1Prize" : "p2Prize"
+  for (var i = 0; i < prizes.length; i++) {
+    if (!isPlaceholder(prizes[i])) {
+      processCard(prizes[i], prizeTag + "Display" + i, prizeTag + i, false)
     }
   }
-	if ('HAND' in data) {
-		var hand = data.HAND
-		var loc = $(p1Orient ? "#p1HandPanel" : "#p2HandPanel")
-		loc.empty()
-		for (var i = 0; i < hand.length; i++) {
-			var tag = (p1Orient ? "p1Hand" : "p2Hand") + i
-			addCardToHand(hand[i], loc, tag, p1Orient)
-			if (p1Orient) {
-				$("#" + tag).click(function() {
-					if ($(this).hasClass("noClick")) {
-						$(this).removeClass("noClick")
-					} else {
-					showNonActionPopUp($(this).data("card_data"))	
-					}
-				})
-				$("#" + tag).draggable({
-					start: function (event, ui) {
-						$(this).addClass("noClick")
-					},
-					//revert: true,
-					cursor: 'move'
-				})
-			}
-			
-		}
-	}
-  if ('BENCH' in data) {
-    var bench = data.BENCH
-    for (var i = 0; i < bench.length; i++) {
-      var tagWithoutIndex = p1Orient ? "p1Bench" : "p2Bench"
-      var tag = tagWithoutIndex + (i+1)
-      $("#" + tagWithoutIndex + "Display" + (i+1)).empty()
-      $("#" + tagWithoutIndex + "Descriptor" + (i+1)).empty()
-      $("#" + tagWithoutIndex + "EnergyIcon" + (i+1)).empty()
-      if(!isPlaceholder(bench[i])) {
-        addImageOfItem(bench[i], $("#" + tagWithoutIndex + "Display" + (i+1)), tagWithoutIndex + (i+1), true)
-        energyDescription("#" + tagWithoutIndex + "EnergyIcon" + (i+1), bench[i])
-        $("#" + tag).unbind('click')
-        $("#" + tag).click(function() {
-          if ($(this).hasClass("noClick")) {
-            $(this).removeClass("noClick")
-          } else {
-            showPopUpActive($(this).data("card_data"), $(this).attr("id"))            
-          }
 
-		    })
-        $("#" + tag).draggable({
-          start: function (event, ui) {
-            $(this).addClass("noClick")
-          },
-          //revert: true,
-          cursor: 'move'
-        })
-        $("#" + tagWithoutIndex + "Descriptor" + (i+1)).html(bench[i].CURR_HP + "/" + bench[i].MAX_HP)
-      }
+  var hand = player.HAND
+  var handPanelTag = p1Orient ? "p1HandPanel" : "p2HandPanel"
+  $("#" + handPanelTag).empty()
+  for (var i = 0; i < hand.length; i++) {
+    var handTag = (p1Orient ? "p1Hand" : "p2Hand") + i
+    processCard(hand[i], handPanelTag, handTag, true)
+  }
+
+  var bench = player.BENCH
+  var benchTag = p1Orient ? "p1Bench" : "p2Bench"
+  for (var i = 0; i < bench.length; i++) {
+    $("#" + benchTag + "Display" + (i+1)).empty()
+    $("#" + benchTag + "Descriptor" + (i+1)).empty()
+    $("#" + benchTag + "EnergyIcon" + (i+1)).empty()
+    if (!isPlaceholder(bench[i])) {
+      processCard(bench[i], benchTag + "Display" + (i+1), benchTag + (i+1), false)
+      energyDescription("#" + benchTag + "EnergyIcon", bench[i])
+      $("#" + benchTag + "Descriptor" + (i+1)).html(populateDescriptor(bench[i]))
     }
   }
 	
-	if ('ACTIVE' in data) {
-		var active = data.ACTIVE
-    var tag = p1Orient ? "p1Active" : "p2Active"
-    $("#" + tag + "Display").empty()
-      $("#" + tag + "Descriptor").empty()
-      $("#" + tag + "EnergyIcon").empty()
-		if (active.IDENTIFIER != "PLACEHOLDER") {
-		  addImageOfItem(active, $("#" + tag + "Display"), tag, true)
-      $("#" + tag + "Descriptor").html(populateDescriptor(active))
-      energyDescription("#" + tag + "EnergyIcon", active)
-      $("#" + tag).unbind('click')
-      $("#" + tag).click(function() {
-				if ($(this).hasClass("noClick")) {
-					$(this).removeClass("noClick")
-				} else {
-				  showPopUpActive($(this).data("card_data"), $(this).attr("id"))
-        }
-		  })
-		  $("#" + tag).draggable({
-			  start: function (event, ui) {
-				  $(this).addClass("noClick")
+  var active = player.ACTIVE
+  var activeTag = p1Orient ? "p1Active" : "p2Active"
+  $("#" + activeTag + "Display").empty()
+  $("#" + activeTag + "Descriptor").empty()
+  $("#" + activeTag + "EnergyIcon").empty()
+  if (!isPlaceholder(active)) {
+    processCard(active, activeTag + "Display", activeTag, false)
+    energyDescription("#" + activeTag + "EnergyIcon", active)
+    $("#" + activeTag + "Descriptor").html(populateDescriptor(active))
+  }
+}
+
+function addCardToDisplay(card, displayTag, imageTag) {
+  $("#" + displayTag).html(
+    imgTag.replace("[IMG_NAME]", card.FACE_UP ? card.IMG_NAME : cardBackImg)
+          .replace("[ID]", imageTag))
+  $("#" + imageTag).data("card_data", card)
+}
+
+function addCardToHand(card, handPanelTag, imageTag) {
+  $("#" + handPanelTag).append("<div class=\"cardHandDisplay\">"
+      + imgTag.replace("[IMG_NAME]", card.FACE_UP ? card.IMG_NAME : cardBackImg)
+              .replace("[ID]", imageTag)
+      + "</div>")
+  $("#" + imageTag).data("card_data", card)
+}
+
+function processCard(card, displayTag, imageTag, forHand) {
+  if (forHand) {
+    addCardToHand(card, displayTag, imageTag)
+  } else {
+    addCardToDisplay(card, displayTag, imageTag)    
+  }
+  $("#" + imageTag).unbind('click')
+  if (card.DRAGGABLE) {
+    $("#" + imageTag).draggable({
+        start: function (event, ui) {
+          $(this).addClass("noClick")
         },
-				cursor: 'move'
+        cursor: 'move'
       })
-		}
-	}
-  if ('GARBAGE' in data) {
-    var garbage = data.GARBAGE
-    var tag = p1Orient ? "p1Garbage" : "p2Garbage"
-    $("#" + tag + "Display").empty()
-    for (var i = 0; i < garbage.length; i++) {
-      addImageOfItem(garbage[garbage.length -1], $("#" + tag + "Display"), tag, true)
-    }
+  }
+  if (card.CLICKABLE) {
+    $("#" + imageTag).click(function() {
+      if ($(this).hasClass("noClick")) {
+        $(this).removeClass("noClick")
+      } else if (card.USABLE) {
+        showPopUpActive($(this).data("card_data"), $(this).attr("id"))
+      } else {
+        showNonActionPopUp($(this).data("card_data"))
+      }
+    })
   }
 }
 
@@ -295,23 +286,8 @@ function isPlaceholder(item) {
 	return item.IDENTIFIER == "PLACEHOLDER"
 }
 
-function addCardToHand(item, location, idName, showFront) {
-	location.append("<div class=\"cardHandDisplay\">"
-			+ imgTag.replace("[IMG_NAME]", showFront ? item.IMG_NAME : cardBackImg)
-			        .replace("[ID]", idName)
-			+ "</div>")
-	$("#" + idName).data("card_data", item)
-}
 
-function addImageOfItem(item, location, idName, showFront) {
-	if (!isPlaceholder(item)) {
-		location.html(
-			imgTag.replace("[IMG_NAME]", showFront ? item.IMG_NAME : cardBackImg)
-			      .replace("[ID]", idName))
-    $("#" + idName).data("card_data", item)
-    $("#" + idName).effect("highlight", {color:"#669966"}, 3000)
-	}
-}
+
 
 function closeUp(tag) {
   var popUpDiv = "<div>" +

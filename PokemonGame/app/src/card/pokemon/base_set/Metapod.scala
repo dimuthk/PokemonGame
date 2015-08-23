@@ -1,4 +1,4 @@
-package src.card.pokemon
+package src.card.pokemon.base_set
 
 import src.json.Identifier
 import src.move.Move
