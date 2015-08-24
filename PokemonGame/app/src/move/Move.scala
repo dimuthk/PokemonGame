@@ -1,21 +1,33 @@
 package src.move
 
 import play.api.libs.json._
+import src.board.drag.CustomDragInterpreter
+import src.board.state.CustomStateGenerator
 import src.card.energy.EnergyCard
 import src.card.energy.EnergyType
 import src.json.Identifier
 import src.json.Jsonable
+import src.move.interceptor._
 import src.player.Player
 
+/**
+ * Defines a move that can be performed by a Pokemon. Moves can be both active
+ * and reactive. In the active case, they execute some function when explicitly
+ * instructed by the player. In the reactive case, they intercept an incoming
+ * command and handle it in some way.
+ */
 abstract class Move(
 	val name : String,
 	val totalEnergyReq : Int,
 	val specialEnergyReq : Map[EnergyType.Value, Int],
-  val isActivatable : Boolean = false) extends Jsonable {
+  val dragInterpreter : Option[CustomDragInterpreter] = None,
+  val moveInterceptor : Option[MoveInterceptor] = None,
+  val clickInterceptor : Option[ClickInterceptor] = None,
+  val stateGenerator : Option[CustomStateGenerator] = None) extends Jsonable {
 
   var status : Status.Value = Status.DISABLED
 
-	def hasEnoughEnergy(p : Player, energyCards : Seq[EnergyCard]) : Boolean = {
+  def hasEnoughEnergy(p : Player, energyCards : Seq[EnergyCard]) : Boolean = {
 		val total = energyCards.map { card => card.energyCount }.sum
 		if (total < totalEnergyReq) {
 			return false
@@ -31,10 +43,6 @@ abstract class Move(
     	}
     	return true
   }
-  
-  //def canUse(owner : Player, opp : Player) : Boolean = {
-  //  return hasEnoughEnergy(owner.active.get.energyCards)
- // }
   
   def perform(owner : Player, opp : Player) : Unit
 

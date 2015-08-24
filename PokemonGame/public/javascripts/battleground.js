@@ -168,7 +168,7 @@ function repaintForPlayer(player, p1Orient) {
     $("#" + benchTag + "EnergyIcon" + (i+1)).empty()
     if (!isPlaceholder(bench[i])) {
       processCard(bench[i], benchTag + "Display" + (i+1), benchTag + (i+1), false)
-      energyDescription("#" + benchTag + "EnergyIcon", bench[i])
+      energyDescription("#" + benchTag + "EnergyIcon" + (i+1), bench[i])
       $("#" + benchTag + "Descriptor" + (i+1)).html(populateDescriptor(bench[i]))
     }
   }

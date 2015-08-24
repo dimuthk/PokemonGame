@@ -1,5 +1,7 @@
 package actors
 
+import src.board._
+import src.board.drag._
 import src.board.AddChild
 import src.board.Board.Correspondent
 import src.board.BoardCommand
@@ -35,23 +37,11 @@ class PlayerActor(out : ActorRef, var correspondent : Correspondent) extends Act
       val contents = m.split("<>")
       contents(0) match {
         case "ACTIVE_TO_ACTIVE" => correspondent.rebroadcastState()
-        case "ACTIVE_TO_BENCH" => correspondent.handleMove(correspondent.activeToBench, Map(
-            "drop" -> (contents(1).toInt - 1)),
-            "ACTIVE_TO_BENCH")
-        case "BENCH_TO_ACTIVE" => correspondent.handleMove(correspondent.benchToActive, Map(
-            "drag" -> (contents(1).toInt - 1)),
-            "BENCH_TO_ACTIVE")
-        case "BENCH_TO_BENCH" => correspondent.handleMove(correspondent.benchToBench, Map(
-            "drag" -> (contents(1).toInt - 1),
-            "drop" -> (contents(2).toInt - 1)),
-            "BENCH_TO_BENCH")
-        case "HAND_TO_ACTIVE" => correspondent.handleMove(correspondent.handToActive, Map(
-            "drag" -> (contents(1).toInt)),
-            "HAND_TO_ACTIVE")
-        case "HAND_TO_BENCH" => correspondent.handleMove(correspondent.handToBench, Map(
-            "drag" -> (contents(1).toInt),
-            "drop" -> (contents(2).toInt - 1)),
-            "HAND_TO_BENCH")
+        case "ACTIVE_TO_BENCH" => correspondent.handleDrag(ActiveToBench(contents(1).toInt - 1))
+        case "BENCH_TO_ACTIVE" => correspondent.handleDrag(BenchToActive(contents(1).toInt - 1))
+        case "BENCH_TO_BENCH" => correspondent.handleDrag(BenchToBench(contents(1).toInt - 1, contents(2).toInt - 1))
+        case "HAND_TO_ACTIVE" => correspondent.handleDrag(HandToActive(contents(1).toInt))
+        case "HAND_TO_BENCH" => correspondent.handleDrag(HandToBench(contents(1).toInt, contents(2).toInt - 1))
         case "ATTACK_FROM_ACTIVE" => correspondent.attackFromActive(contents(1).toInt)
         case "ATTACK_FROM_BENCH" => correspondent.attackFromBench(contents(2).toInt, contents(1).toInt - 1)
       }

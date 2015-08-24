@@ -21,7 +21,7 @@ abstract class EnergyCard(
     val energyCount : Int = 1,
     deck : Deck.Value = Deck.BASE_SET) extends Card(displayName, imgName, deck) {
 
-  override def toJsonImpl() = Json.obj(
+  override def toJsonImpl() = super.toJsonImpl() ++ Json.obj(
       Identifier.DISPLAY_NAME.toString -> displayName,
       Identifier.IMG_NAME.toString -> imgName,
       Identifier.ENERGY_TYPE.toString -> eType.toString)

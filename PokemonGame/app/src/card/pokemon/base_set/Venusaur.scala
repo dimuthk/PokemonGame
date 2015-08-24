@@ -2,13 +2,19 @@ package src.card.pokemon.base_set
 
 import src.json.Identifier
 import src.move.Move
+import src.move.interceptor._
 import src.move.MoveBuilder._
 import src.move.PokemonPower
+import src.board.state.CustomStateGenerator
 import src.player.Player
 import src.card.energy.EnergyCard
 import src.card.energy.EnergyType
+import src.card.CardUI
+import src.card.CardUI._
 import src.card.pokemon._
 import src.card.Deck
+import play.api.libs.json._
+import play.api.Logger
 
 class Venusaur extends PokemonCard(
     "Venusaur",
@@ -22,17 +28,54 @@ class Venusaur extends PokemonCard(
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.FIRE),
     retreatCost = 2,
-    evolutionStage = EvolutionStage.STAGE_TWO) {
+    evolutionStage = EvolutionStage.BASIC) {
 
   override def isEvolutionOf(pokemon : PokemonCard) = pokemon.id == 2
 
 }
 
+private class EnergyTransState extends CustomStateGenerator {
+
+  override def willIntercept(owner : Player, opp : Player) = true
+
+  override def generateForOwner(owner : Player, opp : Player, interceptor : PokemonCard) : (JsObject, JsObject) = {
+    // Active and bench cards are visible and draggable to allow energy transfer.
+    owner.setUIOrientationForActiveAndBench(Set(FACE_UP, DRAGGABLE))
+    // Hand is deactivated.
+    owner.setUiOrientationForHand(Set())
+
+    // Opponent active and bench cards are visible but not clickable.
+    opp.setUIOrientationForActiveAndBench(Set(FACE_UP))
+    opp.setUiOrientationForHand(Set())
+
+    // Venusaur must still be usable to deactivate power.
+    owner.setUIOrientationForActiveAndBench(Set(FACE_UP, CLICKABLE, DRAGGABLE, USABLE))
+    return (owner.toJson, opp.toJson)
+  }
+
+  override def generateForOpp(opp : Player, owner : Player, interceptor : PokemonCard) : (JsObject, JsObject) = {
+    // Cards are visible and nothing else.
+    opp.setUIOrientationForActiveAndBench(Set(FACE_UP))
+    opp.setUiOrientationForHand(Set(FACE_UP))
+
+    owner.setUIOrientationForActiveAndBench(Set(FACE_UP))
+    owner.setUiOrientationForHand(Set())
+    return (opp.toJson, owner.toJson)
+  }
+
+}
+
 private class EnergyTrans extends PokemonPower(
   "Energy Trans",
-  isActivatable = true) {
+  isActivatable = true,
+  stateGenerator = Some(new EnergyTransState())) {
 
-  override def handleMove(owner : Player, opp : Player, moveName : String, itemMap : Map[String, Int]) {
+  override def perform(owner : Player, opp : Player) : Unit = {
+    activated = !activated
+    stateGenerator.get.isActive = !stateGenerator.get.isActive
+  }
+
+ /* override def handleMove(owner : Player, opp : Player, moveName : String, itemMap : Map[String, Int]) {
     moveName match {
       case "BENCH_TO_BENCH" => {
         val benchIndex2 = itemMap.getOrElse("drop", -1)
@@ -72,7 +115,7 @@ private class EnergyTrans extends PokemonPower(
         return
       }
     }
-  }
+  }*/
 
 }
 

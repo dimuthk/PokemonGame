@@ -3,6 +3,7 @@ import org.specs2.mutable._
 import src.card.energy._
 import src.card.energy.EnergyType._
 import src.card.pokemon._
+import src.card.pokemon.base_set._
 import src.card.condition._
 import src.move.MoveBuilder._
 import src.player.Player

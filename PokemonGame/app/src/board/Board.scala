@@ -4,6 +4,8 @@ import actors.PlayerActor
 
 import scala.util.Random
 
+import src.board.drag._
+import src.board.state.DefaultStateGenerator
 import src.card.Card
 import src.card.energy._
 import src.card.pokemon._
@@ -72,48 +74,44 @@ object Board {
         p.deck = List.fill(20)(new Squirtle()) ++ List.fill(20)(new WaterEnergy())
         p.deck = Random.shuffle(p.deck)
         p.active = Some(new Venusaur())
-        p.active.get.isFaceUp = true
-        p.active.get.isClickable = true
-        p.active.get.isUsable = true
-        p.isTurn = true
-      } else {
-        p.deck = List.fill(20)(new Caterpie()) ++ List.fill(20)(new Metapod()) ++ List.fill(20)(new GrassEnergy())
-        p.deck = Random.shuffle(p.deck)
-        p.bench(2) = Some(new Charizard())
-        p.bench(2).get.isFaceUp = true
-        p.bench(2).get.isClickable = true
-        p.bench(2).get.isUsable = true
         p.isTurn = false
+      } else {
+        p.deck = List.fill(20)(new Caterpie()) ++ List.fill(20)(new Venusaur()) ++ List.fill(20)(new GrassEnergy())
+        p.deck = Random.shuffle(p.deck)
+        p.isTurn = true
       }
 
       distributeInitialCards()
       ready = true
       if (bothCorrespondentsReady) {
-        broadcastState()
+        broadcastState(
+          DefaultStateGenerator.generateForPlayer1(c1.get.p, c2.get.p),
+          DefaultStateGenerator.generateForPlayer2(c1.get.p, c2.get.p))
       }
     }
 
     def rebroadcastState() {
-      broadcastState()
+      broadcastState(
+          DefaultStateGenerator.generateForPlayer1(c1.get.p, c2.get.p),
+          DefaultStateGenerator.generateForPlayer2(c1.get.p, c2.get.p))
     }
 
     def attackUsing(pc : PokemonCard, moveNum : Int) {
       val move = if (moveNum == 1) pc.firstMove.get else pc.secondMove.get
-      if (move.isActivatable) {
-        move.status match {
-          case Status.ACTIVATABLE => move.status = Status.ACTIVATED
-          case Status.ACTIVATED => move.status = Status.ACTIVATABLE
-          case _ => ()
-        }
-      } else {
-        move.perform(p, getOpponent(p))
-      }
+      move.perform(p, getOpponent(p))
       move match {
         case power : PokemonPower => ()
         case _ => flipTurn()
       }
       updateMoveStatuses()
-      broadcastState()
+      val ui = interceptedUI()
+      if (ui.isDefined) {
+        broadcastState(ui.get._1, ui.get._2)
+      } else {
+        broadcastState(
+          DefaultStateGenerator.generateForPlayer1(c1.get.p, c2.get.p),
+          DefaultStateGenerator.generateForPlayer2(c1.get.p, c2.get.p))
+      }
     }
 
     def attackFromActive(moveNum : Int) {
@@ -125,162 +123,35 @@ object Board {
       attackUsing(p.bench(benchIndex).get, moveNum)
     }
 
-    def handleMove(
-      move : (Map[String, Int]) => Unit,
-      itemMap : Map[String, Int],
-      moveName : String) {
-        if (!allowMoveExceptions(moveName, itemMap)) {
-          move(itemMap)
-        }
-        updateMoveStatuses()
-        broadcastState()
-    }
-
-  def allowMoveExceptions(moveName : String, itemMap : Map[String, Int]) : Boolean = {
-    if (p.active.isDefined) {
-      for (m <- List(p.active.get.firstMove, p.active.get.secondMove)) {
-        if (m.isDefined && m.get.status == Status.ACTIVATED) {
-          // delegate move handle to pokemon with activated power
-          m.get match {
-            case power : PokemonPower => power.handleMove(p, getOpponent(p), moveName, itemMap)
-            case _ => ()
-          }
-          return true
-        }
-      }
-    }
-    for (obc : Option[PokemonCard] <- p.bench) {
-      if (obc.isDefined) {
-        for (m <- List(obc.get.firstMove, obc.get.secondMove)) {
-          if (m.isDefined && m.get.status == Status.ACTIVATED) {
-            m.get match {
-              case power : PokemonPower => power.handleMove(p, getOpponent(p), moveName, itemMap)
-              case _ => ()
-            }
-            return true
-          }
-        }
-      }
-    }
-    return false
-  }
-
-    def benchToBench(itemMap : Map[String, Int]) {
-      val benchIndex1 = itemMap.getOrElse("drag", -1)
-      val benchIndex2 = itemMap.getOrElse("drop", -1)
-      val benchOne = p.bench(benchIndex1).get
-      if (p.bench(benchIndex2).isDefined) {
-        p.bench(benchIndex1) = Some(p.bench(benchIndex2).get)
-        p.bench(benchIndex2) = Some(benchOne)
+    def handleDrag(move : DragCommand) {
+      DefaultDragInterpreter.handleDrag(p, move)
+      updateMoveStatuses()
+      val ui = interceptedUI()
+      if (ui.isDefined) {
+        broadcastState(ui.get._1, ui.get._2)
       } else {
-        p.bench(benchIndex2) = Some(benchOne)
-        p.bench(benchIndex1) = None
+        broadcastState(
+          DefaultStateGenerator.generateForPlayer1(c1.get.p, c2.get.p),
+          DefaultStateGenerator.generateForPlayer2(c1.get.p, c2.get.p))
       }
     }
 
-    def benchToActive(itemMap : Map[String, Int]) {
-      val benchIndex = itemMap.getOrElse("drag", -1)
-      if (p.active.isDefined) {
-        swapActiveAndBench(benchIndex)
-      } else {
-        p.active = Some(p.bench(benchIndex).get)
-        p.bench(benchIndex) = None
-      }
-    }
-
-    def activeToBench(itemMap : Map[String, Int]) {
-      val benchIndex = itemMap.getOrElse("drop", -1)
-      if (p.bench(benchIndex).isDefined) {
-        swapActiveAndBench(benchIndex)
-      } else {
-        val active = p.active.get
-        if (active.getTotalEnergy() >= active.retreatCost) {
-          active.energyCards = active.energyCards.dropRight(active.retreatCost)
-          p.bench(benchIndex) = Some(active)
-          p.active = None
-        }
-      }
-    }
-
-    def swapActiveAndBench(benchIndex : Int) {
-      val active = p.active.get
-      val benchCard = p.bench(benchIndex).get
-      if (active.getTotalEnergy() >= active.retreatCost) {
-        active.energyCards = active.energyCards.dropRight(active.retreatCost)
-        p.active = Some(benchCard)
-        p.bench(benchIndex) = Some(active)
-      }
-    }
-
-    def handToActive(itemMap : Map[String, Int]) {
-      val handIndex = itemMap.getOrElse("drag", -1)
-      val card : Card = p.hand(handIndex)
-      if (p.active.isEmpty) {
-        card match {
-          // Moving basic pokemon from hand to active slot.
-          case pc : PokemonCard => {
-            if (pc.evolutionStage == EvolutionStage.BASIC) {
-              p.active = Some(pc)
-              p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
+    def interceptedUI() : Option[((JsObject, JsObject), (JsObject, JsObject))] = {
+      for (pc : Option[PokemonCard] <- p.bench ++ List(p.active)) {
+        if (pc.isDefined) {
+          for (om : Option[Move] <- List(pc.get.firstMove, pc.get.secondMove)) {
+            if (om.isDefined && om.get.stateGenerator.isDefined) {
+              val generator = om.get.stateGenerator.get
+              if (generator.isActive && generator.willIntercept(p, getOpponent(p))) {
+                val p1 = if (isPlayer1(p)) p else getOpponent(p)
+                val p2 = if (isPlayer1(p)) getOpponent(p) else p
+                return Some(generator.generateForPlayer1(p1, p2, pc.get), generator.generateForPlayer2(p1, p2, pc.get))
+              }
             }
           }
-          case _ => ()
-        }
-      } else {
-        val active = p.active.get
-        card match {
-          // Attaching energy card to active pokemon.
-          case ec : EnergyCard => {
-            active.energyCards = active.energyCards ++ List(ec)
-            p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
-          }
-          // Evolving active pokemon.
-          case pc : PokemonCard => {
-            if (pc.isEvolutionOf(active)) {
-              pc.evolveOver(active)
-              p.active = Some(pc)
-              p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
-            }
-          }
-          case _ => ()
         }
       }
-    }
-
-    def handToBench(itemMap : Map[String, Int]) {
-      val handIndex = itemMap.getOrElse("drag", -1)
-      val benchIndex = itemMap.getOrElse("drop", -1)
-      Logger.debug("handToBench(" + handIndex + ", " + benchIndex + ")")
-      val card : Card = p.hand(handIndex)
-      if (p.bench(benchIndex).isEmpty) {
-        card match {
-          case pc : PokemonCard => {
-            // Moving basic pokemon to empty bench slot.
-            if (pc.evolutionStage == EvolutionStage.BASIC) {
-              p.bench(benchIndex) = Some(pc)
-              p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
-            }
-          }
-          case _ => ()
-        }
-      } else {
-        val benchCard = p.bench(benchIndex).get
-        card match {
-          case ec : EnergyCard => {
-            benchCard.energyCards = benchCard.energyCards ++ List(ec)
-            p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
-          }
-          // Evolving this bench pokemon.
-          case pc : PokemonCard => {
-            if (pc.isEvolutionOf(benchCard)) {
-              pc.evolveOver(benchCard)
-              p.bench(benchIndex) = Some(pc)
-              p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
-            }
-          }
-          case _ => ()
-        }
-      }
+      return None
     }
 
     /**
@@ -306,21 +177,22 @@ object Board {
         val active = p.active.get
         for (m <- List(p.active.get.firstMove, p.active.get.secondMove)) {
           if (m.isDefined) {
-            if (m.get.isActivatable) {
-              if (m.get.status != Status.ACTIVATED && active.statusCondition.isEmpty) {
-                m.get.status = Status.ACTIVATABLE
-              }
-            } else {
               m.get match {
-                // Passive powers
-                case power : PokemonPower => power.status =
-                  if (active.statusCondition.isEmpty) Status.PASSIVE else Status.DISABLED
+                case power : PokemonPower => {
+                  if (active.statusCondition.isEmpty) {
+                    if (power.isActivatable) {
+                      power.status = if (power.activated) Status.ACTIVATED else Status.ACTIVATABLE
+                    } else {
+                      power.status = Status.PASSIVE
+                    }
+                  } else {
+                    power.status = Status.DISABLED
+                  }
+                }
                  // Active pokemon with non-activatable moves should be enabled if there's enough energy.
                 case move : Move => move.status =
                   if (move.hasEnoughEnergy(p, active.energyCards)) Status.ENABLED else Status.DISABLED
               }
-            
-            }
           }
         }
       }
@@ -329,15 +201,9 @@ object Board {
         if (pc.isDefined) {
           for (m <- List[Option[Move]](pc.get.firstMove, pc.get.secondMove)) {
             if (m.isDefined) {
-              if (m.get.isActivatable) {
-                if (m.get.status != Status.ACTIVATED && pc.get.statusCondition.isEmpty) {
-                  m.get.status = Status.ACTIVATABLE
-                }
-              } else {
-                m.get match {
+              m.get match {
                   case power : PokemonPower => power.status = Status.PASSIVE
                   case move : Move => move.status = Status.DISABLED
-                }
               }
             }
           }
@@ -345,6 +211,8 @@ object Board {
       }
     }
   }
+
+  def isPlayer1(p : Player) : Boolean = return c1.get.p == p
 
   def flipTurn() : Unit = {
     c1.get.p.isTurn = !c1.get.p.isTurn
@@ -354,11 +222,11 @@ object Board {
   def bothCorrespondentsReady =
       !c1.isEmpty && !c2.isEmpty && c1.get.ready && c2.get.ready
 
-  def broadcastState() {
+  def broadcastState(p1Orientation : (JsObject, JsObject), p2Orientation : (JsObject, JsObject)) {
     eventBus.publish(StateEvent(
-      1, JsObject(Seq("player1" -> c1.get.p.toJson, "player2" -> c2.get.p.toJson))))
+      1, JsObject(Seq("player1" -> p1Orientation._1, "player2" -> p1Orientation._2))))
     eventBus.publish(StateEvent(
-      2, JsObject(Seq("player1" -> c2.get.p.toJson, "player2" -> c1.get.p.toJson))))
+      2, JsObject(Seq("player1" -> p2Orientation._1, "player2" -> p2Orientation._2))))
     c1.get.p.notification = None
     c2.get.p.notification = None
   }

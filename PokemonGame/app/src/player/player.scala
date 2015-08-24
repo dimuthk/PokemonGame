@@ -1,5 +1,6 @@
 package src.player
 
+import src.card.CardUI
 import src.card.Card
 import src.card.Placeholder
 import src.card.pokemon.PokemonCard
@@ -24,6 +25,27 @@ class Player extends Jsonable {
 
   var isTurn : Boolean = false
 
+  def setUIOrientationForBench(uiSet : Set[CardUI.Value]) {
+    for (bc : Option[PokemonCard] <- bench) {
+      if (bc.isDefined) {
+        bc.get.setUiOrientation(uiSet)
+      }
+    }
+  }
+
+  def setUIOrientationForActiveAndBench(uiSet : Set[CardUI.Value]) {
+    if (active.isDefined) {
+      active.get.setUiOrientation(uiSet)
+    }
+    setUIOrientationForBench(uiSet)
+  }
+
+  def setUiOrientationForHand(uiSet : Set[CardUI.Value]) {
+    for (hc : Card <- hand) {
+      hc.setUiOrientation(uiSet)
+    }
+  }
+
   def notify(msg : String) {
     notification = Some(msg)
   }
@@ -37,7 +59,6 @@ class Player extends Jsonable {
       case Some(s) => JsString(s)
       case None => Placeholder.toJson
     }
-    Logger.debug(notifyJson.toString)
     return Json.obj(
   	   Identifier.ACTIVE.toString -> optionCardToJson(active),
   	   Identifier.DECK.toString -> cardListToJsArray(deck),
