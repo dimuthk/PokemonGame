@@ -34,9 +34,7 @@ class Venusaur extends PokemonCard(
 
 }
 
-private class EnergyTransState extends CustomStateGenerator {
-
-  override def willIntercept(owner : Player, opp : Player) = true
+private class EnergyTransState extends CustomStateGenerator(true, false) {
 
   override def generateForOwner(owner : Player, opp : Player, interceptor : PokemonCard) : (JsObject, JsObject) = {
     // Active and bench cards are visible and draggable to allow energy transfer.
@@ -51,16 +49,6 @@ private class EnergyTransState extends CustomStateGenerator {
     // Venusaur must still be usable to deactivate power.
     owner.setUIOrientationForActiveAndBench(Set(FACE_UP, CLICKABLE, DRAGGABLE, USABLE))
     return (owner.toJson, opp.toJson)
-  }
-
-  override def generateForOpp(opp : Player, owner : Player, interceptor : PokemonCard) : (JsObject, JsObject) = {
-    // Cards are visible and nothing else.
-    opp.setUIOrientationForActiveAndBench(Set(FACE_UP))
-    opp.setUiOrientationForHand(Set(FACE_UP))
-
-    owner.setUIOrientationForActiveAndBench(Set(FACE_UP))
-    owner.setUiOrientationForHand(Set())
-    return (opp.toJson, owner.toJson)
   }
 
 }

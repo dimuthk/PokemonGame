@@ -142,7 +142,7 @@ object Board {
           for (om : Option[Move] <- List(pc.get.firstMove, pc.get.secondMove)) {
             if (om.isDefined && om.get.stateGenerator.isDefined) {
               val generator = om.get.stateGenerator.get
-              if (generator.isActive && generator.willIntercept(p, getOpponent(p))) {
+              if (generator.isActive) {
                 val p1 = if (isPlayer1(p)) p else getOpponent(p)
                 val p2 = if (isPlayer1(p)) getOpponent(p) else p
                 return Some(generator.generateForPlayer1(p1, p2, pc.get), generator.generateForPlayer2(p1, p2, pc.get))
