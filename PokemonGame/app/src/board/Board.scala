@@ -4,6 +4,8 @@ import actors.PlayerActor
 
 import scala.util.Random
 
+import src.board.state.StateGeneratorDirector
+import src.board.BoardCleaner
 import src.board.move.MoveDirector
 import src.board.drag._
 import src.board.state.DefaultStateGenerator
@@ -99,46 +101,16 @@ object Board {
 
     def handleMove(contents : Seq[String]) {
       MoveDirector.handleMoveCommand(p, getOpponent(p), contents)
-      updateMoveStatuses()
-      val ui = interceptedUI()
-      if (ui.isDefined) {
-        broadcastState(ui.get._1, ui.get._2)
-      } else {
-        broadcastState(
-          DefaultStateGenerator.generateForPlayer1(c1.get.p, c2.get.p),
-          DefaultStateGenerator.generateForPlayer2(c1.get.p, c2.get.p))
-      }
+      BoardCleaner.cleanUpBoardState(p, getOpponent(p))
+      val state = StateGeneratorDirector.generateState(c1.get.p, c2.get.p, isPlayer1(p))
+      broadcastState(state._1, state._2)
     }
 
     def handleDrag(contents : Seq[String]) {
       DragDirector.handleDragCommand(p, getOpponent(p), contents)
-      updateMoveStatuses()
-      val ui = interceptedUI()
-      if (ui.isDefined) {
-        broadcastState(ui.get._1, ui.get._2)
-      } else {
-        broadcastState(
-          DefaultStateGenerator.generateForPlayer1(c1.get.p, c2.get.p),
-          DefaultStateGenerator.generateForPlayer2(c1.get.p, c2.get.p))
-      }
-    }
-
-    def interceptedUI() : Option[((JsObject, JsObject), (JsObject, JsObject))] = {
-      for (pc : Option[PokemonCard] <- p.bench ++ List(p.active)) {
-        if (pc.isDefined) {
-          for (om : Option[Move] <- List(pc.get.firstMove, pc.get.secondMove)) {
-            if (om.isDefined && om.get.stateGenerator.isDefined) {
-              val generator = om.get.stateGenerator.get
-              if (generator.isActive) {
-                val p1 = if (isPlayer1(p)) p else getOpponent(p)
-                val p2 = if (isPlayer1(p)) getOpponent(p) else p
-                return Some(generator.generateForPlayer1(p1, p2, pc.get), generator.generateForPlayer2(p1, p2, pc.get))
-              }
-            }
-          }
-        }
-      }
-      return None
+      BoardCleaner.cleanUpBoardState(p, getOpponent(p))
+      val state = StateGeneratorDirector.generateState(c1.get.p, c2.get.p, isPlayer1(p))
+      broadcastState(state._1, state._2)
     }
 
     /**
@@ -156,47 +128,6 @@ object Board {
 
     def terminateSocket() = onTerminateSocket(id)
 
-  }
-
-  def updateMoveStatuses() {
-    for (p : Player <- List[Player](c1.get.p, c2.get.p)) {
-      if (p.active.isDefined) {
-        val active = p.active.get
-        for (m <- List(p.active.get.firstMove, p.active.get.secondMove)) {
-          if (m.isDefined) {
-              m.get match {
-                case power : PokemonPower => {
-                  if (active.statusCondition.isEmpty) {
-                    if (power.isActivatable) {
-                      power.status = if (power.activated) Status.ACTIVATED else Status.ACTIVATABLE
-                    } else {
-                      power.status = Status.PASSIVE
-                    }
-                  } else {
-                    power.status = Status.DISABLED
-                  }
-                }
-                 // Active pokemon with non-activatable moves should be enabled if there's enough energy.
-                case move : Move => move.status =
-                  if (move.hasEnoughEnergy(p, active.energyCards)) Status.ENABLED else Status.DISABLED
-              }
-          }
-        }
-      }
-
-      for (pc : Option[PokemonCard] <- p.bench) {
-        if (pc.isDefined) {
-          for (m <- List[Option[Move]](pc.get.firstMove, pc.get.secondMove)) {
-            if (m.isDefined) {
-              m.get match {
-                  case power : PokemonPower => power.status = Status.PASSIVE
-                  case move : Move => move.status = Status.DISABLED
-              }
-            }
-          }
-        }
-      }
-    }
   }
 
   def isPlayer1(p : Player) : Boolean = return c1.get.p == p
