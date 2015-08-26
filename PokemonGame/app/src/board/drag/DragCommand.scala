@@ -11,3 +11,5 @@ case class ActiveToBench(benchIndex : Int) extends DragCommand
 case class BenchToActive(benchIndex : Int) extends DragCommand
 
 case class BenchToBench(benchIndex1 : Int, benchIndex2 : Int) extends DragCommand
+
+case class Intermediary(cmds : Seq[String]) extends DragCommand

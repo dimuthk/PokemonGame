@@ -4,6 +4,7 @@ import actors.PlayerActor
 
 import scala.util.Random
 
+import src.board.move.MoveDirector
 import src.board.drag._
 import src.board.state.DefaultStateGenerator
 import src.card.Card
@@ -96,13 +97,8 @@ object Board {
           DefaultStateGenerator.generateForPlayer2(c1.get.p, c2.get.p))
     }
 
-    def attackUsing(pc : PokemonCard, moveNum : Int) {
-      val move = if (moveNum == 1) pc.firstMove.get else pc.secondMove.get
-      move.perform(p, getOpponent(p))
-      move match {
-        case power : PokemonPower => ()
-        case _ => flipTurn()
-      }
+    def handleMove(contents : Seq[String]) {
+      MoveDirector.handleMoveCommand(p, getOpponent(p), contents)
       updateMoveStatuses()
       val ui = interceptedUI()
       if (ui.isDefined) {
@@ -114,17 +110,8 @@ object Board {
       }
     }
 
-    def attackFromActive(moveNum : Int) {
-      Logger.debug("attack " + moveNum)
-      attackUsing(p.active.get, moveNum)
-    }
-
-    def attackFromBench(moveNum : Int, benchIndex : Int) {
-      attackUsing(p.bench(benchIndex).get, moveNum)
-    }
-
-    def handleDrag(move : DragCommand) {
-      DefaultDragInterpreter.handleDrag(p, move)
+    def handleDrag(contents : Seq[String]) {
+      DragDirector.handleDragCommand(p, getOpponent(p), contents)
       updateMoveStatuses()
       val ui = interceptedUI()
       if (ui.isDefined) {

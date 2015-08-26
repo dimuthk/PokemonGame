@@ -263,23 +263,23 @@ function energyDescription(tag, card) {
 }
 
 function handToActive(handIndex) {
-  $("#content").data("socket").send("HAND_TO_ACTIVE<>" + handIndex)
+  $("#content").data("socket").send("DRAG<>HAND_TO_ACTIVE<>" + handIndex)
 }
 
 function handToBench(handIndex, benchIndex) {
-  $("#content").data("socket").send("HAND_TO_BENCH<>" + handIndex + "<>" + benchIndex)
+  $("#content").data("socket").send("DRAG<>HAND_TO_BENCH<>" + handIndex + "<>" + benchIndex)
 }
 
 function benchToBench(benchIndex1, benchIndex2) {
-  $("#content").data("socket").send("BENCH_TO_BENCH<>" + benchIndex1 + "<>" + benchIndex2)
+  $("#content").data("socket").send("DRAG<>BENCH_TO_BENCH<>" + benchIndex1 + "<>" + benchIndex2)
 }
 
 function benchToActive(benchIndex) {
-	$("#content").data("socket").send("BENCH_TO_ACTIVE<>" + benchIndex)
+	$("#content").data("socket").send("DRAG<>BENCH_TO_ACTIVE<>" + benchIndex)
 }
 
 function activeToBench(benchIndex) {
-  $("#content").data("socket").send("ACTIVE_TO_BENCH<>" + benchIndex)
+  $("#content").data("socket").send("DRAG<>ACTIVE_TO_BENCH<>" + benchIndex)
 }
 
 function isPlaceholder(item) {
@@ -371,9 +371,9 @@ function useAttack(moveNum, tag) {
   var socket = $("#content").data("socket")
   if (tag.includes("Bench")) {
     var benchIndex = tag.charAt(tag.length - 1)
-    socket.send("ATTACK_FROM_BENCH<>" + benchIndex + "<>" + moveNum)
+    socket.send("MOVE<>ATTACK_FROM_BENCH<>" + benchIndex + "<>" + moveNum)
   } else if (tag.includes("Active")) {
-    socket.send("ATTACK_FROM_ACTIVE<>" + moveNum)
+    socket.send("MOVE<>ATTACK_FROM_ACTIVE<>" + moveNum)
   }
 	$(".popUp").dialog("close")
 }

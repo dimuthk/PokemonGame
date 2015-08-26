@@ -1,5 +1,7 @@
 package src.board.drag
 
+import src.board.intermediary.ClickableCardRequest
+import src.board.intermediary.IntermediaryRequest
 import src.card.Card
 import src.card.energy.EnergyCard
 import src.card.pokemon.PokemonCard
@@ -7,7 +9,45 @@ import src.card.pokemon.EvolutionStage
 import src.board.drag._
 import src.player.Player
 
+class RetreatEnergySpecification(
+  clickCount : Int, energyCards : Seq[EnergyCard]) extends ClickableCardRequest(
+  "Discard Energy",
+  "Select the energy cards you want to discard.",
+  clickCount,
+  energyCards)
+
 object DefaultDragInterpreter extends DragInterpreter {
+
+  override def additionalRequest(p : Player, cmd : DragCommand) : Option[IntermediaryRequest] = {
+    cmd match {
+      case BenchToActive(benchIndex : Int) => return checkActiveRestoreAmbiguity(p.active)
+      case ActiveToBench(benchIndex : Int) => return checkActiveRestoreAmbiguity(p.active)
+      case _ => return None
+    }
+  }
+
+  private def checkActiveRestoreAmbiguity(active : Option[PokemonCard]): Option[RetreatEnergySpecification] = {
+    if (active.isDefined && active.get.retreatCost > 0 && active.get.energyCards.length > 1) {
+      if (hasMultipleEnergyTypes(active.get.energyCards)) {
+        return Some(new RetreatEnergySpecification(active.get.retreatCost, active.get.energyCards))
+      }
+    }
+    return None
+  }
+
+  private def hasMultipleEnergyTypes(energyCards : Seq[EnergyCard]) : Boolean = {
+    if (energyCards.length > 1) {
+      val firstCard = energyCards(0)
+      return !energyCards.filter(_.eType != firstCard.eType).isEmpty
+    }
+    return false;
+  }
+
+  // tmpl: benchIndex<>[indices of selected energyCards]
+  override def handleIntermediary(cmd : Seq[String]) {
+    val benchIndex : Int = cmd(0).toInt - 1
+    val eCardIndices : Seq[Int] = cmd(1).split(",").map(_.toInt)
+  }
 
     override def benchToBench(p : Player, benchIndex1 : Int, benchIndex2 : Int) {
       val benchOne = p.bench(benchIndex1).get
@@ -20,6 +60,9 @@ object DefaultDragInterpreter extends DragInterpreter {
       }
     }
 
+    /**
+     * Assumes benchIndex points to a non-null bench card.
+     */
     override def benchToActive(p : Player, benchIndex : Int) {
       if (p.active.isDefined) {
         swapActiveAndBench(p, benchIndex)
@@ -42,7 +85,7 @@ object DefaultDragInterpreter extends DragInterpreter {
       }
     }
 
-    override def swapActiveAndBench(p : Player, benchIndex : Int) {
+    private def swapActiveAndBench(p : Player, benchIndex : Int) {
       val active = p.active.get
       val benchCard = p.bench(benchIndex).get
       if (active.getTotalEnergy() >= active.retreatCost) {
