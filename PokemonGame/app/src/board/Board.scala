@@ -100,14 +100,24 @@ object Board {
     }
 
     def handleMove(contents : Seq[String]) {
-      MoveDirector.handleMoveCommand(p, getOpponent(p), contents)
-      BoardCleaner.cleanUpBoardState(p, getOpponent(p))
-      val state = StateGeneratorDirector.generateState(c1.get.p, c2.get.p, isPlayer1(p))
-      broadcastState(state._1, state._2)
+      val intermediary = MoveDirector.handleMoveCommand(p, getOpponent(p), contents)
+      if (intermediary.isDefined) {
+        // do something else
+      } else {
+          cleanupBoardAndPassBackState()
+      }
     }
 
     def handleDrag(contents : Seq[String]) {
-      DragDirector.handleDragCommand(p, getOpponent(p), contents)
+      val intermediary = DragDirector.handleDragCommand(p, getOpponent(p), contents)
+      if (intermediary.isDefined) {
+        // do something else
+      } else {
+         cleanupBoardAndPassBackState()
+      }
+    }
+
+    def cleanupBoardAndPassBackState() {
       BoardCleaner.cleanUpBoardState(p, getOpponent(p))
       val state = StateGeneratorDirector.generateState(c1.get.p, c2.get.p, isPlayer1(p))
       broadcastState(state._1, state._2)
