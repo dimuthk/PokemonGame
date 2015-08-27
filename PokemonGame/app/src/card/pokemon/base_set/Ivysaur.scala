@@ -20,11 +20,7 @@ class Ivysaur extends PokemonCard(
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.FIRE),
     retreatCost = 1,
-    evolutionStage = EvolutionStage.STAGE_ONE) {
-
-  override def isEvolutionOf(pokemon : PokemonCard) = pokemon.id == 1
-
-}
+    evolutionStage = EvolutionStage.STAGE_ONE)
 
 private class VineWhip extends Move(
   "Vine Whip",

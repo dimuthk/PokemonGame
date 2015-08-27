@@ -7,10 +7,8 @@ import src.card.pokemon.EvolutionStage
 import src.board.drag._
 import src.player.Player
 
-abstract class CustomDragInterpreter {
+abstract class CustomDragInterpreter extends DragInterpreter {
 
-    var isActive : Boolean
-
-    def willIntercept(owner : Player, opp : Player)
+    var isActive : Boolean = false
 
 }

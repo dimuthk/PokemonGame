@@ -10,26 +10,29 @@ import src.board.drag._
 import src.player.Player
 
 class RetreatEnergySpecification(
-  clickCount : Int, energyCards : Seq[EnergyCard]) extends ClickableCardRequest(
+  p : Player, clickCount : Int, energyCards : Seq[EnergyCard]) extends ClickableCardRequest(
   "Discard Energy",
   "Select the energy cards you want to discard.",
+  p,
   clickCount,
   energyCards)
 
 object DefaultDragInterpreter extends DragInterpreter {
 
+  val restrictEnergyAttach = false
+
   override def additionalRequest(p : Player, cmd : DragCommand) : Option[IntermediaryRequest] = {
     cmd match {
-      case BenchToActive(benchIndex : Int) => return checkActiveRestoreAmbiguity(p.active)
-      case ActiveToBench(benchIndex : Int) => return checkActiveRestoreAmbiguity(p.active)
+      case BenchToActive(benchIndex : Int) => return checkActiveRestoreAmbiguity(p, p.active)
+      case ActiveToBench(benchIndex : Int) => return checkActiveRestoreAmbiguity(p, p.active)
       case _ => return None
     }
   }
 
-  private def checkActiveRestoreAmbiguity(active : Option[PokemonCard]): Option[RetreatEnergySpecification] = {
+  private def checkActiveRestoreAmbiguity(p : Player, active : Option[PokemonCard]): Option[RetreatEnergySpecification] = {
     if (active.isDefined && active.get.retreatCost > 0 && active.get.energyCards.length > 1) {
       if (hasMultipleEnergyTypes(active.get.energyCards)) {
-        return Some(new RetreatEnergySpecification(active.get.retreatCost, active.get.energyCards))
+        return Some(new RetreatEnergySpecification(p, active.get.retreatCost, active.get.energyCards))
       }
     }
     return None
@@ -41,6 +44,14 @@ object DefaultDragInterpreter extends DragInterpreter {
       return !energyCards.filter(_.eType != firstCard.eType).isEmpty
     }
     return false;
+  }
+
+  private def attachEnergyToPokemon(p : Player, ec : EnergyCard, handIndex : Int, pc : PokemonCard) {
+    if (!p.addedEnergy || !restrictEnergyAttach) {
+      pc.energyCards = pc.energyCards ++ List(ec)
+      p.removeCardFromHand(handIndex)
+      p.addedEnergy = true
+    }
   }
 
   // tmpl: benchIndex<>[indices of selected energyCards]
@@ -112,10 +123,7 @@ object DefaultDragInterpreter extends DragInterpreter {
         val active = p.active.get
         card match {
           // Attaching energy card to active pokemon.
-          case ec : EnergyCard => {
-            active.energyCards = active.energyCards ++ List(ec)
-            p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
-          }
+          case ec : EnergyCard => attachEnergyToPokemon(p, ec, handIndex, active)
           // Evolving active pokemon.
           case pc : PokemonCard => {
             if (pc.isEvolutionOf(active)) {
@@ -145,10 +153,7 @@ object DefaultDragInterpreter extends DragInterpreter {
       } else {
         val benchCard = p.bench(benchIndex).get
         card match {
-          case ec : EnergyCard => {
-            benchCard.energyCards = benchCard.energyCards ++ List(ec)
-            p.hand = p.hand.slice(0, handIndex) ++ p.hand.slice(handIndex + 1, p.hand.size)
-          }
+          case ec : EnergyCard => attachEnergyToPokemon(p, ec, handIndex, benchCard)
           // Evolving this bench pokemon.
           case pc : PokemonCard => {
             if (pc.isEvolutionOf(benchCard)) {

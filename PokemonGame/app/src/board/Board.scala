@@ -4,6 +4,9 @@ import actors.PlayerActor
 
 import scala.util.Random
 
+import src.card.Placeholder
+import src.json.Identifier
+import src.board.intermediary.IntermediaryRequest
 import src.board.state.StateGeneratorDirector
 import src.board.BoardCleaner
 import src.board.move.MoveDirector
@@ -79,7 +82,7 @@ object Board {
         p.active = Some(new Venusaur())
         p.isTurn = false
       } else {
-        p.deck = List.fill(20)(new Caterpie()) ++ List.fill(20)(new Venusaur()) ++ List.fill(20)(new GrassEnergy())
+        p.deck = List.fill(20)(new WaterEnergy()) ++ List.fill(20)(new Blastoise()) ++ List.fill(20)(new GrassEnergy())
         p.deck = Random.shuffle(p.deck)
         p.isTurn = true
       }
@@ -102,7 +105,7 @@ object Board {
     def handleMove(contents : Seq[String]) {
       val intermediary = MoveDirector.handleMoveCommand(p, getOpponent(p), contents)
       if (intermediary.isDefined) {
-        // do something else
+        rebroadcastStateWithIntermediary(intermediary.get)
       } else {
           cleanupBoardAndPassBackState()
       }
@@ -111,10 +114,16 @@ object Board {
     def handleDrag(contents : Seq[String]) {
       val intermediary = DragDirector.handleDragCommand(p, getOpponent(p), contents)
       if (intermediary.isDefined) {
-        // do something else
+        Logger.debug("intermediary: " + intermediary.get)
+        rebroadcastStateWithIntermediary(intermediary.get)
       } else {
          cleanupBoardAndPassBackState()
       }
+    }
+
+    def rebroadcastStateWithIntermediary(intermediary : IntermediaryRequest) {
+      val state = StateGeneratorDirector.generateState(c1.get.p, c2.get.p, isPlayer1(p))
+      broadcastState(state._1, state._2, Some(intermediary))
     }
 
     def cleanupBoardAndPassBackState() {
@@ -150,11 +159,31 @@ object Board {
   def bothCorrespondentsReady =
       !c1.isEmpty && !c2.isEmpty && c1.get.ready && c2.get.ready
 
-  def broadcastState(p1Orientation : (JsObject, JsObject), p2Orientation : (JsObject, JsObject)) {
+  def getIntermediaryForPlayer(p : Player, intermediary : Option[IntermediaryRequest]) : JsObject = {
+    if (intermediary.isDefined) {
+      if (intermediary.get.p == p) {
+        return intermediary.get.toJson
+      }
+    }
+    return Placeholder.toJson
+  }
+
+  def broadcastState(
+    p1Orientation : (JsObject, JsObject),
+    p2Orientation : (JsObject, JsObject),
+    intermediary : Option[IntermediaryRequest] = None) {
     eventBus.publish(StateEvent(
-      1, JsObject(Seq("player1" -> p1Orientation._1, "player2" -> p1Orientation._2))))
+      1, JsObject(Seq(
+        "player1" -> p1Orientation._1,
+        "player2" -> p1Orientation._2,
+        //"intermediary" -> JsString("INTERMEDIARY")))))
+        "intermediary" -> getIntermediaryForPlayer(c1.get.p, intermediary)))))
     eventBus.publish(StateEvent(
-      2, JsObject(Seq("player1" -> p2Orientation._1, "player2" -> p2Orientation._2))))
+      2, JsObject(Seq(
+        "player1" -> p2Orientation._1,
+        "player2" -> p2Orientation._2,
+        //"intermediary" -> JsString("INTERMEDIARY")))))
+        "intermediary" -> getIntermediaryForPlayer(c2.get.p, intermediary)))))
     c1.get.p.notification = None
     c2.get.p.notification = None
   }

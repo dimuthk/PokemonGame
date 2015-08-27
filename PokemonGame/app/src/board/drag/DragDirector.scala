@@ -1,5 +1,7 @@
 package src.board.drag
 
+import src.move.Move
+import src.card.pokemon.PokemonCard
 import src.player.Player
 import src.board.intermediary.IntermediaryRequest
 
@@ -7,7 +9,7 @@ object DragDirector {
 
 	def handleDragCommand(
 		owner : Player, opp : Player, contents : Seq[String]) : Option[IntermediaryRequest] = {
-		val interpreter = selectDragInterpreter()
+		val interpreter = selectDragInterpreter(owner, opp)
 		val dragCmd : DragCommand = contents(0) match {
 			case "HAND_TO_ACTIVE" => HandToActive(contents(1).toInt)
 			case "HAND_TO_BENCH" => HandToBench(contents(1).toInt, contents(2).toInt - 1)
@@ -24,7 +26,17 @@ object DragDirector {
 		return intermediaryReq
 	}
 
-	def selectDragInterpreter() : DragInterpreter = {
+	/**
+	 * For now, only allow custom interpreters to intercept drags made by their owner.
+	 */
+	def selectDragInterpreter(owner : Player, opp : Player) : DragInterpreter = {
+		for (pc : PokemonCard <- owner.getExistingActiveAndBenchCards()) {
+			for (m : Move <- pc.getExistingMoves()) {
+				if (m.dragInterpreter.isDefined && m.dragInterpreter.get.isActive) {
+					return m.dragInterpreter.get
+				}
+			}
+		}
 		return DefaultDragInterpreter
 	}
 

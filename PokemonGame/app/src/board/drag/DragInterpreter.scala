@@ -13,7 +13,7 @@ abstract class DragInterpreter {
     /**
      * Idempotent method returning any additional information needed to process the request.
      */
-    def additionalRequest(p : Player, command : DragCommand) : Option[IntermediaryRequest]
+    def additionalRequest(p : Player, command : DragCommand) : Option[IntermediaryRequest] = None
 
     def handleDrag(p : Player, move : DragCommand) {
       move match {
@@ -56,6 +56,6 @@ abstract class DragInterpreter {
      */
     def handToBench(p : Player, handIndex : Int, benchIndex : Int) : Unit
 
-    def handleIntermediary(cmd : Seq[String]) : Unit
+    def handleIntermediary(cmd : Seq[String]) : Unit = ()
 
 }

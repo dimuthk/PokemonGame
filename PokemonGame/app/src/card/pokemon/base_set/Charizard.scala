@@ -3,7 +3,7 @@ package src.card.pokemon.base_set
 import src.json.Identifier
 import src.move.Move
 import src.move.MoveBuilder._
-import src.move.PokemonPower
+import src.move.PassivePokemonPower
 import src.player.Player
 import src.card.energy.EnergyCard
 import src.card.energy.EnergyType
@@ -25,8 +25,6 @@ class Charizard extends PokemonCard(
     retreatCost = 3,
     evolutionStage = EvolutionStage.STAGE_TWO) {
 
-  override def isEvolutionOf(pokemon : PokemonCard) = pokemon.id == 5
-
   override def discardEnergy(eType : EnergyType.Value, cnt : Int = 1) : Seq[EnergyCard] = {
     if (statusCondition == None) {
       return super.discardEnergy(EnergyType.COLORLESS, cnt)
@@ -36,9 +34,7 @@ class Charizard extends PokemonCard(
   }
 }
 
-private class EnergyBurn extends PokemonPower(
-  "Energy Burn",
-  isActivatable = false)
+private class EnergyBurn extends PassivePokemonPower("Energy Burn")
 
 private class FireSpin extends Move(
   "Fire Spin",

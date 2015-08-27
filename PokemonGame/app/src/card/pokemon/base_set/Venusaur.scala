@@ -4,7 +4,9 @@ import src.json.Identifier
 import src.move.Move
 import src.move.interceptor._
 import src.move.MoveBuilder._
-import src.move.PokemonPower
+import src.move.ActivePokemonPower
+import src.board.intermediary.IntermediaryRequest
+import src.board.drag.CustomDragInterpreter
 import src.board.state.CustomStateGenerator
 import src.player.Player
 import src.card.energy.EnergyCard
@@ -28,10 +30,20 @@ class Venusaur extends PokemonCard(
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.FIRE),
     retreatCost = 2,
-    evolutionStage = EvolutionStage.BASIC) {
+    evolutionStage = EvolutionStage.STAGE_TWO)
 
-  override def isEvolutionOf(pokemon : PokemonCard) = pokemon.id == 2
+private class EnergyTrans extends ActivePokemonPower(
+  "Energy Trans",
+  dragInterpreter = Some(new EnergyTransDrag()),
+  stateGenerator = Some(new EnergyTransState()))
 
+
+private class Solarbeam extends Move(
+  "Solarbeam",
+  4,
+  Map(EnergyType.GRASS -> 4)) {
+
+  override def perform(owner : Player, opp : Player) = standardAttack(owner, opp, 60)
 }
 
 private class EnergyTransState extends CustomStateGenerator(true, false) {
@@ -53,48 +65,31 @@ private class EnergyTransState extends CustomStateGenerator(true, false) {
 
 }
 
-private class EnergyTrans extends PokemonPower(
-  "Energy Trans",
-  isActivatable = true,
-  stateGenerator = Some(new EnergyTransState())) {
+private class EnergyTransDrag extends CustomDragInterpreter {
 
-  override def perform(owner : Player, opp : Player) : Unit = {
-    activated = !activated
-    stateGenerator.get.isActive = !stateGenerator.get.isActive
-  }
-
- /* override def handleMove(owner : Player, opp : Player, moveName : String, itemMap : Map[String, Int]) {
-    moveName match {
-      case "BENCH_TO_BENCH" => {
-        val benchIndex2 = itemMap.getOrElse("drop", -1)
-        if (owner.bench(benchIndex2).isEmpty) {
-          return
-        }
-        val benchIndex1 = itemMap.getOrElse("drag", -1)
-        val dragTarget = owner.bench(benchIndex1).get
-        val dropTarget = owner.bench(benchIndex2).get
-        transferLeafEnergy(dragTarget, dropTarget)
-      }
-      case "BENCH_TO_ACTIVE" => {
-        if (owner.active.isEmpty) {
-          return
-        }
-        val benchIndex = itemMap.getOrElse("drag", -1)
-        transferLeafEnergy(owner.bench(benchIndex).get, owner.active.get)
-      }
-      case "ACTIVE_TO_BENCH" => {
-        val benchIndex = itemMap.getOrElse("drop", -1)
-        if (owner.bench(benchIndex).isEmpty) {
-          return
-        }
-        transferLeafEnergy(owner.active.get, owner.bench(benchIndex).get)
-      }
-      case _ => () 
+  override def benchToBench(p : Player, benchIndex1 : Int, benchIndex2 : Int) : Unit = {
+    if (p.bench(benchIndex2).isDefined) {
+      transferLeafEnergy(p.bench(benchIndex1).get, p.bench(benchIndex2).get)
     }
-    
   }
 
-  def transferLeafEnergy(drag : PokemonCard, drop : PokemonCard) {
+  override def benchToActive(p : Player, benchIndex : Int) : Unit = {
+    if (p.active.isDefined) {
+      transferLeafEnergy(p.bench(benchIndex).get, p.active.get)
+    }
+  }
+
+  override def activeToBench(p : Player, benchIndex : Int) : Unit = {
+    if (p.bench(benchIndex).isDefined) {
+      transferLeafEnergy(p.active.get, p.bench(benchIndex).get)
+    }
+  }
+
+  override def handToActive(p : Player, handIndex : Int) : Unit = ()
+
+  override def handToBench(p : Player, handIndex : Int, benchIndex : Int) : Unit = ()
+
+  private def transferLeafEnergy(drag : PokemonCard, drop : PokemonCard) {
     for (i <- 0 until drag.energyCards.length) {
       if (drag.energyCards(i).eType == EnergyType.GRASS) {
         val ec : EnergyCard = drag.energyCards(i)
@@ -103,14 +98,7 @@ private class EnergyTrans extends PokemonPower(
         return
       }
     }
-  }*/
+  }
 
 }
 
-private class Solarbeam extends Move(
-  "Solarbeam",
-  4,
-  Map(EnergyType.GRASS -> 4)) {
-
-  override def perform(owner : Player, opp : Player) = standardAttack(owner, opp, 60)
-}

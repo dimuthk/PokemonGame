@@ -25,6 +25,11 @@ class Player extends Jsonable {
 
   var isTurn : Boolean = false
 
+  var addedEnergy : Boolean = false
+
+  def getExistingActiveAndBenchCards() : Seq[PokemonCard]
+    = return (bench.toList ++ List(active)).flatten
+
   def setUIOrientationForBench(uiSet : Set[CardUI.Value]) {
     for (bc : Option[PokemonCard] <- bench) {
       if (bc.isDefined) {

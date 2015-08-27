@@ -38,8 +38,6 @@ class PlayerActor(out : ActorRef, var correspondent : Correspondent) extends Act
       contents(0) match {
         case "DRAG" => correspondent.handleDrag(contents.tail)
         case "MOVE" => correspondent.handleMove(contents.tail)
-        //case "ATTACK_FROM_ACTIVE" => correspondent.attackFromActive(contents(1).toInt)
-        //case "ATTACK_FROM_BENCH" => correspondent.attackFromBench(contents(2).toInt, contents(1).toInt - 1)
       }
     }
     case StateEvent(_, state) => out ! state.toString

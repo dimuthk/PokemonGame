@@ -20,11 +20,7 @@ class Charmeleon extends PokemonCard(
     energyType = EnergyType.FIRE,
     weakness = Some(EnergyType.WATER),
     retreatCost = 1,
-    evolutionStage = EvolutionStage.STAGE_ONE) {
-
-  override def isEvolutionOf(pokemon : PokemonCard) = pokemon.id == 4
-
-}
+    evolutionStage = EvolutionStage.STAGE_ONE)
 
 private class Slash extends Move(
   "Slash",

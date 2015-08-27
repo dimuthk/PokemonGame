@@ -5,6 +5,8 @@ var energyTag = "<img src=" + srcTag + " height=\"50%\" width=\"50%\" id=[ID] da
 
 var popUpTag = "<img src=" + srcTag + " height=\"70%\" width=\"60%\" id=\"[ID]\" dat=\"[DAT]\">" 
 
+var intermediaryCardHolder = "<div style=\" white-space: nowrap; padding: 1%; float: left; position: relative; width: 30%; height: 100%;\">" + imgTag + "\" </div>"
+
 
 function establishConnection() {
 	var socket = new WebSocket("ws://localhost:9000/socket")
@@ -16,9 +18,17 @@ function establishConnection() {
 	}
 
 	socket.onmessage = function (event) {
-		repaintBoard(JSON.parse(event.data), socket)
+    var data = JSON.parse(event.data)
+		repaintBoard(data, socket)
+    processIntermediary(data)
 	}
 
+}
+
+function processIntermediary(data) {
+  if (!isPlaceholder(data.intermediary)) {
+    showClickableCardRequest(data.intermediary)
+  }
 }
 
 /**
@@ -422,6 +432,43 @@ function generalConditionTag(item) {
   } else {
     return item.GENERAL_CONDITION
   }
+}
+
+function generateCardList(intermediary) {
+  var cardList = ""
+  for (var i=0; i<intermediary.CARD_LIST.length; i++) {
+    var card = intermediary.CARD_LIST[i]
+    cardList += intermediaryCardHolder.replace("[IMG_NAME]", card.FACE_UP ? card.IMG_NAME : cardBackImg)
+  }
+  return cardList
+  /*$("#").append("<div class=\"cardHandDisplay\">"
+      + imgTag.replace("[IMG_NAME]", card.FACE_UP ? card.IMG_NAME : cardBackImg)
+              .replace("[ID]", imageTag)
+      + "</div>")
+  $("#" + imageTag).data("card_data", card)*/
+
+}
+
+function showClickableCardRequest(intermediary) {
+  var popUp = "<div style=\"background-color: #888888;\">" +
+          "<div class=\"row row-1-5\">" +
+          intermediary.REQUEST_MSG +
+          "</div>" +
+          "<div class=\"row row-3-5\">" +
+            "<div class=\"col col-1-10\"></div>" +
+            "<div class=\"col col-8-10\" style=\" background-color: blue; overflow-y: hidden; overflow-x : scroll;\">" +
+              generateCardList(intermediary) +
+            "</div>" +
+            "<div class=\"col col-1-10\"></div>" +
+          "</div>" +
+          "<div class=\"row row-1-5\"></div>" +
+      "</div>"
+    $(popUp).dialog({
+      modal: true,
+        height: 400,
+        width: 800,
+        title: intermediary.REQUEST_TITLE
+    })
 }
 
 function showPopUpActive(item, tag) {

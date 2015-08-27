@@ -61,6 +61,10 @@ abstract class PokemonCard(
       case None => "None"
     }))
 
+  def getExistingMoves() : Seq[Move] = {
+    return List(firstMove, secondMove).flatten
+  }
+
   def getTotalEnergy(oEType : Option[EnergyType.Value] = None) : Int = {
     oEType match {
       case Some(eType) => return energyCards.filter(_.eType == eType).length
@@ -104,7 +108,9 @@ abstract class PokemonCard(
     currHp = math.min(currHp + amount, maxHp)
   }
 
-  def isEvolutionOf(pokemon : PokemonCard) : Boolean = return false
+  def isEvolutionOf(pc : PokemonCard) : Boolean = {
+    return if(evolutionStage == EvolutionStage.BASIC) false else pc.id == (id - 1)
+  }
 
 }
 

@@ -17,7 +17,7 @@ object MoveDirector {
     val interpreter = selectMoveInterpreter()
     val moveCmd : MoveCommand = contents(0) match {
       case "ATTACK_FROM_ACTIVE" => AttackFromActive(contents(1).toInt)
-      case "ATTACK_FROM_BENCH" => ActiveFromBench(contents(2).toInt, contents(1).toInt)
+      case "ATTACK_FROM_BENCH" => ActiveFromBench(contents(1).toInt - 1, contents(2).toInt)
     }
     val intermediaryReq = interpreter.additionalRequest(owner, moveCmd)
     if (intermediaryReq == None) {

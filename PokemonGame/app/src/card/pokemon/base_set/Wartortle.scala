@@ -21,11 +21,7 @@ class Wartortle extends PokemonCard(
     energyType = EnergyType.WATER,
     weakness = Some(EnergyType.THUNDER),
     retreatCost = 1,
-    evolutionStage = EvolutionStage.STAGE_ONE) {
-
-  override def isEvolutionOf(pokemon : PokemonCard) = pokemon.id == 7
-
-}
+    evolutionStage = EvolutionStage.STAGE_ONE)
 
 private class WithdrawWortortle extends Move(
   "Withdraw",

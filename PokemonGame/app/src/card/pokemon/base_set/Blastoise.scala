@@ -5,7 +5,8 @@ import src.card.pokemon._
 import src.json.Identifier
 import src.move.Move
 import src.move.MoveBuilder._
-import src.move.PokemonPower
+import src.move.ActivePokemonPower
+import src.board.drag.CustomDragInterpreter
 import src.player.Player
 import src.card.energy.EnergyCard
 import src.card.energy.EnergyType
@@ -23,54 +24,12 @@ class Blastoise extends PokemonCard(
     energyType = EnergyType.WATER,
     weakness = Some(EnergyType.THUNDER),
     retreatCost = 3,
-    evolutionStage = EvolutionStage.STAGE_TWO) {
+    evolutionStage = EvolutionStage.BASIC)
 
-  override def isEvolutionOf(pokemon : PokemonCard) = pokemon.id == 8
-
-}
-
-private class RainDance extends PokemonPower(
+private class RainDance extends ActivePokemonPower(
   "Rain Dance",
-  isActivatable = true) {
+  dragInterpreter = Some(new RainDanceDrag()))
 
-  override def handleMove(owner : Player, opp : Player, moveName : String, itemMap : Map[String, Int]) {
-    moveName match {
-      case "HAND_TO_ACTIVE" => {
-        if (owner.active.isEmpty) {
-          return
-        }
-        val active = owner.active.get
-        val handIndex = itemMap.getOrElse("drag", -1)
-        owner.hand(handIndex) match {
-          case ec : WaterEnergy => {
-            active.energyCards = active.energyCards ++ List(ec)
-            owner.removeCardFromHand(handIndex)
-          }
-          case _ => return
-        }
-      }
-      case "HAND_TO_BENCH" => {
-        val handIndex = itemMap.getOrElse("drag", -1)
-        val benchIndex = itemMap.getOrElse("drop", -1)
-        if (owner.bench(benchIndex).isEmpty) {
-          return
-        }
-        val benchCard = owner.bench(benchIndex).get
-        owner.hand(handIndex) match {
-          case ec : WaterEnergy => {
-            benchCard.energyCards = benchCard.energyCards ++ List(ec)
-            owner.removeCardFromHand(handIndex)
-          }
-          case _ => return
-        }
-
-      }
-      case _ => ()
-    }
-    
-  }
-
-}
 
 private class HydroPump extends Move(
   "HydroPump",
@@ -79,4 +38,39 @@ private class HydroPump extends Move(
 
   override def perform(owner : Player, opp : Player)
       = standardAttackPlusExtra(owner, opp, 40, EnergyType.WATER, 3)
+}
+
+
+private class RainDanceDrag extends CustomDragInterpreter {
+
+  override def benchToBench(p : Player, benchIndex1 : Int, benchIndex2 : Int) : Unit = ()
+
+  override def benchToActive(p : Player, benchIndex : Int) : Unit = ()
+
+  override def activeToBench(p : Player, benchIndex : Int) : Unit = ()
+
+  override def handToActive(p : Player, handIndex : Int) : Unit = {
+    if (p.active.isDefined) {
+      attachWaterEnergy(p, p.active.get, handIndex)
+    }
+  }
+
+  override def handToBench(p : Player, handIndex : Int, benchIndex : Int) : Unit = {
+    if (p.bench(benchIndex).isDefined) {
+      attachWaterEnergy(p, p.bench(benchIndex).get, handIndex)
+    }
+  }
+
+  private def attachWaterEnergy(p : Player, pc : PokemonCard, handIndex : Int) {
+    p.hand(handIndex) match {
+      case ec : EnergyCard => {
+        if (ec.eType == EnergyType.WATER) {
+          pc.energyCards = pc.energyCards ++ List(ec)
+          p.removeCardFromHand(handIndex)
+        }
+      }
+      case _ => ()
+    }
+  }
+
 }

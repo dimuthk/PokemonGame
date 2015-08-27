@@ -21,11 +21,7 @@ class Metapod extends PokemonCard(
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.FIRE),
     retreatCost = 2,
-    evolutionStage = EvolutionStage.STAGE_ONE) {
-
-  override def isEvolutionOf(pokemon : PokemonCard) = pokemon.id == 10
-
-}
+    evolutionStage = EvolutionStage.STAGE_ONE)
 
 private class Stiffen extends Move(
   "Stiffen",
