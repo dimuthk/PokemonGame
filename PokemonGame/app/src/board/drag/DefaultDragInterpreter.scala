@@ -1,5 +1,6 @@
 package src.board.drag
 
+import play.api.Logger
 import src.board.intermediary.ClickableCardRequest
 import src.board.intermediary.IntermediaryRequest
 import src.card.Card
@@ -10,9 +11,10 @@ import src.board.drag._
 import src.player.Player
 
 class RetreatEnergySpecification(
-  p : Player, clickCount : Int, energyCards : Seq[EnergyCard]) extends ClickableCardRequest(
+  p : Player, clickCount : Int, energyCards : Seq[EnergyCard], benchIndex : Int) extends ClickableCardRequest(
   "Discard Energy",
   "Select the energy cards you want to discard.",
+  "DRAG<>INTERMEDIARY<>" + benchIndex + "<>",
   p,
   clickCount,
   energyCards)
@@ -23,16 +25,16 @@ object DefaultDragInterpreter extends DragInterpreter {
 
   override def additionalRequest(p : Player, cmd : DragCommand) : Option[IntermediaryRequest] = {
     cmd match {
-      case BenchToActive(benchIndex : Int) => return checkActiveRestoreAmbiguity(p, p.active)
-      case ActiveToBench(benchIndex : Int) => return checkActiveRestoreAmbiguity(p, p.active)
+      case BenchToActive(benchIndex : Int) => return checkActiveRestoreAmbiguity(p, p.active, benchIndex)
+      case ActiveToBench(benchIndex : Int) => return checkActiveRestoreAmbiguity(p, p.active, benchIndex)
       case _ => return None
     }
   }
 
-  private def checkActiveRestoreAmbiguity(p : Player, active : Option[PokemonCard]): Option[RetreatEnergySpecification] = {
+  private def checkActiveRestoreAmbiguity(p : Player, active : Option[PokemonCard], benchIndex : Int): Option[RetreatEnergySpecification] = {
     if (active.isDefined && active.get.retreatCost > 0 && active.get.energyCards.length > 1) {
       if (hasMultipleEnergyTypes(active.get.energyCards)) {
-        return Some(new RetreatEnergySpecification(p, active.get.retreatCost, active.get.energyCards))
+        return Some(new RetreatEnergySpecification(p, active.get.retreatCost, active.get.energyCards, benchIndex))
       }
     }
     return None
@@ -54,10 +56,25 @@ object DefaultDragInterpreter extends DragInterpreter {
     }
   }
 
-  // tmpl: benchIndex<>[indices of selected energyCards]
-  override def handleIntermediary(cmd : Seq[String]) {
-    val benchIndex : Int = cmd(0).toInt - 1
+  /**
+   * Corresponds to a specification on which energy cards to discard when retreating an active pokemon
+   * to the bench.
+   */
+  override def handleIntermediary(p : Player, cmd : Seq[String]) {
+    val benchIndex : Int = cmd(0).toInt
     val eCardIndices : Seq[Int] = cmd(1).split(",").map(_.toInt)
+    val active = p.active.get
+    if (p.bench(benchIndex).isDefined) {
+      val benchCard = p.bench(benchIndex).get
+      p.active = Some(benchCard)
+    } else {
+      p.active = None
+    }
+    p.bench(benchIndex) = Some(active)
+    p.bench(benchIndex).get.energyCards = p.bench(benchIndex).get.energyCards
+      .zipWithIndex
+      .filterNot { case (_, index) => eCardIndices.contains(index) }
+      .map(_._1)
   }
 
     override def benchToBench(p : Player, benchIndex1 : Int, benchIndex2 : Int) {

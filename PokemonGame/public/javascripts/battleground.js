@@ -5,7 +5,7 @@ var energyTag = "<img src=" + srcTag + " height=\"50%\" width=\"50%\" id=[ID] da
 
 var popUpTag = "<img src=" + srcTag + " height=\"70%\" width=\"60%\" id=\"[ID]\" dat=\"[DAT]\">" 
 
-var intermediaryCardHolder = "<div class=\"intermediary\" style=\" white-space: nowrap; padding: 1%; float: left; position: relative; width: 30%; height: 100%;\">" + imgTag + "\" </div>"
+var intermediaryCardHolder = "<div class=\"intermediary\" style=\"  padding: 1%; display: inline-block; position: relative; width: 30%; height: 90%;\">" + imgTag + "\" </div>"
 
 
 function establishConnection() {
@@ -444,27 +444,63 @@ function generateCardList(intermediary) {
     
   }
   return cardList
-  /*$("#").append("<div class=\"cardHandDisplay\">"
-      + imgTag.replace("[IMG_NAME]", card.FACE_UP ? card.IMG_NAME : cardBackImg)
-              .replace("[ID]", imageTag)
-      + "</div>")
-  $("#" + imageTag).data("card_data", card)*/
+}
 
+function handleClickable(clickedCard) {
+  var intermediary = $("#intermediaryPanel").data("intermediary")
+  var clickReq = intermediary.CLICK_COUNT
+  var clickCount = $("#intermediaryPanel").data("clickCount")
+  if ($(clickedCard).hasClass('selected')) {
+    $(clickedCard).removeClass('selected')
+    clickCount--
+  } else {
+    if (clickCount < clickReq) {
+      $(clickedCard).addClass('selected')
+      clickCount++
+    }
+  }
+  $("#intermediaryPanel").data("clickCount", clickCount)
+  if (clickCount == clickReq) {
+    $(".submitIntermediary").prop("disabled", false)
+  } else {
+    $(".submitIntermediary").prop("disabled", true)
+  }
+}
+
+function sendClickIntermediary() {
+  var indices = ""
+  for (var i=0; i<$("#intermediaryPanel").data("numCards"); i++) {
+    if ($("#intermediary" + i).hasClass('selected')) {
+      indices += i + ","
+    }
+    $("#intermediary" + i).removeAttr('id')
+  }
+  indices = indices.substring(0, indices.length - 1)
+  var tag = $("#intermediaryPanel").data("intermediary").SERVER_TAG
+  tag += indices
+  $("#content").data("socket").send(tag)
+  $(".popUp").dialog("close")
 }
 
 function showClickableCardRequest(intermediary) {
-  var popUp = "<div style=\"background-color: #888888;\">" +
+  var popUp = "<div style=\"background-color: #888888;\" class=\"popUp\">" +
           "<div class=\"row row-1-5\">" +
-          intermediary.REQUEST_MSG +
+            "<div style=\"text-align: center; top: 10%; position: relative; font-size:15px; color: white;\">" + intermediary.REQUEST_MSG + "</div>" +
           "</div>" +
           "<div class=\"row row-3-5\">" +
             "<div class=\"col col-1-10\"></div>" +
-            "<div class=\"col col-8-10\" style=\" background-color: blue; overflow-y: hidden; overflow-x : scroll;\">" +
+            "<div class=\"col col-8-10\" id=\"intermediaryPanel\" style=\" background-color: #484848; border-radius: 10px; overflow-y: hidden; white-space: nowrap; overflow-x : scroll;\">" +
               generateCardList(intermediary) +
             "</div>" +
             "<div class=\"col col-1-10\"></div>" +
           "</div>" +
-          "<div class=\"row row-1-5\"></div>" +
+          "<div class=\"row row-1-5\">" +
+            "<div class=\"col col-1-3\"></div>" +
+            "<div class=\"col col-1-3\">" +
+            "<button class=\"actionButton submitIntermediary\" onclick=sendClickIntermediary() disabled  style=\"top: 20%; width: 100%; position: relative;\">Submit</button>" +
+            "</div>" +
+            "<div class=\"col col-1-3\"></div>" +
+          "</div>" +
       "</div>"
     $(popUp).dialog({
       modal: true,
@@ -472,11 +508,14 @@ function showClickableCardRequest(intermediary) {
         width: 800,
         title: intermediary.REQUEST_TITLE
     })
+    $("#intermediaryPanel").data("clickCount", 0)
+    $("#intermediaryPanel").data("intermediary", intermediary)
+    $("#intermediaryPanel").data("numCards", intermediary.CARD_LIST.length)
 
     for (var i=0; i<intermediary.CARD_LIST.length; i++) {
+      $("#intermediary" + i).unbind('click')
       $("#intermediary" + i).click(function() {
-        //$('.selected').removeClass('selected'); // removes the previous selected class
-        $(this).addClass('selected'); // adds the class to the clicked image
+        handleClickable(this)
       })
     }
 }

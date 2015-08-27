@@ -22,7 +22,7 @@ abstract class DragInterpreter {
         case ActiveToBench(benchIndex : Int) => activeToBench(p, benchIndex : Int)
         case BenchToActive(benchIndex : Int) => benchToActive(p, benchIndex : Int)
         case BenchToBench(benchIndex1 : Int, benchIndex2 : Int) => benchToBench(p, benchIndex1, benchIndex2)
-        case Intermediary(cmd : Seq[String]) => handleIntermediary(cmd)
+        case Intermediary(cmd : Seq[String]) => handleIntermediary(p, cmd)
       }
     }
 
@@ -56,6 +56,6 @@ abstract class DragInterpreter {
      */
     def handToBench(p : Player, handIndex : Int, benchIndex : Int) : Unit
 
-    def handleIntermediary(cmd : Seq[String]) : Unit = ()
+    def handleIntermediary(p : Player, cmd : Seq[String]) : Unit = ()
 
 }
