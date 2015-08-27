@@ -5,7 +5,7 @@ var energyTag = "<img src=" + srcTag + " height=\"50%\" width=\"50%\" id=[ID] da
 
 var popUpTag = "<img src=" + srcTag + " height=\"70%\" width=\"60%\" id=\"[ID]\" dat=\"[DAT]\">" 
 
-var intermediaryCardHolder = "<div style=\" white-space: nowrap; padding: 1%; float: left; position: relative; width: 30%; height: 100%;\">" + imgTag + "\" </div>"
+var intermediaryCardHolder = "<div class=\"intermediary\" style=\" white-space: nowrap; padding: 1%; float: left; position: relative; width: 30%; height: 100%;\">" + imgTag + "\" </div>"
 
 
 function establishConnection() {
@@ -439,6 +439,9 @@ function generateCardList(intermediary) {
   for (var i=0; i<intermediary.CARD_LIST.length; i++) {
     var card = intermediary.CARD_LIST[i]
     cardList += intermediaryCardHolder.replace("[IMG_NAME]", card.FACE_UP ? card.IMG_NAME : cardBackImg)
+         .replace("[ID]", "\"intermediary" + i + "\"")
+
+    
   }
   return cardList
   /*$("#").append("<div class=\"cardHandDisplay\">"
@@ -469,6 +472,13 @@ function showClickableCardRequest(intermediary) {
         width: 800,
         title: intermediary.REQUEST_TITLE
     })
+
+    for (var i=0; i<intermediary.CARD_LIST.length; i++) {
+      $("#intermediary" + i).click(function() {
+        //$('.selected').removeClass('selected'); // removes the previous selected class
+        $(this).addClass('selected'); // adds the class to the clicked image
+      })
+    }
 }
 
 function showPopUpActive(item, tag) {

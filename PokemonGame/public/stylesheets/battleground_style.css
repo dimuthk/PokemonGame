@@ -300,3 +300,7 @@ button:disabled {
   background-image: -o-linear-gradient(top, #c4b668, #d1bb4b);
   background-image: linear-gradient(to bottom, #c4b668, #d1bb4b);
 }
+
+.selected{
+   border:solid 1px red; /*margin:10px*/;
+}
