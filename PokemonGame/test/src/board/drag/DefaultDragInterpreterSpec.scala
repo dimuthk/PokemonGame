@@ -41,11 +41,28 @@ class DefaultDragInterpreterSpec extends Specification {
 	}
 
 	"benchToActive()" should {
-		"move bench card to active slot if no active" {
+		"move bench card to active slot if no active" in {
 			player.bench(0) = Some(pc1)
 			benchToActive(player, 0)
 			player.bench(0) mustEqual None
 			player.active mustEqual Some(pc1)
+		}
+		"do nothing if active doesn't have enough energy to retreat" in {
+			player.active = Some(pc1)
+			player.bench(0) = Some(pc2)
+			benchToActive(player, 0)
+			player.active mustEqual Some(pc1)
+			player.bench(0) mustEqual Some(pc2)
+		}
+		"swap bench and active and discard retreat cost if active has enough energy" in {
+			player.active = Some(pc1)
+			player.active.get.energyCards = List(new FireEnergy(), new FireEnergy())
+			player.bench(0) = Some(pc2)
+			benchToActive(player, 0)
+			player.active mustEqual Some(pc2)
+			player.bench(0) mustEqual Some(pc1)
+			player.bench(0).get.energyCards must have size(1)
+			player.bench(0).get.energyCards.filter(_.eType == EnergyType.FIRE) must have size(1)
 		}
 
 	}
