@@ -12,7 +12,7 @@ abstract class MoveInterpreter {
 
     def additionalRequest(owner : Player, opp : Player, command : MoveCommand) : Option[IntermediaryRequest] = None
 
-    def handleIntermediary(cmds : Seq[String]) : Unit = ()
+    def handleIntermediary(owner : Player, opp : Player, cmds : Seq[String]) : Unit = ()
 
     def attack(owner : Player, opp : Player, move : Move) : Unit
 
@@ -27,7 +27,7 @@ abstract class MoveInterpreter {
             case (bc : PokemonCard, 2) => attack(owner, opp, bc.secondMove.get)
             case _ => throw new Exception("Invalid move number")
         }
-        case Intermediary(cmds : Seq[String]) => handleIntermediary(cmds)
+        case Intermediary(cmds : Seq[String]) => handleIntermediary(owner, opp, cmds)
     }
 
 }

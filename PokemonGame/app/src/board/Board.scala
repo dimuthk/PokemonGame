@@ -82,7 +82,7 @@ object Board {
         p.active = Some(new Butterfree())
         p.isTurn = false
       } else {
-        p.deck = List.fill(20)(new WaterEnergy()) ++ List.fill(20)(new Rattata()) ++ List.fill(20)(new GrassEnergy())
+        p.deck = List.fill(20)(new WaterEnergy()) ++ List.fill(20)(new Charmander()) ++ List.fill(20)(new GrassEnergy())
         p.deck = Random.shuffle(p.deck)
         p.isTurn = true
       }
