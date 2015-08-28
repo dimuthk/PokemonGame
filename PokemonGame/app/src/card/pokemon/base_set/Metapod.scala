@@ -10,7 +10,7 @@ import src.card.condition.PreventDamageCondition
 import src.card.pokemon._
 import src.card.Deck
 
-class Metapod extends PokemonCard(
+class Metapod extends StageOnePokemon(
     "Metapod",
     "Metapod-Base-Set-54.jpg",
     Deck.BASE_SET,
@@ -21,8 +21,7 @@ class Metapod extends PokemonCard(
     secondMove = Some(new StunSpore()),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.FIRE),
-    retreatCost = 2,
-    evolutionStage = EvolutionStage.STAGE_ONE)
+    retreatCost = 2)
 
 private class Stiffen extends Move(
   "Stiffen",
@@ -30,12 +29,8 @@ private class Stiffen extends Move(
   Map(),
   moveInterpreter = Some(new PreventDamageInterpreter())) {
 
-  override def perform(owner : Player, opp : Player) {
-    if (flippedHeads()) {
-      moveInterpreter.get.isActive = true
-      owner.active.get.generalCondition = Some("Stiffen")
-    }
-  }
+  override def perform(owner : Player, opp : Player) =
+      activateMoveInterpreterChance(owner, this, "Stiffen")
 }
 
 private class StunSpore extends Move(

@@ -2,7 +2,6 @@ package src.card.pokemon.base_set
 
 import src.json.Identifier
 import src.move.Move
-import src.move.interceptor._
 import src.move.MoveBuilder._
 import src.move.ActivePokemonPower
 import src.board.intermediary.IntermediaryRequest
@@ -18,7 +17,7 @@ import src.card.Deck
 import play.api.libs.json._
 import play.api.Logger
 
-class Venusaur extends PokemonCard(
+class Venusaur extends StageTwoPokemon(
     "Venusaur",
     "Venusaur-Base-Set-15.jpg",
     Deck.BASE_SET,
@@ -29,8 +28,7 @@ class Venusaur extends PokemonCard(
     secondMove = Some(new Solarbeam()),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.FIRE),
-    retreatCost = 2,
-    evolutionStage = EvolutionStage.STAGE_TWO)
+    retreatCost = 2)
 
 private class EnergyTrans extends ActivePokemonPower(
   "Energy Trans",
@@ -59,7 +57,7 @@ private class EnergyTransState extends CustomStateGenerator(true, false) {
     opp.setUiOrientationForHand(Set())
 
     // Venusaur must still be usable to deactivate power.
-    owner.setUIOrientationForActiveAndBench(Set(FACE_UP, CLICKABLE, DRAGGABLE, USABLE))
+    owner.setUIOrientationForActiveAndBench(Set(FACE_UP, CLICKABLE, DISPLAYABLE, DRAGGABLE, USABLE))
     return (owner.toJson, opp.toJson)
   }
 

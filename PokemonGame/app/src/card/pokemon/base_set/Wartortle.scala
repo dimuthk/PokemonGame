@@ -10,7 +10,7 @@ import src.card.energy.EnergyType
 import src.card.pokemon._
 import src.card.Deck
 
-class Wartortle extends PokemonCard(
+class Wartortle extends StageOnePokemon(
     "Wartortle",
     "Wartortle-Base-Set-42.jpg",
     Deck.BASE_SET,
@@ -21,8 +21,7 @@ class Wartortle extends PokemonCard(
     secondMove = Some(new WartortleBite()),
     energyType = EnergyType.WATER,
     weakness = Some(EnergyType.THUNDER),
-    retreatCost = 1,
-    evolutionStage = EvolutionStage.STAGE_ONE)
+    retreatCost = 1)
 
 private class WithdrawWortortle extends Move(
   "Withdraw",

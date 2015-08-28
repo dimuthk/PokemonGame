@@ -79,7 +79,7 @@ object Board {
       if (id == 1) {
         p.deck = List.fill(20)(new Squirtle()) ++ List.fill(20)(new WaterEnergy())
         p.deck = Random.shuffle(p.deck)
-        p.active = Some(new Wartortle())
+        p.active = Some(new Butterfree())
         p.isTurn = false
       } else {
         p.deck = List.fill(20)(new WaterEnergy()) ++ List.fill(20)(new Rattata()) ++ List.fill(20)(new GrassEnergy())

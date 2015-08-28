@@ -8,7 +8,7 @@ import src.card.energy.EnergyType
 import src.card.pokemon._
 import src.card.Deck
 
-class Machop extends PokemonCard(
+class Machop extends BasicPokemon(
 	"Machop",
 	"Machop-Base-Set-52.jpg",
 	Deck.BASE_SET,

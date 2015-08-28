@@ -8,7 +8,7 @@ import src.card.energy.EnergyType
 import src.card.pokemon._
 import src.card.Deck
 
-class Rattata extends PokemonCard(
+class Rattata extends BasicPokemon(
 	"Rattata",
 	"Rattata-Base-Set-61.jpg",
 	Deck.BASE_SET,

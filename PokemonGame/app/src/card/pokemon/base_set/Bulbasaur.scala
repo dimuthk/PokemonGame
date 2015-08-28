@@ -8,7 +8,7 @@ import src.card.energy.EnergyType
 import src.card.Deck
 import src.card.pokemon._
 
-class Bulbasaur extends PokemonCard(
+class Bulbasaur extends BasicPokemon(
     "Bulbasaur",
     "Bulbasaur-Base-Set-44.jpg",
     Deck.BASE_SET,

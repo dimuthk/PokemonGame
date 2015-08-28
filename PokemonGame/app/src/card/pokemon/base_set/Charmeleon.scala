@@ -8,7 +8,7 @@ import src.card.energy.EnergyType
 import src.card.pokemon._
 import src.card.Deck
 
-class Charmeleon extends PokemonCard(
+class Charmeleon extends StageOnePokemon(
     "Charmeleon",
     "Charmeleon-Base-Set-24.jpg",
     Deck.BASE_SET,
@@ -19,8 +19,7 @@ class Charmeleon extends PokemonCard(
     secondMove = Some(new Flamethrower()),
     energyType = EnergyType.FIRE,
     weakness = Some(EnergyType.WATER),
-    retreatCost = 1,
-    evolutionStage = EvolutionStage.STAGE_ONE)
+    retreatCost = 1)
 
 private class Slash extends Move(
   "Slash",

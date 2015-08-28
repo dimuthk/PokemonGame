@@ -8,7 +8,7 @@ import src.card.energy.EnergyType
 import src.card.pokemon._
 import src.card.Deck
 
-class Caterpie extends PokemonCard(
+class Caterpie extends BasicPokemon(
 	"Caterpie",
 	"Caterpie-Base-Set-45.jpg",
 	Deck.BASE_SET,

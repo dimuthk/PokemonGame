@@ -66,4 +66,20 @@ class DefaultDragInterpreterSpec extends Specification {
 		}
 	}
 
+	"activeToBench()" should {
+		"do nothing if active doesn't have enough energy to retreat" in {
+			player.active = Some(pc1)
+			player.bench(0) = Some(pc2)
+			activeToBench(player, 0)
+			player.active mustEqual Some(pc1)
+			player.bench(0) mustEqual Some(pc2)
+		}
+		"move active to bench if no bench" in {
+			player.active = Some(pc2)
+			activeToBench(player, 0)
+			player.active mustEqual None
+			player.bench(0) mustEqual Some(pc2)
+		}
+	}
+
 }

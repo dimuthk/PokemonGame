@@ -8,7 +8,7 @@ import src.card.energy.EnergyType
 import src.card.pokemon._
 import src.card.Deck
 
-class Ivysaur extends PokemonCard(
+class Ivysaur extends StageOnePokemon(
     "Ivysaur",
     "Ivysaur-Base-Set-30.jpg",
     Deck.BASE_SET,
@@ -19,8 +19,7 @@ class Ivysaur extends PokemonCard(
     secondMove = Some(new Poisonpowder()),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.FIRE),
-    retreatCost = 1,
-    evolutionStage = EvolutionStage.STAGE_ONE)
+    retreatCost = 1)
 
 private class VineWhip extends Move(
   "Vine Whip",

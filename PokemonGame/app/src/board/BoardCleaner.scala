@@ -38,24 +38,16 @@ object BoardCleaner {
 
   private def updateBenchCardMoves(curr : Player, next : Player) {
     for (bc : PokemonCard <- curr.bench.toList.flatten) {
-      for (m : Move <- bc.getExistingMoves()) {
-        m match {
-          case ap : ActivePokemonPower => handleActivePowerStatus(curr, bc, ap)
-          case pp : PassivePokemonPower => handlePassivePowerStatus(bc, pp)
-          case _ => {
-            m.status = Status.DISABLED
-          }
-        }
+      bc.getExistingMoves().foreach {
+        case ap : ActivePokemonPower => handleActivePowerStatus(curr, bc, ap)
+        case pp : PassivePokemonPower => handlePassivePowerStatus(bc, pp)
+        case m : Move => m.status = Status.DISABLED
       }
     }
     for (bc : PokemonCard <- next.bench.toList.flatten) {
-      for(m : Move <- bc.getExistingMoves()) {
-        m match {
-          case pp : PassivePokemonPower => handlePassivePowerStatus(bc, pp)
-          case _ => {
-            m.status = Status.DISABLED
-          }
-        }
+      bc.getExistingMoves().foreach {
+        case pp : PassivePokemonPower => handlePassivePowerStatus(bc, pp)
+        case m : Move => m.status = Status.DISABLED
       }
     }
   }
@@ -83,15 +75,10 @@ object BoardCleaner {
 
   private def cardWithActivatedPower(p : Player) : Option[PokemonCard] = {
     for (pc : PokemonCard <- p.getExistingActiveAndBenchCards()) {
-      for (m : Move <- pc.getExistingMoves()) {
-        m match {
-          case ap : ActivePokemonPower => {
-            if (ap.isActive) {
-              return Some(pc)
-            }
-          }
-          case _ => ()
-        }
+      if (pc.getExistingMoves().exists {
+        case ap : ActivePokemonPower => ap.isActive
+        case _ => false }) {
+        return Some(pc)
       }
     }
     return None
@@ -100,29 +87,20 @@ object BoardCleaner {
   private def updateActiveCardMoves(curr : Player, next : Player) {
     if (curr.active.isDefined) {
       val active = curr.active.get
-      for (m : Move <- active.getExistingMoves()) {
-        m match {
-          case ap : ActivePokemonPower => handleActivePowerStatus(curr, active, ap)
-          case pp : PassivePokemonPower => handlePassivePowerStatus(active, pp)
-          case _ => {
-            if (cardWithActivatedPower(curr) != None) {
-              m.status = Status.DISABLED
-            } else {
-              m.status = if (m.hasEnoughEnergy(curr, active.energyCards)) Status.ENABLED else Status.DISABLED
-            }
-          }
+      active.getExistingMoves().foreach {
+        case ap : ActivePokemonPower => handleActivePowerStatus(curr, active, ap)
+        case pp : PassivePokemonPower => handlePassivePowerStatus(active, pp)
+        case m : Move => cardWithActivatedPower(curr) match {
+          case Some(_) => m.status = Status.DISABLED
+          case None => if (m.hasEnoughEnergy(curr, active.energyCards)) Status.ENABLED else Status.DISABLED
         }
       }
     }
     if (next.active.isDefined) {
       val active = next.active.get
-      for (m : Move <- active.getExistingMoves()) {
-        m match {
-          case pp : PassivePokemonPower => handlePassivePowerStatus(active, pp)
-          case _ => {
-            m.status = Status.DISABLED
-          }
-        }
+      active.getExistingMoves().foreach {
+        case pp : PassivePokemonPower => handlePassivePowerStatus(active, pp)
+        case m : Move => m.status = Status.DISABLED
       }
     }
   }

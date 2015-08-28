@@ -6,7 +6,6 @@ import src.move.Move
 import src.move.PokemonPower
 import src.card.energy.EnergyCard
 import src.card.pokemon.PokemonCard
-import src.card.pokemon.EvolutionStage
 import src.board.drag._
 import src.player.Player
 

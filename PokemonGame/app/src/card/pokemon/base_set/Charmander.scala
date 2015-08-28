@@ -8,7 +8,7 @@ import src.card.energy.EnergyType
 import src.card.pokemon._
 import src.card.Deck
 
-class Charmander extends PokemonCard(
+class Charmander extends BasicPokemon(
 	"Charmander",
 	"Charmander-Base-Set-46.jpg",
 	Deck.BASE_SET,

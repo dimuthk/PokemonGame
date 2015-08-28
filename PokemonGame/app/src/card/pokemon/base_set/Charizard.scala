@@ -10,7 +10,7 @@ import src.card.energy.EnergyType
 import src.card.pokemon._
 import src.card.Deck
 
-class Charizard extends PokemonCard(
+class Charizard extends StageTwoPokemon(
     "Charizard",
     "Charizard-Base-Set-4.jpg",
     Deck.BASE_SET,
@@ -22,8 +22,7 @@ class Charizard extends PokemonCard(
     energyType = EnergyType.FIRE,
     weakness = Some(EnergyType.WATER),
     resistance = Some(EnergyType.FIGHTING),
-    retreatCost = 3,
-    evolutionStage = EvolutionStage.STAGE_TWO) {
+    retreatCost = 3) {
 
   override def discardEnergy(eType : EnergyType.Value, cnt : Int = 1) : Seq[EnergyCard] = {
     if (statusCondition == None) {

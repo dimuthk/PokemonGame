@@ -10,7 +10,6 @@ import src.card.energy.EnergyCard
 import src.card.energy.EnergyType
 import src.json.Identifier
 import src.json.Jsonable
-import src.move.interceptor._
 import src.player.Player
 
 /**
@@ -25,7 +24,6 @@ abstract class Move(
 	val specialEnergyReq : Map[EnergyType.Value, Int],
   val dragInterpreter : Option[CustomDragInterpreter] = None,
   val moveInterpreter : Option[CustomMoveInterpreter] = None,
-  val clickInterceptor : Option[ClickInterceptor] = None,
   val stateGenerator : Option[CustomStateGenerator] = None) extends Jsonable {
 
   var status : Status.Value = Status.DISABLED

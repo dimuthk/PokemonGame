@@ -12,7 +12,7 @@ import src.card.energy.EnergyCard
 import src.card.energy.EnergyType
 import src.card.energy.WaterEnergy
 
-class Blastoise extends PokemonCard(
+class Blastoise extends StageTwoPokemon(
     "Blastoise",
     "Blastoise-Base-Set-2.jpg",
     Deck.BASE_SET,
@@ -23,8 +23,7 @@ class Blastoise extends PokemonCard(
     secondMove = Some(new HydroPump()),
     energyType = EnergyType.WATER,
     weakness = Some(EnergyType.THUNDER),
-    retreatCost = 3,
-    evolutionStage = EvolutionStage.BASIC)
+    retreatCost = 3)
 
 private class RainDance extends ActivePokemonPower(
   "Rain Dance",

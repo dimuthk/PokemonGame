@@ -7,7 +7,6 @@ import src.move.Move
 import src.move.PokemonPower
 import src.card.energy.EnergyCard
 import src.card.pokemon.PokemonCard
-import src.card.pokemon.EvolutionStage
 import src.board.drag._
 import src.player.Player
 import play.api.Logger
@@ -18,6 +17,7 @@ object MoveDirector {
     val moveCmd : MoveCommand = contents(0) match {
       case "ATTACK_FROM_ACTIVE" => AttackFromActive(contents(1).toInt)
       case "ATTACK_FROM_BENCH" => AttackFromBench(contents(1).toInt - 1, contents(2).toInt)
+      case "INTERMEDIARY" => Intermediary(contents.tail)
     }
     val intermediaryReq = DefaultMoveInterpreter.additionalRequest(owner, opp, moveCmd)
     if (intermediaryReq == None) {

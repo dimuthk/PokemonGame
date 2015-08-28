@@ -9,7 +9,7 @@ import src.card.energy.EnergyType
 import src.card.pokemon._
 import src.card.Deck
 
-class Squirtle extends PokemonCard(
+class Squirtle extends BasicPokemon(
 	"Squirtle",
 	"Squirtle-Base-Set-63.jpg",
 	Deck.BASE_SET,

@@ -24,8 +24,7 @@ abstract class PokemonCard(
 	val energyType : EnergyType.Value,
 	val weakness : Option[EnergyType.Value] = None,
   val resistance : Option[EnergyType.Value] = None,
-  val retreatCost : Int,
-  val evolutionStage : EvolutionStage.Value = EvolutionStage.BASIC) extends Card(displayName, imgName, deck) {
+  val retreatCost : Int) extends Card(displayName, imgName, deck) {
 
   var currHp : Int = maxHp
 
@@ -113,16 +112,6 @@ abstract class PokemonCard(
     currHp = math.min(currHp + amount, maxHp)
   }
 
-  def isEvolutionOf(pc : PokemonCard) : Boolean = evolutionStage match {
-    case EvolutionStage.BASIC => false
-    case _ => pc.id == (id - 1)
-  }
+  def isEvolutionOf(pc : PokemonCard) : Boolean
 
-}
-
-object EvolutionStage extends Enumeration {
-
-  type EvolutionStage = Value
-
-  val BASIC, STAGE_ONE, STAGE_TWO = Value
 }
