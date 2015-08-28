@@ -5,6 +5,7 @@ import src.move.Move
 import src.move.MoveBuilder._
 import src.player.Player
 import src.card.energy.EnergyType
+import src.board.move.PreventDamageInterpreter
 import src.card.condition.PreventDamageCondition
 import src.card.pokemon._
 import src.card.Deck
@@ -26,10 +27,15 @@ class Metapod extends PokemonCard(
 private class Stiffen extends Move(
   "Stiffen",
   2,
-  Map()) {
+  Map(),
+  moveInterpreter = Some(new PreventDamageInterpreter())) {
 
-  override def perform(owner : Player, opp : Player) =
-      setGeneralConditionChance(owner, opp, new PreventDamageCondition("Stiffen"))
+  override def perform(owner : Player, opp : Player) {
+    if (flippedHeads()) {
+      moveInterpreter.get.isActive = true
+      owner.active.get.generalCondition = Some("Stiffen")
+    }
+  }
 }
 
 private class StunSpore extends Move(

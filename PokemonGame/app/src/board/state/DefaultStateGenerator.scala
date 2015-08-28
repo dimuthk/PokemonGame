@@ -31,8 +31,8 @@ object DefaultStateGenerator extends StateGenerator {
         // active and bench cards are always face up
         oc.get.isFaceUp = true
         oc.get.isDraggable = yourCards && yourTurn
-        // It has to be your turn
-        oc.get.isClickable = yourTurn
+        oc.get.isClickable = true
+        oc.get.isDisplayable = true
         oc.get.isUsable = yourCards && yourTurn
       }
     }
@@ -40,6 +40,7 @@ object DefaultStateGenerator extends StateGenerator {
       c.isFaceUp = yourCards
       c.isDraggable = yourCards && yourTurn
       c.isClickable = yourCards && yourTurn
+      c.isDisplayable = yourCards && yourTurn
       c.isUsable = false
     }
     return p.toJson

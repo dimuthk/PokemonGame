@@ -1,6 +1,6 @@
 package src.json
 
-// next id: 62
+// next id: 63
 object Identifier extends Enumeration {
 
   type Identifier = Value
@@ -46,6 +46,7 @@ object Identifier extends Enumeration {
    val DRAGGABLE = Value(53)
    val CLICKABLE = Value(54)
    val USABLE = Value(55)
+   val DISPLAYABLE = Value(62)
 
 
   /*

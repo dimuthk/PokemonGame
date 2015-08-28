@@ -229,7 +229,7 @@ function processCard(card, displayTag, imageTag, forHand) {
     $("#" + imageTag).click(function() {
       if ($(this).hasClass("noClick")) {
         $(this).removeClass("noClick")
-      } else if (card.USABLE) {
+      } else if (card.DISPLAYABLE) {
         showPopUpActive($(this).data("card_data"), $(this).attr("id"))
       } else {
         showNonActionPopUp($(this).data("card_data"))
@@ -389,6 +389,9 @@ function useAttack(moveNum, tag) {
 }
 
 function drawMoveButtons(card, tag) {
+  if (!card.USABLE) {
+    return ""
+  }
 	var res = ""
   for (var i=0; i<card.MOVES.length; i++) {
     if (!isPlaceholder(card.MOVES[i])) {
@@ -427,10 +430,10 @@ function statusConditionTag(item) {
 }
 
 function generalConditionTag(item) {
-  if (item.GENERAL_CONDITION != "None") {
+  if (!isPlaceholder(item.GENERAL_CONDITION)) {
     return "<font style=\"color: blue;\">" + item.GENERAL_CONDITION + "</font>"
   } else {
-    return item.GENERAL_CONDITION
+    return "None"
   }
 }
 

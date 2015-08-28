@@ -4,6 +4,7 @@ import play.api.libs.json._
 import src.board.move.MoveCommand
 import src.board.intermediary.IntermediaryRequest
 import src.board.drag.CustomDragInterpreter
+import src.board.move.CustomMoveInterpreter
 import src.board.state.CustomStateGenerator
 import src.card.energy.EnergyCard
 import src.card.energy.EnergyType
@@ -23,13 +24,13 @@ abstract class Move(
 	val totalEnergyReq : Int,
 	val specialEnergyReq : Map[EnergyType.Value, Int],
   val dragInterpreter : Option[CustomDragInterpreter] = None,
-  val moveInterceptor : Option[MoveInterceptor] = None,
+  val moveInterpreter : Option[CustomMoveInterpreter] = None,
   val clickInterceptor : Option[ClickInterceptor] = None,
   val stateGenerator : Option[CustomStateGenerator] = None) extends Jsonable {
 
   var status : Status.Value = Status.DISABLED
 
-  def additionalRequest(owner : Player, opp : Player, command : MoveCommand) : Option[IntermediaryRequest] = None
+  def additionalRequest(owner : Player, opp : Player) : Option[IntermediaryRequest] = None
 
   def hasEnoughEnergy(p : Player, energyCards : Seq[EnergyCard]) : Boolean = {
 		val total = energyCards.map { card => card.energyCount }.sum

@@ -12,6 +12,6 @@ sealed abstract class MoveCommand
 
 case class AttackFromActive(moveNum : Int) extends MoveCommand
 
-case class ActiveFromBench(benchIndex : Int, moveNum : Int) extends MoveCommand
+case class AttackFromBench(benchIndex : Int, moveNum : Int) extends MoveCommand
 
 case class Intermediary(cmd : Seq[String]) extends MoveCommand

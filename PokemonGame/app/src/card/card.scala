@@ -9,11 +9,13 @@ import src.json.Identifier
  */
 abstract class Card(val displayName : String, val imgName : String, val deck : Deck.Value) extends Jsonable {
 
-	var isFaceUp : Boolean = false
-
 	var isClickable : Boolean = false
 
 	var isDraggable : Boolean = false
+
+	var isFaceUp : Boolean = false
+
+	var isDisplayable : Boolean = false
 
 	var isUsable : Boolean = false
 
@@ -22,16 +24,18 @@ abstract class Card(val displayName : String, val imgName : String, val deck : D
 		isClickable = uiSet.contains(CardUI.CLICKABLE)
 		isDraggable = uiSet.contains(CardUI.DRAGGABLE)
 		isUsable = uiSet.contains(CardUI.USABLE)
+		isDisplayable = uiSet.contains(CardUI.DISPLAYABLE)
 	}
 
 	override def toJsonImpl() = Json.obj(
 		Identifier.FACE_UP.toString -> JsBoolean(isFaceUp),
 		Identifier.DRAGGABLE.toString -> JsBoolean(isDraggable),
 		Identifier.CLICKABLE.toString -> JsBoolean(isClickable),
-		Identifier.USABLE.toString -> JsBoolean(isUsable))
+		Identifier.USABLE.toString -> JsBoolean(isUsable),
+		Identifier.DISPLAYABLE.toString -> JsBoolean(isDisplayable))
 }
 
 object CardUI extends Enumeration {
 	type CardUI = Value
-	val FACE_UP, CLICKABLE, DRAGGABLE, USABLE = Value
+	val FACE_UP, CLICKABLE, DRAGGABLE, DISPLAYABLE, USABLE = Value
 }

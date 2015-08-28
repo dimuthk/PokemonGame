@@ -12,7 +12,10 @@ import src.player.Player
 
 object DefaultMoveInterpreter extends MoveInterpreter {
 
-    override def additionalRequest(p : Player, command : MoveCommand) : Option[IntermediaryRequest] = None
+    override def additionalRequest(owner : Player, opp : Player, command : MoveCommand) = command match {
+      case AttackFromActive(moveNum : Int) => owner.active.get.getMove(moveNum).get.additionalRequest(owner, opp)
+      case AttackFromBench(i : Int, moveNum : Int) => owner.bench(i).get.getMove(moveNum).get.additionalRequest(owner, opp)
+    }
 
     def attack(owner : Player, opp : Player, move : Move) : Unit = {
       move.perform(owner, opp)

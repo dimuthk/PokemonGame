@@ -9,7 +9,6 @@ object DragDirector {
 
 	def handleDragCommand(
 		owner : Player, opp : Player, contents : Seq[String]) : Option[IntermediaryRequest] = {
-		val interpreter = selectDragInterpreter(owner, opp)
 		val dragCmd : DragCommand = contents(0) match {
 			case "HAND_TO_ACTIVE" => HandToActive(contents(1).toInt)
 			case "HAND_TO_BENCH" => HandToBench(contents(1).toInt, contents(2).toInt - 1)
@@ -19,8 +18,10 @@ object DragDirector {
 			case "INTERMEDIARY" => Intermediary(contents.tail)
 			case _ => throw new Exception("Unrecognized drag request:  " + contents) 
 		}
-		val intermediaryReq = interpreter.additionalRequest(owner, dragCmd)
+
+		val intermediaryReq = DefaultDragInterpreter.additionalRequest(owner, dragCmd)
 		if (intermediaryReq == None) {
+			val interpreter = selectDragInterpreter(owner, opp)
 			interpreter.handleDrag(owner, dragCmd)
 		}
 		return intermediaryReq

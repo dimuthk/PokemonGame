@@ -2,6 +2,7 @@ package src.player
 
 import src.card.CardUI
 import src.card.Card
+import src.move.Move
 import src.card.Placeholder
 import src.card.pokemon.PokemonCard
 import src.json.Identifier
@@ -27,8 +28,9 @@ class Player extends Jsonable {
 
   var addedEnergy : Boolean = false
 
-  def getExistingActiveAndBenchCards() : Seq[PokemonCard]
-    = return (bench.toList ++ List(active)).flatten
+  def ownsMove(m : Move) : Boolean = getExistingActiveAndBenchCards().filter(_.ownsMove(m)).length > 0
+
+  def getExistingActiveAndBenchCards() : Seq[PokemonCard] = return (bench.toList ++ List(active)).flatten
 
   def setUIOrientationForBench(uiSet : Set[CardUI.Value]) {
     for (bc : Option[PokemonCard] <- bench) {

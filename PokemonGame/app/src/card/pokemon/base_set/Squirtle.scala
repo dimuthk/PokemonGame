@@ -4,8 +4,8 @@ import src.json.Identifier
 import src.move.Move
 import src.move.MoveBuilder._
 import src.player.Player
+import src.board.move.PreventDamageInterpreter
 import src.card.energy.EnergyType
-import src.card.condition.PreventDamageCondition
 import src.card.pokemon._
 import src.card.Deck
 
@@ -27,15 +27,15 @@ private class Bubble extends Move(
 	1,
 	Map(EnergyType.WATER -> 1)) {
 
-  override def perform(owner : Player, opp : Player) =
-      paralyzeChanceAttack(owner, opp, 10)
+  override def perform(owner : Player, opp : Player) = paralyzeChanceAttack(owner, opp, 10)
 }
 
 private class Withdraw extends Move(
 	"Withdraw",
 	2,
-	Map(EnergyType.WATER -> 1)) {
+	Map(EnergyType.WATER -> 1),
+	moveInterpreter = Some(new PreventDamageInterpreter())) {
 
-	override def perform(owner : Player, opp : Player) =
-	    setGeneralConditionChance(owner, opp, new PreventDamageCondition("Withdraw"))
+	override def perform(owner : Player, opp : Player) = activateMoveInterpreterChance(owner, this, "Withdraw")
+
 }

@@ -64,7 +64,6 @@ class DefaultDragInterpreterSpec extends Specification {
 			player.bench(0).get.energyCards must have size(1)
 			player.bench(0).get.energyCards.filter(_.eType == EnergyType.FIRE) must have size(1)
 		}
-
 	}
 
 }

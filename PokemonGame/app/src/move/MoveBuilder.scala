@@ -34,13 +34,6 @@ object MoveBuilder {
       modifiedDmg -= 30
     }
 
-    if (attacker.generalCondition.isDefined) {
-      modifiedDmg = attacker.generalCondition.get.modifyOffensive(owner, opp, modifiedDmg)
-    }
-    if (defender.generalCondition.isDefined) {
-      modifiedDmg = defender.generalCondition.get.modifyDefensive(owner, opp, modifiedDmg)
-    }
-
     return math.max(modifiedDmg, 0)
   }
   
@@ -95,12 +88,11 @@ object MoveBuilder {
     }
   }
 
-  def setGeneralConditionChance(owner : Player, opp : Player, condition : GeneralCondition) : Unit = {
+  def activateMoveInterpreterChance(owner : Player, m : Move, name : String) {
     if (flippedHeads()) {
-      owner.active.get.generalCondition = Some(condition)
-      owner.notify(condition.name + " successful!")
-    } else {
-      owner.notify(condition.name + " failed")
+      m.moveInterpreter.get.isActive = true
+      owner.active.get.generalCondition = Some(name)
+      owner.notify(owner.active.get.displayName + " successfully performed " + name + "!")
     }
   }
 

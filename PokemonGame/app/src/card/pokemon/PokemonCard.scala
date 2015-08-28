@@ -1,6 +1,7 @@
 package src.card.pokemon
 
 import play.api.libs.json._
+import src.card.Placeholder
 import src.card.Card
 import src.card.Deck
 import src.card.condition.GeneralCondition
@@ -36,7 +37,7 @@ abstract class PokemonCard(
 
   var statusCondition : Option[StatusCondition.Value] = None
 
-  var generalCondition : Option[GeneralCondition] = None
+  var generalCondition : Option[String] = None
 
   override def getIdentifier() = identifier
 
@@ -57,19 +58,23 @@ abstract class PokemonCard(
       case None => "None"
     }),
     Identifier.GENERAL_CONDITION.toString -> (generalCondition match {
-      case Some(g : GeneralCondition) => g.name
-      case None => "None"
+      case Some(s : String) => s
+      case None => Placeholder.toJson()
     }))
 
-  def getExistingMoves() : Seq[Move] = {
-    return List(firstMove, secondMove).flatten
+  def getExistingMoves() : Seq[Move] = List(firstMove, secondMove).flatten
+
+  def getMove(i : Int) : Option[Move] = i match {
+    case 1 => firstMove
+    case 2 => secondMove
+    case _ => None
   }
 
-  def getTotalEnergy(oEType : Option[EnergyType.Value] = None) : Int = {
-    oEType match {
-      case Some(eType) => return energyCards.filter(_.eType == eType).length
-      case None => return energyCards.length
-    }
+  def ownsMove(m : Move) : Boolean = getExistingMoves().filter(_ == m).length > 0
+
+  def getTotalEnergy(oEType : Option[EnergyType.Value] = None) : Int = oEType match {
+    case Some(eType) => energyCards.filter(_.eType == eType).length
+    case None => energyCards.length
   }
 
   def evolveOver(pc : PokemonCard) {
@@ -108,8 +113,9 @@ abstract class PokemonCard(
     currHp = math.min(currHp + amount, maxHp)
   }
 
-  def isEvolutionOf(pc : PokemonCard) : Boolean = {
-    return if(evolutionStage == EvolutionStage.BASIC) false else pc.id == (id - 1)
+  def isEvolutionOf(pc : PokemonCard) : Boolean = evolutionStage match {
+    case EvolutionStage.BASIC => false
+    case _ => pc.id == (id - 1)
   }
 
 }
