@@ -15,27 +15,18 @@ class Ivysaur extends StageOnePokemon(
     Identifier.IVYSAUR,
     id = 2,
     maxHp = 60,
-    firstMove = Some(new VineWhip()),
-    secondMove = Some(new Poisonpowder()),
+    firstMove = Some(new Move(
+      "Vine Whip",
+      3,
+      Map(EnergyType.GRASS -> 1)) {
+        def perform = (owner, opp ) => standardAttack(owner, opp, 30)
+    }),
+    secondMove = Some(new Move(
+      "Poisonpowder",
+      3,
+      Map(EnergyType.GRASS -> 3)) {
+        def perform = (owner, opp) => poisonAttack(owner, opp, 20)
+    }),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.FIRE),
     retreatCost = 1)
-
-private class VineWhip extends Move(
-  "Vine Whip",
-  3,
-  Map(EnergyType.GRASS -> 1)) {
-
-  override def perform(owner : Player, opp : Player) = standardAttack(owner, opp, 30)
-
-}
-
-private class Poisonpowder extends Move(
-  "Poisonpowder",
-  3,
-  Map(EnergyType.GRASS -> 3)) {
-
-  override def perform(owner : Player, opp : Player) = poisonAttack(owner, opp, 20)
-
-}
-

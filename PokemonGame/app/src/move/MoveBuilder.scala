@@ -36,6 +36,11 @@ object MoveBuilder {
 
     return math.max(modifiedDmg, 0)
   }
+
+  def roundUp(num : Int) : Int = num % 10 match {
+    case 0 => num
+    case _ => num + 10
+  }
   
   /**
    * Standard attack which deals damage without any side effects.
@@ -69,6 +74,14 @@ object MoveBuilder {
     opp.active.get.poisonStatus = Some(PoisonStatus.POISONED)
   }
 
+  def poisonChanceAttack(owner : Player, opp : Player, baseDmg : Int) : Unit = {
+    standardAttack(owner, opp, baseDmg)
+    if (flippedHeads()) {
+      opp.active.get.poisonStatus = Some(PoisonStatus.POISONED)
+      opp.notify(opp.active.get.displayName + " is poisoned!")
+    }
+  }
+
   def energyDiscardAttack(
         owner : Player,
         opp : Player,
@@ -96,6 +109,16 @@ object MoveBuilder {
     }
   }
 
-  def flippedHeads() = Random.nextBoolean()
+  def flippedHeads() = true //Random.nextBoolean()
+
+  def preventDamageChance(owner : Player, condName : String) {
+    if (flippedHeads()) {
+      owner.notify(owner.active.get.displayName + " successfully performed " + condName + "!")
+      owner.active.get.preventDamage = true
+      owner.active.get.generalCondition = Some(condName)
+    } else {
+      owner.notify(condName + " failed")
+    }
+  }
   
 }

@@ -35,9 +35,13 @@ class PlayerActor(out : ActorRef, var correspondent : Correspondent) extends Act
     case m : String => {
       Logger.debug("Incoming message: " + m)
       val contents = m.split("<>")
-      contents(0) match {
+      contents.head match {
         case "DRAG" => correspondent.handleDrag(contents.tail)
         case "MOVE" => correspondent.handleMove(contents.tail)
+        case "FLIP" => contents(1) match {
+          case "DRAG" => correspondent.other.handleDrag(contents.tail.tail)
+          case "MOVE" => correspondent.other.handleMove(contents.tail.tail)
+        }
       }
     }
     case StateEvent(_, state) => out ! state.toString

@@ -20,9 +20,24 @@ object BoardCleaner {
     if (owner.isTurn) {
       updateBoardOnSameTurn(owner, opp)
     } else {
+      Logger.debug("update on turn swap")
       updateBoardOnTurnSwap(owner, opp)
+      updateCards(owner : Player, opp : Player)
     }
 	}
+
+  def updateCards(owner : Player, opp : Player) {
+    if (owner.active.isDefined) {
+      owner.active.get.updateActiveOnTurnSwap(owner, opp)
+    }
+    
+    if (opp.active.isDefined) {
+      opp.active.get.updateActiveOnTurnSwap(opp, owner)
+    }
+    for (pc : PokemonCard <- (owner.bench.toList.flatten ++ opp.bench.toList.flatten)) {
+      pc.updateBenchOnTurnSwap(opp, owner)
+    }
+  }
 
   /**
    * Process how to update the board after a turn swap. @param owner references
@@ -74,7 +89,7 @@ object BoardCleaner {
   }
 
   private def cardWithActivatedPower(p : Player) : Option[PokemonCard] = {
-    for (pc : PokemonCard <- p.getExistingActiveAndBenchCards()) {
+    for (pc : PokemonCard <- p.existingActiveAndBenchCards) {
       if (pc.getExistingMoves().exists {
         case ap : ActivePokemonPower => ap.isActive
         case _ => false }) {
@@ -92,7 +107,7 @@ object BoardCleaner {
         case pp : PassivePokemonPower => handlePassivePowerStatus(active, pp)
         case m : Move => cardWithActivatedPower(curr) match {
           case Some(_) => m.status = Status.DISABLED
-          case None => if (m.hasEnoughEnergy(curr, active.energyCards)) Status.ENABLED else Status.DISABLED
+          case None => m.status = if (m.hasEnoughEnergy(curr, active.energyCards)) Status.ENABLED else Status.DISABLED
         }
       }
     }

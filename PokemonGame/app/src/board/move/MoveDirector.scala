@@ -28,9 +28,10 @@ object MoveDirector {
   }
 
   def selectMoveInterpreter(owner : Player, opp : Player) : MoveInterpreter = {
-    for (pc : PokemonCard <- (owner.getExistingActiveAndBenchCards() ++ opp.getExistingActiveAndBenchCards())) {
+    for (pc : PokemonCard <- (owner.existingActiveAndBenchCards ++ opp.existingActiveAndBenchCards)) {
       for (m : Move <- pc.getExistingMoves()) {
         if (m.moveInterpreter.isDefined && m.moveInterpreter.get.isActive) {
+          Logger.debug("got special interpreter")
           return m.moveInterpreter.get
         }
       }

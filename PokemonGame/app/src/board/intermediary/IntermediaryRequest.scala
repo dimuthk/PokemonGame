@@ -20,6 +20,8 @@ import play.api.libs.json._
  * is determined to be required; the entire board state will then be processed upon
  * receiving the additional information. The request will generate some sort of
  * modal pop-up on the client's screen requesting the information.
+ * Add the flip call to the beginning if necessary.
+ * Standard: FLIP?<>MOVE/DRAG<>INTERMEDIARY<>...
  */
 abstract class IntermediaryRequest(
 	val requestTitle : String,

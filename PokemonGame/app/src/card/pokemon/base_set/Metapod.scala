@@ -21,16 +21,22 @@ class Metapod extends StageOnePokemon(
     secondMove = Some(new StunSpore()),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.FIRE),
-    retreatCost = 2)
+    retreatCost = 2) {
+
+  override def updateActiveOnTurnSwap(owner : Player, opp : Player) : Unit = {
+      if (owner.isTurn) {
+          owner.active.get.generalCondition = None
+      }
+      super.updateActiveOnTurnSwap(owner, opp)
+    }
+}
 
 private class Stiffen extends Move(
   "Stiffen",
   2,
-  Map(),
-  moveInterpreter = Some(new PreventDamageInterpreter())) {
+  Map()) {
 
-  override def perform(owner : Player, opp : Player) =
-      activateMoveInterpreterChance(owner, this, "Stiffen")
+  override def perform(owner : Player, opp : Player) = preventDamageChance(owner, "Stiffen")
 }
 
 private class StunSpore extends Move(

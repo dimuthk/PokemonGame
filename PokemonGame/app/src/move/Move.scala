@@ -12,6 +12,8 @@ import src.json.Identifier
 import src.json.Jsonable
 import src.player.Player
 
+import play.api.Logger
+
 /**
  * Defines a move that can be performed by a Pokemon. Moves can be both active
  * and reactive. In the active case, they execute some function when explicitly
@@ -33,6 +35,7 @@ abstract class Move(
   def hasEnoughEnergy(p : Player, energyCards : Seq[EnergyCard]) : Boolean = {
 		val total = energyCards.map { card => card.energyCount }.sum
 		if (total < totalEnergyReq) {
+      Logger.debug(total + "<" + totalEnergyReq)
 			return false
 		}
 
@@ -41,13 +44,17 @@ abstract class Move(
 				.filter(_.eType == energyType)
 				.map { card => card.energyCount }.sum
 			if (specialCntTotal < reqCnt) {
+        Logger.debug("special " + specialCntTotal + "<" + reqCnt)
 				return false
 			}
     	}
+      Logger.debug(name + " is okay")
     	return true
   }
   
-  def perform(owner : Player, opp : Player) : Unit
+  //def perform(owner : Player, opp : Player) : Unit
+
+  def perform : (Player, Player) => Unit
 
   override def toJsonImpl() = Json.obj(
     Identifier.MOVE_NAME.toString -> name,

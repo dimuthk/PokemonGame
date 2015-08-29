@@ -77,12 +77,12 @@ object Board {
 
     def populateMachop : Unit = {
       if (id == 1) {
-        p.deck = List.fill(20)(new Squirtle()) ++ List.fill(20)(new WaterEnergy())
+        p.deck = List.fill(20)(new WaterEnergy())
         p.deck = Random.shuffle(p.deck)
         p.active = Some(new Butterfree())
         p.isTurn = false
       } else {
-        p.deck = List.fill(20)(new WaterEnergy()) ++ List.fill(20)(new Charmander()) ++ List.fill(20)(new GrassEnergy())
+        p.deck = List.fill(20)(new Squirtle()) ++ List.fill(20)(new WaterEnergy())
         p.deck = Random.shuffle(p.deck)
         p.isTurn = true
       }
@@ -101,6 +101,8 @@ object Board {
           DefaultStateGenerator.generateForPlayer1(c1.get.p, c2.get.p),
           DefaultStateGenerator.generateForPlayer2(c1.get.p, c2.get.p))
     }
+
+    def other : Correspondent = if (c1.get == this) c2.get else c1.get
 
     def handleMove(contents : Seq[String]) {
       val intermediary = MoveDirector.handleMoveCommand(p, getOpponent(p), contents)

@@ -1,13 +1,15 @@
 package src.card.pokemon.base_set
 
 import src.json.Identifier
-import src.move.Move
+import src.move._
 import src.move.MoveBuilder._
 import src.player.Player
 import src.board.move.PreventDamageInterpreter
 import src.card.energy.EnergyType
 import src.card.pokemon._
 import src.card.Deck
+
+import play.api.Logger
 
 class Squirtle extends BasicPokemon(
 	"Squirtle",
@@ -16,26 +18,20 @@ class Squirtle extends BasicPokemon(
 	Identifier.SQUIRTLE,
 	id = 7,
 	maxHp = 40,
-	firstMove = Some(new Bubble()),
-	secondMove = Some(new Withdraw()),
+	firstMove = Some(new Move(
+		"Bubble",
+		1,
+		Map(EnergyType.WATER -> 1)) {
+			def perform = (owner, opp) => paralyzeChanceAttack(owner, opp, 10)
+	}),
+	secondMove = Some(new Move(
+		"Withdraw",
+		2,
+		Map(EnergyType.WATER -> 1)) {
+			def perform = (owner, opp ) => Withdrawable.tryWithdraw(owner, "Withdraw")
+	}),
 	energyType = EnergyType.WATER,
 	weakness = Some(EnergyType.THUNDER),
-	retreatCost = 1)
-
-private class Bubble extends Move(
-	"Bubble",
-	1,
-	Map(EnergyType.WATER -> 1)) {
-
-  override def perform(owner : Player, opp : Player) = paralyzeChanceAttack(owner, opp, 10)
-}
-
-private class Withdraw extends Move(
-	"Withdraw",
-	2,
-	Map(EnergyType.WATER -> 1),
-	moveInterpreter = Some(new PreventDamageInterpreter())) {
-
-	override def perform(owner : Player, opp : Player) = activateMoveInterpreterChance(owner, this, "Withdraw")
-
+	retreatCost = 1) with Withdrawable {
+	val testFunc = (i : Int) => (j : Int) => 2
 }

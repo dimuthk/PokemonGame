@@ -15,26 +15,18 @@ class Charmander extends BasicPokemon(
 	Identifier.CHARMANDER,
 	id = 4,
 	maxHp = 50,
-	firstMove = Some(new Scratch()),
-	secondMove = Some(new Ember()),
+	firstMove = Some(new Move(
+		"Scratch",
+		1,
+		Map()) {
+			def perform = (owner, opp) => standardAttack(owner, opp, 10)
+	}),
+	secondMove = Some(new Move(
+		"Ember",
+		2,
+		Map(EnergyType.FIRE -> 1)) {
+			def perform = (owner, opp) => energyDiscardAttack(owner, opp, 30, EnergyType.FIRE)
+	}),
 	energyType = EnergyType.FIRE,
 	weakness = Some(EnergyType.WATER),
 	retreatCost = 1)
-
-private class Scratch extends Move(
-	"Scratch",
-	1,
-	Map()) {
-
-  override def perform(owner : Player, opp : Player) =
-      standardAttack(owner, opp, 10)
-}
-
-private class Ember extends Move(
-	"Ember",
-	2,
-	Map(EnergyType.FIRE -> 1)) {
-
-	override def perform(owner : Player, opp : Player) =
-	    energyDiscardAttack(owner, opp, 30, EnergyType.FIRE)
-}

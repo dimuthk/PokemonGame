@@ -30,4 +30,9 @@ abstract class MoveInterpreter {
         case Intermediary(cmds : Seq[String]) => handleIntermediary(owner, opp, cmds)
     }
 
+    def flipTurn(owner : Player, opp : Player) : Unit = {
+        owner.isTurn = !owner.isTurn
+        opp.isTurn = !opp.isTurn
+    }
+
 }

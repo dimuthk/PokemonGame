@@ -1,6 +1,7 @@
 package src.board.move
 
 import src.board.intermediary.IntermediaryRequest
+import src.board.move.DefaultMoveInterpreter
 import src.card.Card
 import src.move.Move
 import src.move.PokemonPower
@@ -14,6 +15,7 @@ object DefaultMoveInterpreter extends MoveInterpreter {
     override def additionalRequest(owner : Player, opp : Player, command : MoveCommand) = command match {
       case AttackFromActive(moveNum : Int) => owner.active.get.getMove(moveNum).get.additionalRequest(owner, opp)
       case AttackFromBench(i : Int, moveNum : Int) => owner.bench(i).get.getMove(moveNum).get.additionalRequest(owner, opp)
+      case Intermediary(cmd : Seq[String]) => None
     }
 
     def attack(owner : Player, opp : Player, move : Move) : Unit = {
@@ -22,11 +24,6 @@ object DefaultMoveInterpreter extends MoveInterpreter {
         case power : PokemonPower => ()
         case _ => flipTurn(owner, opp)
       }
-    }
-
-    def flipTurn(owner : Player, opp : Player) : Unit = {
-        owner.isTurn = !owner.isTurn
-        opp.isTurn = !opp.isTurn
     }
 
 }

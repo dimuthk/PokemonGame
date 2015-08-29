@@ -4,6 +4,7 @@ import play.api.libs.json._
 import src.card.Placeholder
 import src.card.Card
 import src.card.Deck
+import src.player.Player
 import src.card.condition.GeneralCondition
 import src.card.condition.PoisonStatus
 import src.card.condition.StatusCondition
@@ -11,6 +12,8 @@ import src.card.energy.EnergyCard
 import src.card.energy.EnergyType
 import src.json.Identifier
 import src.move.Move
+
+import play.api.Logger
 
 abstract class PokemonCard(
 	displayName : String,
@@ -96,6 +99,15 @@ abstract class PokemonCard(
       }
     }
     throw new Exception("Not enough energy for discarding")
+  }
+
+  def updateActiveOnTurnSwap(owner : Player, opp : Player) : Unit = {
+  }
+
+  def updateBenchOnTurnSwap(owner : Player, opp : Player) : Unit = {
+    statusCondition = None
+    poisonStatus = None
+    generalCondition = None
   }
 
 	def takeDamage(amount : Int) : Unit = {

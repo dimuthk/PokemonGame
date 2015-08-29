@@ -21,16 +21,22 @@ class Wartortle extends StageOnePokemon(
     secondMove = Some(new WartortleBite()),
     energyType = EnergyType.WATER,
     weakness = Some(EnergyType.THUNDER),
-    retreatCost = 1)
+    retreatCost = 1) {
+
+  override def updateActiveOnTurnSwap(owner : Player, opp : Player) : Unit = {
+      if (owner.isTurn) {
+          owner.active.get.generalCondition = None
+      }
+      super.updateActiveOnTurnSwap(owner, opp)
+    }
+}
 
 private class WithdrawWortortle extends Move(
   "Withdraw",
   2,
-  Map(EnergyType.WATER -> 1),
-  moveInterpreter = Some(new PreventDamageInterpreter())) {
+  Map(EnergyType.WATER -> 1)) {
 
-  override def perform(owner : Player, opp : Player) =
-      activateMoveInterpreterChance(owner, this, "Withdraw")
+  override def perform(owner : Player, opp : Player) = preventDamageChance(owner, "Withdraw")
 }
 
 private class WartortleBite extends Move(

@@ -1,105 +1,107 @@
 package src.json
 
-// next id: 63
 object Identifier extends Enumeration {
 
   type Identifier = Value
 
   implicit def identToString(ident : Identifier.Value) : String = ident.toString()
 
-  /*
-   * GENERAL ATTRIBUTES
-   */
-  val IDENTIFIER = Value(1)
-  val DISPLAY_NAME = Value(2)
-  val PLACEHOLDER = Value(7)
-  val IMG_NAME = Value(14)
-  val BOARD = Value(16)
-
+  val
   /*
    * INTERMEDIARY ATTRIBUTES
    */
-   val REQUEST_TITLE = Value(57)
-   val REQUEST_MSG = Value(58)
-   val SERVER_TAG = Value(61)
-   val CLICK_CARD_REQUEST = Value(56)
-   val CLICK_COUNT = Value(59)
-   val CARD_LIST = Value(60)
+  REQUEST_TITLE,
+  REQUEST_MSG,
+  SERVER_TAG,
+  CLICK_CARD_REQUEST,
+  CLICK_COUNT,
+  CARD_LIST,
 
   /*
    * PLAYER ATTRIBUTES
    */
-  val PLAYER = Value(3)
-  val ACTIVE = Value(8)
-  val BENCH = Value(9)
-  val HAND = Value(10)
-  val DECK = Value(11)
-  val GARBAGE = Value(12)
-  val PRIZES = Value(13)
-  val NOTIFICATION = Value(44)
-  val IS_TURN = Value(51)
+  PLAYER,
+  ACTIVE,
+  BENCH,
+  HAND,
+  DECK,
+  GARBAGE,
+  PRIZES,
+  NOTIFICATION,
+  IS_TURN,
 
   /*
    * CARD ATTRIBUTES
    */
-   val FACE_UP = Value(52)
-   val DRAGGABLE = Value(53)
-   val CLICKABLE = Value(54)
-   val USABLE = Value(55)
-   val DISPLAYABLE = Value(62)
+  FACE_UP,
+  DRAGGABLE,
+  CLICKABLE,
+  USABLE,
+  DISPLAYABLE,
 
 
   /*
    * ENERGY CARD ATTRIBUTES
    */
-  val ENERGY_TYPE = Value(25)
-  val FIRE_ENERGY = Value(17)
-  val WATER_ENERGY = Value(18)
-  val GRASS_ENERGY = Value(19)
-  val THUNDER_ENERGY = Value(20)
-  val FIGHTING_ENERGY = Value(21)
-  val PSYCHIC_ENERGY = Value(22)
-  val DOUBLE_COLORLESS_ENERGY = Value(23)
+  ENERGY_TYPE,
+  FIRE_ENERGY,
+  WATER_ENERGY,
+  GRASS_ENERGY,
+  THUNDER_ENERGY,
+  FIGHTING_ENERGY,
+  PSYCHIC_ENERGY,
+  DOUBLE_COLORLESS_ENERGY,
    
   /*
    * POKEMON CARD ATTRIBUTES
    */
-  val MAX_HP = Value(4)
-  val CURR_HP = Value(5)
-  val ENERGY_CARDS = Value(24)
-  val MOVES = Value(37)
+  MAX_HP,
+  CURR_HP,
+  ENERGY_CARDS,
+  MOVES,
 
   /*
    * MOVE ATTRIBUTES
    */
-  val MOVE = Value(36)
-  val MOVE_NAME = Value(26)
-  val MOVE_ENABLED = Value(29)
-  val MOVE_STATUS = Value(35)
+  MOVE,
+  MOVE_NAME,
+  MOVE_ENABLED,
+  MOVE_STATUS,
 
   /**
    * STATUS ATTRIBUTES
    */
-  val POISON_STATUS = Value(33)
-  val STATUS_CONDITION = Value(45)
-  val GENERAL_CONDITION = Value(46)
+  POISON_STATUS,
+  STATUS_CONDITION,
+  GENERAL_CONDITION,
    
   /*
    * POKEMON
    */
-  val MACHOP = Value(6)
-  val RATTATA = Value(15)
-  val BULBASAUR = Value(31)
-  val IVYSAUR = Value(32)
-  val VENUSAUR = Value(34) 
-  val CHARMANDER = Value(38)
-  val CHARMELEON = Value(39)
-  val CHARIZARD = Value(40)
-  val SQUIRTLE = Value(41)
-  val WARTORTLE = Value(42)
-  val BLASTOISE = Value(43)
-  val CATERPIE = Value(48)
-  val METAPOD = Value(49)
-  val BUTTERFREE = Value(50)
-     
+  MACHOP,
+  RATTATA,
+  BULBASAUR,
+  IVYSAUR,
+  VENUSAUR,
+  CHARMANDER,
+  CHARMELEON,
+  CHARIZARD,
+  SQUIRTLE,
+  WARTORTLE,
+  BLASTOISE,
+  CATERPIE,
+  METAPOD,
+  BUTTERFREE,
+  WEEDLE,
+  KAKUNA,
+  BEEDRILL,
+
+  /*
+   * GENERAL ATTRIBUTES
+   */
+  IDENTIFIER,
+  DISPLAY_NAME,
+  PLACEHOLDER,
+  IMG_NAME,
+  BOARD = Value
 }

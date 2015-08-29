@@ -31,7 +31,7 @@ object DragDirector {
 	 * For now, only allow custom interpreters to intercept drags made by their owner.
 	 */
 	def selectDragInterpreter(owner : Player, opp : Player) : DragInterpreter = {
-		for (pc : PokemonCard <- owner.getExistingActiveAndBenchCards()) {
+		for (pc : PokemonCard <- owner.existingActiveAndBenchCards) {
 			for (m : Move <- pc.getExistingMoves()) {
 				if (m.dragInterpreter.isDefined && m.dragInterpreter.get.isActive) {
 					return m.dragInterpreter.get

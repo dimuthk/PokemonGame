@@ -17,32 +17,28 @@ import src.card.Deck
 import play.api.libs.json._
 import play.api.Logger
 
-class Venusaur extends StageTwoPokemon(
+class Venusaur extends BasicPokemon(
     "Venusaur",
     "Venusaur-Base-Set-15.jpg",
     Deck.BASE_SET,
     Identifier.VENUSAUR,
     id = 3,
     maxHp = 100,
-    firstMove = Some(new EnergyTrans()),
-    secondMove = Some(new Solarbeam()),
+    firstMove = Some(new ActivePokemonPower(
+      "Energy Trans",
+      dragInterpreter = Some(new EnergyTransDrag()),
+      stateGenerator = Some(new EnergyTransState())) {}
+    ),
+    secondMove = Some(new Move(
+      "Solarbeam",
+      4,
+      Map(EnergyType.GRASS -> 4)) {
+      def perform = (owner, opp ) => standardAttack(owner, opp, 60)
+    }),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.FIRE),
     retreatCost = 2)
 
-private class EnergyTrans extends ActivePokemonPower(
-  "Energy Trans",
-  dragInterpreter = Some(new EnergyTransDrag()),
-  stateGenerator = Some(new EnergyTransState()))
-
-
-private class Solarbeam extends Move(
-  "Solarbeam",
-  4,
-  Map(EnergyType.GRASS -> 4)) {
-
-  override def perform(owner : Player, opp : Player) = standardAttack(owner, opp, 60)
-}
 
 private class EnergyTransState extends CustomStateGenerator(true, false) {
 

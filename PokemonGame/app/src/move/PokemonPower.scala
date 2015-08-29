@@ -17,6 +17,6 @@ abstract class PokemonPower(
     moveInterpreter,
     stateGenerator) {
 
-  override def perform(owner : Player, opp : Player) : Unit
+  val perform = (owner : Player, opp : Player) => ()
 
 }
