@@ -12,6 +12,7 @@ import src.card.energy.EnergyCard
 import src.card.energy.EnergyType
 import src.json.Identifier
 import src.move.Move
+import src.move.Pass
 
 import play.api.Logger
 
@@ -28,6 +29,8 @@ abstract class PokemonCard(
 	val weakness : Option[EnergyType.Value] = None,
   val resistance : Option[EnergyType.Value] = None,
   val retreatCost : Int) extends Card(displayName, imgName, deck) {
+
+  val pass : Move = new Pass()
 
   var currHp : Int = maxHp
 
@@ -50,7 +53,7 @@ abstract class PokemonCard(
 		Identifier.IMG_NAME.toString -> imgName,
     Identifier.ENERGY_CARDS.toString -> cardListToJsArray(energyCards),
     Identifier.ENERGY_TYPE.toString -> energyType,
-    Identifier.MOVES.toString -> optionMoveListToJsArray(List(firstMove, secondMove)),
+    Identifier.MOVES.toString -> optionMoveListToJsArray(List(firstMove, secondMove, Some(pass))),
     Identifier.POISON_STATUS.toString -> (poisonStatus match {
       case Some(p : PoisonStatus.Value) => p.toString
       case None => "None"
@@ -64,7 +67,7 @@ abstract class PokemonCard(
       case None => Placeholder.toJson()
     }))
 
-  def getExistingMoves() : Seq[Move] = List(firstMove, secondMove).flatten
+  def existingMoves : Seq[Move] = List(firstMove, secondMove).flatten
 
   def getMove(i : Int) : Option[Move] = i match {
     case 1 => firstMove
@@ -72,7 +75,7 @@ abstract class PokemonCard(
     case _ => None
   }
 
-  def ownsMove(m : Move) : Boolean = getExistingMoves().filter(_ == m).length > 0
+  def ownsMove(m : Move) : Boolean = existingMoves.filter(_ == m).length > 0
 
   def getTotalEnergy(oEType : Option[EnergyType.Value] = None) : Int = oEType match {
     case Some(eType) => energyCards.filter(_.eType == eType).length
@@ -86,42 +89,55 @@ abstract class PokemonCard(
   }
 
   def discardEnergy(eType : EnergyType.Value, cnt : Int = 1) : Seq[EnergyCard] = {
-    var discardedCards : Seq[EnergyCard] = List()
-    var currentCnt = cnt
-    for (i <- 0 until energyCards.length) {
-      if (eType == EnergyType.COLORLESS || energyCards(i).eType == eType) {
-        discardedCards = discardedCards ++ List(energyCards(i))
-        currentCnt = currentCnt - 1
-      }
-      if (currentCnt == 0) {
-        energyCards = energyCards diff discardedCards
-        return discardedCards
-      }
+    val matchingEnergy : Seq[EnergyCard] = (() => eType match {
+      case EnergyType.COLORLESS => energyCards.slice(0, cnt)
+      case other => energyCards.filter(_.eType == other).slice(0, cnt)
+    })()
+    energyCards = energyCards diff matchingEnergy
+    return matchingEnergy
+  }
+
+  /**
+   * Updates the list of moves for this pokemon. This method will be triggered after any operation
+   * made by either player.
+   * @param turnSwapped Whether or not the turn was swapped during this operation.
+   * @param whether or not this card is the active card. false implies this is a bench card.
+   */
+  def updateMoves(owner : Player, opp : Player, turnSwapped : Boolean, isActive : Boolean) : Unit
+    = (existingMoves ++ List(pass)).foreach(_.update(owner, opp, this, turnSwapped, isActive))
+
+  def updateCardOnTurnSwap(owner : Player, opp : Player, isActive : Boolean) : Unit = isActive match {
+    case true => ()
+    case false => {
+      statusCondition = None
+      poisonStatus = None
+      generalCondition = None
     }
-    throw new Exception("Not enough energy for discarding")
   }
 
-  def updateActiveOnTurnSwap(owner : Player, opp : Player) : Unit = {
-  }
-
-  def updateBenchOnTurnSwap(owner : Player, opp : Player) : Unit = {
-    statusCondition = None
-    poisonStatus = None
-    generalCondition = None
-  }
-
-	def takeDamage(amount : Int) : Unit = {
-    	if (amount <= 0) {
-      		return  
-    	}
-    	currHp = math.max(currHp - amount, 0)
-  }
-
-  def heal(amount : Int) : Unit = {
-    if (amount <= 0) {
-      return
+  def calculateDmg(attacker : PokemonCard, dmg : Int) : Int = {
+    var modifiedDmg = dmg
+    
+    // Resistance / weakness modifier
+    if (weakness.exists { eType => eType == attacker.energyType }) {
+      modifiedDmg *= 2
     }
-    currHp = math.min(currHp + amount, maxHp)
+    
+    if (resistance.exists { eType => eType == attacker.energyType }) {
+      modifiedDmg -= 30
+    }
+
+    return math.max(modifiedDmg, 0)
+  }
+
+	def takeDamage(amount : Int) : Unit = (amount <= 0) match {
+    case true => ()
+    case false => currHp = math.max(currHp - amount, 0)
+  }
+
+  def heal(amount : Int) : Unit = (amount <= 0) match {
+    case true => ()
+    case false => currHp = math.min(currHp + amount, maxHp)
   }
 
   def isEvolutionOf(pc : PokemonCard) : Boolean

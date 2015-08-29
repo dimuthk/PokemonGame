@@ -79,10 +79,6 @@ private class EnergyTransDrag extends CustomDragInterpreter {
     }
   }
 
-  override def handToActive(p : Player, handIndex : Int) : Unit = ()
-
-  override def handToBench(p : Player, handIndex : Int, benchIndex : Int) : Unit = ()
-
   private def transferLeafEnergy(drag : PokemonCard, drop : PokemonCard) {
     for (i <- 0 until drag.energyCards.length) {
       if (drag.energyCards(i).eType == EnergyType.GRASS) {

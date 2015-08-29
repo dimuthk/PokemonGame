@@ -29,31 +29,31 @@ abstract class DragInterpreter {
      * Notifies that bench card positioned at index1 is attempting to be moved to index2. Assumes
      * that benchIndex1 points to a non-null bench card.
      */
-    def benchToBench(p : Player, benchIndex1 : Int, benchIndex2 : Int) : Unit
+    def benchToBench(p : Player, benchIndex1 : Int, benchIndex2 : Int) : Unit = ()
 
     /**
      * Notifies that bench card positioned at index is attempting to be moved to active slot. Assumes
      * that benchIndex points to a non-null bench card.
      */
-    def benchToActive(p : Player, benchIndex : Int) : Unit
+    def benchToActive(p : Player, benchIndex : Int) : Unit = ()
 
     /**
      * Notifies that active card is attempting to be moved to bench card position at index. Assumes
      * active card is non-null.
      */
-    def activeToBench(p : Player, benchIndex : Int) : Unit
+    def activeToBench(p : Player, benchIndex : Int) : Unit = ()
 
     /**
      * Notifies that a card from the hand is attempting to be moved to the active slot. Assumes the hand
      * card exists.
      */
-    def handToActive(p : Player, handIndex : Int) : Unit
+    def handToActive(p : Player, handIndex : Int) : Unit = ()
 
     /**
      * Notiies that a card from the hand is attempting to be moved to bench card positioned at index.
      * Assumes the hand card exists.
      */
-    def handToBench(p : Player, handIndex : Int, benchIndex : Int) : Unit
+    def handToBench(p : Player, handIndex : Int, benchIndex : Int) : Unit = ()
 
     def handleIntermediary(p : Player, cmd : Seq[String]) : Unit = ()
 

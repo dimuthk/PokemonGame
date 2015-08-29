@@ -16,27 +16,6 @@ import scala.util.Random
  */
 object MoveBuilder {
 
-  /**
-   * The standard damage calculator for attacks. All attacks which do damage and
-   * are not held to some additional stipulation should utilize this method.
-   */
-  def calculateDmg(owner : Player, opp : Player, dmg : Int) : Int = {
-    var attacker = owner.active.get
-    var defender = opp.active.get
-    var modifiedDmg = dmg
-    
-    // Resistance / weakness modifier
-    if (defender.weakness.exists { eType => eType == attacker.energyType }) {
-      modifiedDmg *= 2
-    }
-    
-    if (defender.resistance.exists { eType => eType == attacker.energyType }) {
-      modifiedDmg -= 30
-    }
-
-    return math.max(modifiedDmg, 0)
-  }
-
   def roundUp(num : Int) : Int = num % 10 match {
     case 0 => num
     case _ => num + 10
@@ -46,7 +25,7 @@ object MoveBuilder {
    * Standard attack which deals damage without any side effects.
    */
   def standardAttack(owner : Player, opp : Player, baseDmg : Int) : Unit = {
-    var dmg = calculateDmg(owner, opp, baseDmg)
+    var dmg = opp.active.get.calculateDmg(owner.active.get, baseDmg)
     opp.active.get.takeDamage(dmg)
   }
 
@@ -72,6 +51,12 @@ object MoveBuilder {
   def poisonAttack(owner : Player, opp : Player, baseDmg : Int) : Unit = {
     standardAttack(owner, opp, baseDmg)
     opp.active.get.poisonStatus = Some(PoisonStatus.POISONED)
+  }
+
+  def multipleHitAttack(owner : Player, opp : Player, baseDmg : Int, flips : Int) : Unit = {
+    for (_ <- 0 until flips) {
+      standardAttack(owner, opp, baseDmg)
+    }
   }
 
   def poisonChanceAttack(owner : Player, opp : Player, baseDmg : Int) : Unit = {
@@ -110,15 +95,5 @@ object MoveBuilder {
   }
 
   def flippedHeads() = true //Random.nextBoolean()
-
-  def preventDamageChance(owner : Player, condName : String) {
-    if (flippedHeads()) {
-      owner.notify(owner.active.get.displayName + " successfully performed " + condName + "!")
-      owner.active.get.preventDamage = true
-      owner.active.get.generalCondition = Some(condName)
-    } else {
-      owner.notify(condName + " failed")
-    }
-  }
   
 }

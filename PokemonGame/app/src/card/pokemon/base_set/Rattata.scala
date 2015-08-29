@@ -15,17 +15,12 @@ class Rattata extends BasicPokemon(
 	Identifier.RATTATA,
 	id = 19,
 	maxHp = 30,
-	firstMove = Some(new Bite()),
+	firstMove = Some(new Move(
+		"Bite",
+		1) {
+			def perform = (owner, opp) => standardAttack(owner, opp, 20)
+		}),
 	energyType = EnergyType.COLORLESS,
 	weakness = Some(EnergyType.FIGHTING),
 	resistance = Some(EnergyType.PSYCHIC),
 	retreatCost = 0)
-
-private class Bite extends Move(
-	"Bite",
-	1,
-	Map()) {
-
-  override def perform(owner : Player, opp : Player) = standardAttack(owner, opp, 20)
-
-}

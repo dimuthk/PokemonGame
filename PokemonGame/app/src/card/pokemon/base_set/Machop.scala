@@ -15,16 +15,12 @@ class Machop extends BasicPokemon(
 	Identifier.MACHOP,
 	id = 66,
 	maxHp = 50,
-	firstMove = Some(new LowKick()),
+	firstMove = Some(new Move(
+		"Low Kick",
+		1,
+		Map(EnergyType.FIGHTING -> 1)) {
+			def perform = (owner, opp) => standardAttack(owner, opp, 20)
+		}),
 	energyType = EnergyType.FIGHTING,
 	weakness = Some(EnergyType.PSYCHIC),
 	retreatCost = 1)
-
-private class LowKick extends Move(
-    "Low Kick",
-    1,
-    Map(EnergyType.FIGHTING -> 1)) {
-
-  override def perform(owner : Player, opp : Player) = standardAttack(owner, opp, 20)
-
-}

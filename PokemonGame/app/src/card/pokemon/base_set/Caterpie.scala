@@ -15,15 +15,12 @@ class Caterpie extends BasicPokemon(
 	Identifier.CATERPIE,
 	id = 10,
 	maxHp = 40,
-	firstMove = Some(new StringShot()),
+	firstMove = Some(new Move(
+		"String Shot",
+		1,
+		Map(EnergyType.GRASS -> 1)) {
+			def perform = (owner, opp) => paralyzeChanceAttack(owner, opp, 10)
+		}),
 	energyType = EnergyType.GRASS,
 	weakness = Some(EnergyType.FIRE),
 	retreatCost = 1)
-
-private class StringShot extends Move(
-	"StringShot",
-	1,
-	Map(EnergyType.GRASS -> 1)) {
-
-  override def perform(owner : Player, opp : Player) = paralyzeChanceAttack(owner, opp, 10)
-}

@@ -54,6 +54,6 @@ private class FireSpin extends Move(
     }
   }
 
-  override def perform(owner : Player, opp : Player) =
+  def perform = (owner : Player, opp : Player) =>
       energyDiscardAttack(owner, opp, 100, EnergyType.FIRE, 2)
 }

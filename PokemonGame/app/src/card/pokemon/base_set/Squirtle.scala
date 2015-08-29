@@ -7,6 +7,7 @@ import src.player.Player
 import src.board.move.PreventDamageInterpreter
 import src.card.energy.EnergyType
 import src.card.pokemon._
+import src.card.pokemon.Withdrawable._
 import src.card.Deck
 
 import play.api.Logger
@@ -24,14 +25,10 @@ class Squirtle extends BasicPokemon(
 		Map(EnergyType.WATER -> 1)) {
 			def perform = (owner, opp) => paralyzeChanceAttack(owner, opp, 10)
 	}),
-	secondMove = Some(new Move(
+	secondMove = Some(new Withdraw(
 		"Withdraw",
 		2,
-		Map(EnergyType.WATER -> 1)) {
-			def perform = (owner, opp ) => Withdrawable.tryWithdraw(owner, "Withdraw")
-	}),
+		Map(EnergyType.WATER -> 1)) {}),
 	energyType = EnergyType.WATER,
 	weakness = Some(EnergyType.THUNDER),
-	retreatCost = 1) with Withdrawable {
-	val testFunc = (i : Int) => (j : Int) => 2
-}
+	retreatCost = 1) with Withdrawable

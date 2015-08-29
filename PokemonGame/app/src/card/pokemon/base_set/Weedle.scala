@@ -15,15 +15,12 @@ class Weedle extends BasicPokemon(
 	Identifier.WEEDLE,
 	id = 13,
 	maxHp = 40,
-	firstMove = Some(new PoisonSting2()),
+	firstMove = Some(new Move(
+		"Poison Sting",
+		1,
+		Map(EnergyType.GRASS -> 1)) {
+			def perform = (owner, opp) => poisonChanceAttack(owner, opp, 10)
+		}),
 	energyType = EnergyType.GRASS,
 	weakness = Some(EnergyType.FIRE),
 	retreatCost = 1)
-
-private class PoisonSting2 extends Move(
-	"Poison Sting",
-	1,
-	Map(EnergyType.GRASS -> 1)) {
-
-  override def perform(owner : Player, opp : Player) = poisonChanceAttack(owner, opp, 10)
-}

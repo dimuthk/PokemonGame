@@ -121,6 +121,14 @@ body {
     height: 10%;
 }
 
+.row-1-4 {
+  height: 25%;
+}
+
+.row-4-5 {
+  height: 80%;
+}
+
 .row-1-5 {
   height: 20%;
 }

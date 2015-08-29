@@ -2,7 +2,7 @@ package src.player
 
 import src.card.CardUI
 import src.card.Card
-import src.move.Move
+import src.move._
 import src.card.Placeholder
 import src.card.pokemon.PokemonCard
 import src.json.Identifier
@@ -38,6 +38,11 @@ class Player extends Jsonable {
         bc.get.setUiOrientation(uiSet)
       }
     }
+  }
+
+  def cardWithActivatedPower : Option[PokemonCard] = existingActiveAndBenchCards.find {
+    case ap : ActivePokemonPower => ap.isActive
+    case _ => false
   }
 
   def setUIOrientationForActiveAndBench(uiSet : Set[CardUI.Value]) {

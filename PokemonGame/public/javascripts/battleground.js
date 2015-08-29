@@ -412,7 +412,7 @@ function drawMoveButtons(card, tag) {
           break;
       }
       var disabledStr = (move.MOVE_STATUS == "DISABLED" || move.MOVE_STATUS == "PASSIVE") ? "disabled" : ""
-		  res += "<button class=\"actionButton\" " + disabledStr
+		  res += "<button style=\"width: 100%; left: -15%; top: -20%; position: relative;\" class=\"actionButton\" " + disabledStr
 		    + " onclick=\"useAttack('" + (i+1) + "', '" + tag + "');\">" + name + "</button><br><br>"
     }
   }
@@ -537,11 +537,11 @@ function showPopUpActive(item, tag) {
 	        "<div class=\"row row-1-10\"></div>" +
 	      "</div>" +
 	      "<div class=\"col col-2-5\" style=\"color: white;\">" +
-	        "<div class=\"row row-1-3\" style=\"font-size: 12px;\">" +
-	            "<br><br><br>Current HP: " + item.CURR_HP + "/" + item.MAX_HP + "<br><br>" +
-	            "Status Condition: " + statusConditionTag(item) + "<br><br>" +
-	            "Other Conditions: " + generalConditionTag(item) +
-	        "</div>" +
+            "<div class\"row row-1-3\" style=\"font-size: 12px;\">" +
+	             "<br><br>Current HP: " + item.CURR_HP + "/" + item.MAX_HP + "<br><br>" +
+	             "Status Condition: " + statusConditionTag(item) + "<br><br>" +
+	             "Other Conditions: " + generalConditionTag(item) + "<br><br>" +
+	          "</div>" +
 	        "<div class=\"row row-1-3\">" +
 	            energyDisplayStringForPopup(item) +	            
 	        "</div>" +

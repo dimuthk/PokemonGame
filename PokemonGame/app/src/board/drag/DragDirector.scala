@@ -4,6 +4,7 @@ import src.move.Move
 import src.card.pokemon.PokemonCard
 import src.player.Player
 import src.board.intermediary.IntermediaryRequest
+import play.api.Logger
 
 object DragDirector {
 
@@ -23,6 +24,8 @@ object DragDirector {
 		if (intermediaryReq == None) {
 			val interpreter = selectDragInterpreter(owner, opp)
 			interpreter.handleDrag(owner, dragCmd)
+		} else {
+			Logger.debug("intermediaryReq: " + intermediaryReq)
 		}
 		return intermediaryReq
 	}
@@ -32,8 +35,9 @@ object DragDirector {
 	 */
 	def selectDragInterpreter(owner : Player, opp : Player) : DragInterpreter = {
 		for (pc : PokemonCard <- owner.existingActiveAndBenchCards) {
-			for (m : Move <- pc.getExistingMoves()) {
+			for (m : Move <- pc.existingMoves) {
 				if (m.dragInterpreter.isDefined && m.dragInterpreter.get.isActive) {
+					Logger.debug("Got a custom dragger")
 					return m.dragInterpreter.get
 				}
 			}

@@ -20,7 +20,7 @@ class Bulbasaur extends BasicPokemon(
         2,
         Map(EnergyType.GRASS -> 2)) {
         def perform = (owner, opp) => {
-            if (calculateDmg(owner, opp, 20) > 0) {
+            if (opp.active.get.calculateDmg(owner.active.get, 20) > 0) {
                 owner.active.get.heal(10)
             }
             standardAttack(owner, opp, 20)

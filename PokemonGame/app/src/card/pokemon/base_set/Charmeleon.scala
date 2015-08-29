@@ -15,26 +15,17 @@ class Charmeleon extends StageOnePokemon(
     Identifier.CHARMELEON,
     id = 2,
     maxHp = 80,
-    firstMove = Some(new Slash()),
-    secondMove = Some(new Flamethrower()),
+    firstMove = Some(new Move(
+      "Slash",
+      3) {
+        def perform = (owner, opp) => standardAttack(owner, opp, 30)
+      }),
+    secondMove = Some(new Move(
+      "Flamethrower",
+      3,
+      Map(EnergyType.FIRE -> 2)) {
+        def perform = (owner, opp) => energyDiscardAttack(owner, opp, 50, EnergyType.FIRE)
+      }),
     energyType = EnergyType.FIRE,
     weakness = Some(EnergyType.WATER),
     retreatCost = 1)
-
-private class Slash extends Move(
-  "Slash",
-  3,
-  Map()) {
-
-  override def perform(owner : Player, opp : Player) = standardAttack(owner, opp, 30)
-}
-
-private class Flamethrower extends Move(
-  "Flamethrower",
-  3,
-  Map(EnergyType.FIRE -> 2)) {
-
-  override def perform(owner : Player, opp : Player) =
-      energyDiscardAttack(owner, opp, 50, EnergyType.FIRE)
-}
-

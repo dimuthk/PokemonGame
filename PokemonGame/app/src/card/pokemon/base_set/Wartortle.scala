@@ -8,43 +8,26 @@ import src.board.move.PreventDamageInterpreter
 import src.card.condition.PreventDamageCondition
 import src.card.energy.EnergyType
 import src.card.pokemon._
+import src.card.pokemon.Withdrawable._
 import src.card.Deck
 
-class Wartortle extends StageOnePokemon(
+class Wartortle extends BasicPokemon(
     "Wartortle",
     "Wartortle-Base-Set-42.jpg",
     Deck.BASE_SET,
     Identifier.IVYSAUR,
     id = 8,
     maxHp = 70,
-    firstMove = Some(new WithdrawWortortle()),
-    secondMove = Some(new WartortleBite()),
+    firstMove = Some(new Withdraw(
+    "Withdraw",
+    2,
+    Map(EnergyType.WATER -> 1)) {}),
+    secondMove = Some(new Move(
+      "Bite",
+      3,
+      Map(EnergyType.WATER -> 1)) {
+        def perform = (owner, opp) => standardAttack(owner, opp, 40)
+      }),
     energyType = EnergyType.WATER,
     weakness = Some(EnergyType.THUNDER),
-    retreatCost = 1) {
-
-  override def updateActiveOnTurnSwap(owner : Player, opp : Player) : Unit = {
-      if (owner.isTurn) {
-          owner.active.get.generalCondition = None
-      }
-      super.updateActiveOnTurnSwap(owner, opp)
-    }
-}
-
-private class WithdrawWortortle extends Move(
-  "Withdraw",
-  2,
-  Map(EnergyType.WATER -> 1)) {
-
-  override def perform(owner : Player, opp : Player) = preventDamageChance(owner, "Withdraw")
-}
-
-private class WartortleBite extends Move(
-  "Bite",
-  3,
-  Map(EnergyType.WATER -> 1)) {
-
-  override def perform(owner : Player, opp : Player) = standardAttack(owner, opp, 40)
-
-}
-
+    retreatCost = 1) with Withdrawable

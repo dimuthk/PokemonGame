@@ -1,5 +1,7 @@
 package src.card.pokemon
 
+import src.move.Move
+import src.card.energy.EnergyType
 import src.move.MoveBuilder._
 import play.api.libs.json._
 import src.card.Placeholder
@@ -11,14 +13,20 @@ trait Withdrawable extends PokemonCard {
 
   var withdrawn : Boolean = false
 
-  val testFunc : Int => Int => Int
-
-  override def updateActiveOnTurnSwap(owner : Player, opp : Player) : Unit = {
-      if (owner.isTurn) {
-          owner.active.get.generalCondition = None
-          withdrawn = false
+  override def updateCardOnTurnSwap(owner : Player, opp : Player, isActive : Boolean) : Unit = {
+    isActive match {
+      case true => if (owner.isTurn) {
+        owner.active.get.generalCondition = None
+        withdrawn = false
       }
-      super.updateActiveOnTurnSwap(owner, opp)
+      case false => withdrawn = false
+    }
+    super.updateCardOnTurnSwap(owner, opp, isActive)
+  }
+
+  override def calculateDmg(attacker : PokemonCard, baseDmg : Int) : Int = withdrawn match {
+    case true => 0
+    case false => super.calculateDmg(attacker, baseDmg)
   }
 
   override def takeDamage(amount : Int) : Unit = withdrawn match {
@@ -26,25 +34,28 @@ trait Withdrawable extends PokemonCard {
     case false => super.takeDamage(amount)
   }
 
-  override def updateBenchOnTurnSwap(owner : Player, opp : Player) : Unit = {
-    withdrawn = false
-    super.updateBenchOnTurnSwap(owner, opp)
-  }
-
 }
 
 object Withdrawable {
 
-  def tryWithdraw(owner : Player, condName : String) : Unit = owner.active.get match {
-    case w : Withdrawable => flippedHeads() match {
-      case true => {
-        owner.notify(w.displayName + " successfully performed " + condName + "!")
-        w.withdrawn = true
-        w.generalCondition = Some(condName)
+  class Withdraw(
+    condName : String,
+    totalEnergyReq : Int,
+    specialEnergyReq : Map[EnergyType.Value, Int] = Map()) extends Move(
+      condName,
+      totalEnergyReq,
+      specialEnergyReq) {
+        def perform = (owner, opp) => owner.active.get match {
+          case w : Withdrawable => flippedHeads() match {
+            case true => {
+              owner.notify(w.displayName + " successfully performed " + condName + "!")
+              w.withdrawn = true
+              w.generalCondition = Some(condName)
+            }
+            case false => owner.notify(condName + " failed")
+          }
+          case _ => throw new Exception("Tried to use tryWithdrawable with a non-withdrawable card")
+        }
       }
-      case false => owner.notify(condName + " failed")
-    }
-    case _ => throw new Exception("Tried to use tryWithdrawable with a non-withdrawable card")
-  }
 
 }

@@ -15,8 +15,4 @@ abstract class PokemonPower(
     Map(),
     dragInterpreter,
     moveInterpreter,
-    stateGenerator) {
-
-  val perform = (owner : Player, opp : Player) => ()
-
-}
+    stateGenerator)

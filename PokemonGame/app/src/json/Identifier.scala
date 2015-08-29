@@ -67,6 +67,7 @@ object Identifier extends Enumeration {
   MOVE_NAME,
   MOVE_ENABLED,
   MOVE_STATUS,
+  PASS,
 
   /**
    * STATUS ATTRIBUTES
@@ -95,6 +96,9 @@ object Identifier extends Enumeration {
   WEEDLE,
   KAKUNA,
   BEEDRILL,
+  PIDGEY,
+  PIDGEOTTO,
+  PIDGEOT,
 
   /*
    * GENERAL ATTRIBUTES

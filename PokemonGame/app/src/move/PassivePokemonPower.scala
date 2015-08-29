@@ -1,5 +1,6 @@
 package src.move
 
+import src.card.pokemon.PokemonCard
 import src.board.move.CustomMoveInterpreter
 import src.board.state.CustomStateGenerator
 import src.board.drag.CustomDragInterpreter
@@ -15,6 +16,17 @@ abstract class PassivePokemonPower(
     moveInterpreter,
     stateGenerator) {
 
-  override def perform(owner : Player, opp : Player) : Unit = ()
-  
+  def perform = (owner, opp) => ()
+
+  override def update(
+  	owner : Player,
+  	opp : Player,
+  	pc : PokemonCard,
+  	turnSwapped : Boolean,
+  	isActive : Boolean) : Unit =
+    	status = (pc.statusCondition) match {
+      		case Some(_) => Status.DISABLED
+      		case _ => Status.PASSIVE
+  		}
+
 }

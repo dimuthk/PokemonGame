@@ -19,57 +19,40 @@ class Blastoise extends StageTwoPokemon(
     Identifier.BLASTOISE,
     id = 9,
     maxHp = 100,
-    firstMove = Some(new RainDance()),
-    secondMove = Some(new HydroPump()),
+    firstMove = Some(new ActivePokemonPower(
+      "Rain Dance",
+      dragInterpreter = Some(new RainDanceDrag())) {}),
+    secondMove = Some(new Move(
+      "Hydro Pump",
+      3,
+      Map(EnergyType.WATER -> 3)) {
+        def perform = (owner, opp) => standardAttackPlusExtra(owner, opp, 40, EnergyType.WATER, 3)
+      }),
     energyType = EnergyType.WATER,
     weakness = Some(EnergyType.THUNDER),
     retreatCost = 3)
 
-private class RainDance extends ActivePokemonPower(
-  "Rain Dance",
-  dragInterpreter = Some(new RainDanceDrag()))
-
-
-private class HydroPump extends Move(
-  "HydroPump",
-  3,
-  Map(EnergyType.WATER -> 3)) {
-
-  override def perform(owner : Player, opp : Player)
-      = standardAttackPlusExtra(owner, opp, 40, EnergyType.WATER, 3)
-}
-
 
 private class RainDanceDrag extends CustomDragInterpreter {
 
-  override def benchToBench(p : Player, benchIndex1 : Int, benchIndex2 : Int) : Unit = ()
-
-  override def benchToActive(p : Player, benchIndex : Int) : Unit = ()
-
-  override def activeToBench(p : Player, benchIndex : Int) : Unit = ()
-
-  override def handToActive(p : Player, handIndex : Int) : Unit = {
-    if (p.active.isDefined) {
-      attachWaterEnergy(p, p.active.get, handIndex)
-    }
+  override def handToActive(p : Player, handIndex : Int) : Unit = p.active match {
+    case Some(pc) => attachWaterEnergy(p, pc, handIndex)
+    case None => ()
   }
 
-  override def handToBench(p : Player, handIndex : Int, benchIndex : Int) : Unit = {
-    if (p.bench(benchIndex).isDefined) {
-      attachWaterEnergy(p, p.bench(benchIndex).get, handIndex)
-    }
+  override def handToBench(p : Player, handIndex : Int, benchIndex : Int) : Unit = p.bench(benchIndex) match {
+    case Some(pc) => attachWaterEnergy(p, p.bench(benchIndex).get, handIndex)
+    case None => ()
   }
 
-  private def attachWaterEnergy(p : Player, pc : PokemonCard, handIndex : Int) {
-    p.hand(handIndex) match {
-      case ec : EnergyCard => {
-        if (ec.eType == EnergyType.WATER) {
-          pc.energyCards = pc.energyCards ++ List(ec)
-          p.removeCardFromHand(handIndex)
-        }
+  private def attachWaterEnergy(p : Player, pc : PokemonCard, handIndex : Int) : Unit = p.hand(handIndex) match {
+    case ec : EnergyCard => {
+      if (ec.eType == EnergyType.WATER) {
+        pc.energyCards = pc.energyCards ++ List(ec)
+        p.removeCardFromHand(handIndex)
       }
-      case _ => ()
     }
+    case _ => ()
   }
 
 }

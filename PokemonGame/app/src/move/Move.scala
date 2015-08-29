@@ -1,5 +1,6 @@
 package src.move
 
+import src.card.pokemon.PokemonCard
 import play.api.libs.json._
 import src.board.move.MoveCommand
 import src.board.intermediary.IntermediaryRequest
@@ -23,7 +24,7 @@ import play.api.Logger
 abstract class Move(
 	val name : String,
 	val totalEnergyReq : Int,
-	val specialEnergyReq : Map[EnergyType.Value, Int],
+	val specialEnergyReq : Map[EnergyType.Value, Int] = Map(),
   val dragInterpreter : Option[CustomDragInterpreter] = None,
   val moveInterpreter : Option[CustomMoveInterpreter] = None,
   val stateGenerator : Option[CustomStateGenerator] = None) extends Jsonable {
@@ -52,7 +53,18 @@ abstract class Move(
     	return true
   }
   
-  //def perform(owner : Player, opp : Player) : Unit
+  def update(owner : Player, opp : Player, pc : PokemonCard, turnSwapped : Boolean, isActive : Boolean) : Unit =
+      // Status is enabled iff it's your turn, this card is in the active slot,
+      // the card has enough energy to perform the move, and you don't currently
+      // have an activated power on the board.
+      status = (
+        owner.isTurn,
+        isActive,
+        hasEnoughEnergy(owner, pc.energyCards),
+        owner.cardWithActivatedPower == None) match {
+        case (true, true, true, true) =>  Status.ENABLED
+        case _ => Status.DISABLED
+      }
 
   def perform : (Player, Player) => Unit
 

@@ -20,6 +20,7 @@ abstract class MoveInterpreter {
         case AttackFromActive(moveNum : Int) => moveNum match {
             case 1 => attack(owner, opp, owner.active.get.firstMove.get)
             case 2 => attack(owner, opp, owner.active.get.secondMove.get)
+            case 3 => attack(owner, opp, owner.active.get.pass)
             case _ => throw new Exception("Invalid move number")
         }
         case AttackFromBench(benchIndex : Int, moveNum : Int) => (owner.bench(benchIndex).get, moveNum) match {

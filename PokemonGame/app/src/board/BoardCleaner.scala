@@ -28,14 +28,13 @@ object BoardCleaner {
 
   def updateCards(owner : Player, opp : Player) {
     if (owner.active.isDefined) {
-      owner.active.get.updateActiveOnTurnSwap(owner, opp)
+      owner.active.get.updateCardOnTurnSwap(owner, opp, true)
     }
-    
     if (opp.active.isDefined) {
-      opp.active.get.updateActiveOnTurnSwap(opp, owner)
+      opp.active.get.updateCardOnTurnSwap(opp, owner, true)
     }
     for (pc : PokemonCard <- (owner.bench.toList.flatten ++ opp.bench.toList.flatten)) {
-      pc.updateBenchOnTurnSwap(opp, owner)
+      pc.updateCardOnTurnSwap(opp, owner, false)
     }
   }
 
@@ -44,85 +43,27 @@ object BoardCleaner {
    * the player whose turn just ended.
    */
   private def updateBoardOnTurnSwap(owner : Player, opp : Player) {
-    updateMoveStatuses(opp, owner)
+    updateMoveStatuses(opp, owner, true)
   }
 
   private def updateBoardOnSameTurn(owner : Player, opp : Player) {
-    updateMoveStatuses(owner, opp)
+    updateMoveStatuses(owner, opp, false)
   }
 
-  private def updateBenchCardMoves(curr : Player, next : Player) {
-    for (bc : PokemonCard <- curr.bench.toList.flatten) {
-      bc.getExistingMoves().foreach {
-        case ap : ActivePokemonPower => handleActivePowerStatus(curr, bc, ap)
-        case pp : PassivePokemonPower => handlePassivePowerStatus(bc, pp)
-        case m : Move => m.status = Status.DISABLED
-      }
-    }
-    for (bc : PokemonCard <- next.bench.toList.flatten) {
-      bc.getExistingMoves().foreach {
-        case pp : PassivePokemonPower => handlePassivePowerStatus(bc, pp)
-        case m : Move => m.status = Status.DISABLED
-      }
-    }
-  }
 
-  private def handleActivePowerStatus(p : Player, pc : PokemonCard, ap : ActivePokemonPower) {
-    if (!pc.statusCondition.isEmpty) {
-      ap.status = Status.DISABLED
-    } else {
-      val activatedCard : Option[PokemonCard] = cardWithActivatedPower(p)
-      if (activatedCard.isDefined && activatedCard.get != pc) {
-        ap.status = Status.DISABLED
-      } else {
-        ap.status = if (ap.isActive) Status.ACTIVATED else Status.ACTIVATABLE
-      }
-    }
-  }
-
-  private def handlePassivePowerStatus(pc : PokemonCard, pp : PassivePokemonPower) {
-    if (!pc.statusCondition.isEmpty) {
-      pp.status = Status.DISABLED
-    } else {
-      pp.status = Status.PASSIVE
-    }
-  }
-
-  private def cardWithActivatedPower(p : Player) : Option[PokemonCard] = {
-    for (pc : PokemonCard <- p.existingActiveAndBenchCards) {
-      if (pc.getExistingMoves().exists {
-        case ap : ActivePokemonPower => ap.isActive
-        case _ => false }) {
-        return Some(pc)
-      }
-    }
-    return None
-  }
-
-  private def updateActiveCardMoves(curr : Player, next : Player) {
+	private def updateMoveStatuses(curr : Player, next : Player, turnSwapped : Boolean) {
     if (curr.active.isDefined) {
-      val active = curr.active.get
-      active.getExistingMoves().foreach {
-        case ap : ActivePokemonPower => handleActivePowerStatus(curr, active, ap)
-        case pp : PassivePokemonPower => handlePassivePowerStatus(active, pp)
-        case m : Move => cardWithActivatedPower(curr) match {
-          case Some(_) => m.status = Status.DISABLED
-          case None => m.status = if (m.hasEnoughEnergy(curr, active.energyCards)) Status.ENABLED else Status.DISABLED
-        }
-      }
+      curr.active.get.updateMoves(curr, next, turnSwapped, true)
     }
     if (next.active.isDefined) {
-      val active = next.active.get
-      active.getExistingMoves().foreach {
-        case pp : PassivePokemonPower => handlePassivePowerStatus(active, pp)
-        case m : Move => m.status = Status.DISABLED
-      }
+      next.active.get.updateMoves(next, curr, turnSwapped, true)
     }
-  }
-
-	private def updateMoveStatuses(curr : Player, next : Player) {
-    updateActiveCardMoves(curr, next)
-    updateBenchCardMoves(curr, next)
+    for (pc : PokemonCard <- curr.bench.toList.flatten) {
+      pc.updateMoves(curr, next, turnSwapped, false)
+    }
+    for (pc : PokemonCard <- next.bench.toList.flatten) {
+      pc.updateMoves(next, curr, turnSwapped, false)
+    }
   }
 
 }
