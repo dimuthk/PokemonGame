@@ -4,7 +4,6 @@ import src.card.Deck
 import src.card.pokemon._
 import src.json.Identifier
 import src.move._
-import src.card.pokemon.MirrorMoveable._
 import src.move.MoveBuilder._
 import src.move.ActivePokemonPower
 import src.board.drag.CustomDragInterpreter
@@ -22,10 +21,12 @@ class Pidgeotto extends StageOnePokemon(
     maxHp = 60,
     firstMove = Some(new Whirlwind(
         "Whirlwind",
-        2,
-        20) {}),
+        ownerChooses = false,
+        moveNum = 1,
+        dmg = 20,
+        totalEnergyReq = 2)),
     secondMove = Some(new MirrorMove(
-        3) {}),
+        3)),
     energyType = EnergyType.COLORLESS,
     weakness = Some(EnergyType.THUNDER),
     resistance = Some(EnergyType.FIGHTING),

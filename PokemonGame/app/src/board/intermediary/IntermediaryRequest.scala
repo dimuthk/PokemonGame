@@ -4,6 +4,7 @@ import src.player.Player
 import src.json.Jsonable
 import src.json.Identifier
 import src.card.Card
+import src.card.pokemon.PokemonCard
 import actors.PlayerActor
 import akka.actor._
 import akka.actor.ActorRef
@@ -26,7 +27,7 @@ import play.api.libs.json._
 abstract class IntermediaryRequest(
 	val requestTitle : String,
 	val requestMsg : String,
-	val serverTag : String,
+	var serverTag : String,
 	val p : Player) extends Jsonable {
 
 	override def toJsonImpl() = Json.obj(
@@ -35,9 +36,26 @@ abstract class IntermediaryRequest(
 		Identifier.REQUEST_MSG.toString -> requestMsg)
 }
 
+object IntermediaryRequest {
+
+	def getRealIndexFor(flatIndex : Int, bench : Seq[Option[PokemonCard]]) : Int = {
+        var matcher : Int = -1
+        for (realIndex : Int <- 0 until 5) {
+            if (bench(realIndex).isDefined) {
+                matcher = matcher + 1
+            }
+            if (matcher == flatIndex) {
+                return realIndex
+            }
+        }
+        throw new Exception("Did not get matching index for flattened index")
+    }
+
+}
+
 /**
  * Generates a list of clickable cards to the user, where the user must click on a
- * preset number of cards and then submit the response.
+ * preset number of cards and then submit the response. This message should NOT be exitable.
  */
 abstract class ClickableCardRequest(
 	requestTitle : String,
@@ -52,5 +70,33 @@ abstract class ClickableCardRequest(
 	override def toJsonImpl() = super.toJsonImpl() ++ Json.obj(
 		Identifier.CLICK_COUNT.toString -> clickCount,
 		Identifier.CARD_LIST.toString -> cardListToJsArray(cardList))
+
+}
+
+/**
+ * Same as ClickableCardRequest, but only certain cards are clickable.
+ * TODO: This request needs to be exitable, since it's possible you have no matches.
+ */
+abstract class SpecificClickableCardRequest(
+	requestTitle : String,
+	requestMsg : String,
+	serverTag : String,
+	p : Player,
+	val clickCount : Int,
+	val cardList : Seq[Card]) extends IntermediaryRequest(requestTitle, requestMsg, serverTag, p) {
+
+	override def getIdentifier() = Identifier.SPECIFIC_CLICK_CARD_REQUEST
+
+	override def toJsonImpl() = super.toJsonImpl() ++ Json.obj(
+		Identifier.MATCHER.toString -> selectersToJsArray(cardList),
+		Identifier.CLICK_COUNT.toString -> clickCount,
+		Identifier.CARD_LIST.toString -> cardListToJsArray(cardList))
+
+	def isSelectable : Card => Boolean
+
+	def selectersToJsArray(list : Seq[Card]) : JsArray = {
+    	return list.foldRight(new JsArray())((c, curr) => curr.prepend(JsBoolean(isSelectable(c))))
+  	}
+
 
 }

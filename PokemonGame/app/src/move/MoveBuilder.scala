@@ -48,7 +48,7 @@ object MoveBuilder {
   /**
    * Does standard damage along with inflicting poison status.
    */
-  def poisonAttack(owner : Player, opp : Player, baseDmg : Int) : Unit = {
+  def poisonAttack(owner : Player, opp : Player, baseDmg : Int = 0) : Unit = {
     standardAttack(owner, opp, baseDmg)
     opp.active.get.poisonStatus = Some(PoisonStatus.POISONED)
   }
@@ -56,6 +56,46 @@ object MoveBuilder {
   def multipleHitAttack(owner : Player, opp : Player, baseDmg : Int, flips : Int) : Unit = {
     for (_ <- 0 until flips) {
       standardAttack(owner, opp, baseDmg)
+    }
+  }
+
+  def energyDrainAttack(owner : Player, opp : Player, baseDmg : Int) : Unit = {
+    owner.active.get.heal(opp.active.get.calculateDmg(owner.active.get, baseDmg))
+    standardAttack(owner, opp, baseDmg)
+  }
+
+  def extraDamageOrHurtSelf(owner : Player, opp : Player, baseDmg : Int, extraDmg : Int) : Unit = {
+    standardAttack(owner, opp, baseDmg)
+    flippedHeads() match {
+      case true => standardAttack(owner, opp, extraDmg)
+      case false => owner.active.get.takeDamage(extraDmg)
+    }
+  }
+
+  def selfDamageChanceAttack(owner : Player, opp : Player, baseDmg : Int, selfDmg : Int) : Unit = {
+    if (flippedHeads()) {
+      owner.active.get.takeDamage(selfDmg)
+      owner.notify(owner.active.get.displayName + " hurt itself while attacking!")
+    }
+    standardAttack(owner, opp, baseDmg)
+  }
+
+  def sleepAttack(owner : Player, opp : Player, baseDmg : Int = 0) : Unit = {
+    standardAttack(owner, opp, baseDmg)
+    opp.active.get.statusCondition = Some(StatusCondition.ASLEEP)
+  }
+
+  def confuseAttack(owner : Player, opp : Player, baseDmg : Int) : Unit = {
+    standardAttack(owner, opp, baseDmg)
+    owner.active.get.statusCondition = Some(StatusCondition.CONFUSED)
+    opp.notify(opp.active.get.displayName + " is confused!")
+  }
+
+  def confuseChanceAttack(owner : Player, opp : Player, baseDmg : Int = 0) : Unit = {
+    standardAttack(owner, opp, baseDmg)
+    if (flippedHeads()) {
+      owner.active.get.statusCondition = Some(StatusCondition.CONFUSED)
+      opp.notify(opp.active.get.displayName + " is confused!")
     }
   }
 

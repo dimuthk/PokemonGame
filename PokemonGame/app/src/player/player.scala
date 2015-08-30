@@ -45,9 +45,15 @@ class Player extends Jsonable {
 
   def bench = _bench
 
+  def benchIsFull = _bench.length == _bench.toList.flatten.length
+
   val prizes : Array[Option[Card]] = Array.fill(6) { None }
 
   private var _active : Option[PokemonCard] = None
+
+  def setActive(pc : PokemonCard) {
+    _active = Some(pc)
+  }
 
   def active = _active
 
@@ -59,20 +65,22 @@ class Player extends Jsonable {
 
   def ownsMove(m : Move) : Boolean = existingActiveAndBenchCards.filter(_.ownsMove(m)).length > 0
 
-  def existingActiveAndBenchCards : Seq[PokemonCard] = return (bench.toList ++ List(active)).flatten
+  def existingActiveAndBenchCards : Seq[PokemonCard] = return (List(active) ++ bench.toList).flatten
 
   def moveActiveToHand() {
-    if (active.isDefined && !active.get.stuck) {
+    if (active.isDefined && !active.get.agility) {
       _hand = _hand ++ active.get.pickUp()
+      _active = None
     }
   }
 
   def swapActiveAndBench(benchIndex : Int) {
-    if (_active.isDefined && !_active.get.stuck) {
-      val tmp = _active
-      _active = _bench(benchIndex)
-      _bench(benchIndex) = tmp
+    if (_active.isDefined && _active.get.agility) {
+      return
     }
+    val tmp = _active
+    _active = _bench(benchIndex)
+    _bench(benchIndex) = tmp
   }
 
   def swapBenchCards(benchIndex1 : Int, benchIndex2 : Int) {
@@ -105,6 +113,18 @@ class Player extends Jsonable {
       }
       case _ => ()
     }
+  }
+
+  def moveDeckToBench(deckIndex : Int, benchIndex : Int) : Unit = _deck(deckIndex) match {
+    case pc : PokemonCard => {
+      _bench(benchIndex) = Some(pc)
+      removeCardFromDeck(deckIndex)
+    }
+    case _ => throw new Exception("Tried to move a non-pokemon card from deck to bench")
+  }
+
+  def removeCardFromDeck(deckIndex : Int) {
+    _deck = _deck.slice(0, deckIndex) ++ _deck.slice(deckIndex + 1, _deck.size)
   }
 
   def moveHandToActive(handIndex : Int) {

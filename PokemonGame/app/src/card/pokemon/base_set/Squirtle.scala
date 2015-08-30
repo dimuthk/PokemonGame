@@ -6,7 +6,6 @@ import src.move.MoveBuilder._
 import src.player.Player
 import src.card.energy.EnergyType
 import src.card.pokemon._
-import src.card.pokemon.Withdrawable._
 import src.card.Deck
 
 import play.api.Logger
@@ -30,4 +29,4 @@ class Squirtle extends BasicPokemon(
 		Map(EnergyType.WATER -> 1)) {}),
 	energyType = EnergyType.WATER,
 	weakness = Some(EnergyType.THUNDER),
-	retreatCost = 1) with Withdrawable
+	retreatCost = 1)

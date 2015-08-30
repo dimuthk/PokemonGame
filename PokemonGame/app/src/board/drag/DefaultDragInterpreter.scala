@@ -90,7 +90,7 @@ object DefaultDragInterpreter extends DragInterpreter {
 
     private def chargeRetreat(p : Player, benchIndex : Int) : Boolean = {
       val active = p.active.get
-      if (active.getTotalEnergy() > active.retreatCost) {
+      if (active.getTotalEnergy() >= active.retreatCost) {
         active.energyCards = active.energyCards.dropRight(active.retreatCost)
         return true
       } else {

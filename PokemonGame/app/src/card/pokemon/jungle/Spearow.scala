@@ -1,9 +1,9 @@
 package src.card.pokemon.base_set
 
 import src.json.Identifier
-import src.move.Move
+import src.move._
+import src.card.pokemon.MirrorMoveable
 import src.move.MoveBuilder._
-import src.card.pokemon.MirrorMoveable._
 import src.player.Player
 import src.card.energy.EnergyType
 import src.card.pokemon._

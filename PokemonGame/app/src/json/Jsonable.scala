@@ -20,6 +20,10 @@ trait Jsonable {
     return list.foldRight(new JsArray())((c, curr) => curr.prepend(c.toJson))
   }
 
+  def identifiersToJsArray(list : Set[Identifier.Value]) : JsArray = {
+    return list.foldRight(new JsArray())((i, curr) => curr.prepend(JsString(i.toString)))
+  }
+
   def optionCardListToJsArray[T <: Card : ClassTag](list : Seq[Option[T]]) : JsArray = {
     return list.foldRight(new JsArray())((c, curr) => curr.prepend(optionCardToJson(c)))
   }

@@ -27,7 +27,14 @@ function establishConnection() {
 
 function processIntermediary(data) {
   if (!isPlaceholder(data.intermediary)) {
-    showClickableCardRequest(data.intermediary)
+    switch (data.intermediary.IDENTIFIER) {
+      case "CLICK_CARD_REQUEST":
+        showClickableCardRequest(data.intermediary)
+        break;
+      case "SPECIFIC_CLICK_CARD_REQUEST":
+        showSpecificClickableCardRequest(data.intermediary)
+        break;
+    }
   }
 }
 
@@ -437,14 +444,12 @@ function generalConditionTag(item) {
   }
 }
 
-function generateCardList(intermediary) {
+function generateCardList(intermediary, forceCardUp) {
   var cardList = ""
   for (var i=0; i<intermediary.CARD_LIST.length; i++) {
     var card = intermediary.CARD_LIST[i]
-    cardList += intermediaryCardHolder.replace("[IMG_NAME]", card.FACE_UP ? card.IMG_NAME : cardBackImg)
+    cardList += intermediaryCardHolder.replace("[IMG_NAME]", (card.FACE_UP || forceCardUp) ? card.IMG_NAME : cardBackImg)
          .replace("[ID]", "\"intermediary" + i + "\"")
-
-    
   }
   return cardList
 }
@@ -484,6 +489,55 @@ function sendClickIntermediary() {
   $("#content").data("socket").send(tag)
   $(".popUp").dialog("close")
 }
+
+function contains(matcher, value) {
+  for (var i=0; i<matcher.length; i++) {
+    if (matcher[i] == value) {
+      return true
+    }
+  }
+  return false
+}
+
+function showSpecificClickableCardRequest(intermediary) {
+    var popUp = "<div style=\"background-color: #888888;\" class=\"popUp\">" +
+          "<div class=\"row row-1-5\">" +
+            "<div style=\"text-align: center; top: 10%; position: relative; font-size:15px; color: white;\">" + intermediary.REQUEST_MSG + "</div>" +
+          "</div>" +
+          "<div class=\"row row-3-5\">" +
+            "<div class=\"col col-1-10\"></div>" +
+            "<div class=\"col col-8-10\" id=\"intermediaryPanel\" style=\" background-color: #484848; border-radius: 10px; overflow-y: hidden; white-space: nowrap; overflow-x : scroll;\">" +
+              generateCardList(intermediary, true) +
+            "</div>" +
+            "<div class=\"col col-1-10\"></div>" +
+          "</div>" +
+          "<div class=\"row row-1-5\">" +
+            "<div class=\"col col-1-3\"></div>" +
+            "<div class=\"col col-1-3\">" +
+            "<button class=\"actionButton submitIntermediary\" onclick=sendClickIntermediary() disabled  style=\"top: 20%; width: 100%; position: relative;\">Submit</button>" +
+            "</div>" +
+            "<div class=\"col col-1-3\"></div>" +
+          "</div>" +
+      "</div>"
+    $(popUp).dialog({
+      modal: true,
+        height: 400,
+        width: 800,
+        title: intermediary.REQUEST_TITLE
+    })
+    $("#intermediaryPanel").data("clickCount", 0)
+    $("#intermediaryPanel").data("intermediary", intermediary)
+    $("#intermediaryPanel").data("numCards", intermediary.CARD_LIST.length)
+
+    for (var i=0; i<intermediary.CARD_LIST.length; i++) {
+      $("#intermediary" + i).unbind('click')
+      if (intermediary.MATCHER[i] == true) {
+        $("#intermediary" + i).click(function() {
+          handleClickable(this)
+        })
+      }
+    }
+  }
 
 function showClickableCardRequest(intermediary) {
   var popUp = "<div style=\"background-color: #888888;\" class=\"popUp\">" +

@@ -1,8 +1,7 @@
 package src.card.pokemon.base_set
 
 import src.json.Identifier
-import src.move.Move
-import src.card.pokemon.Withdrawable._
+import src.move._
 import src.move.MoveBuilder._
 import src.player.Player
 import src.card.energy.EnergyType
@@ -18,7 +17,7 @@ class Kakuna extends StageOnePokemon(
 	maxHp = 80,
 	firstMove = Some(new Withdraw(
 		"Stiffen",
-		2) {}),
+		2)),
 	energyType = EnergyType.GRASS,
 	weakness = Some(EnergyType.FIRE),
-	retreatCost = 2) with Withdrawable
+	retreatCost = 2)

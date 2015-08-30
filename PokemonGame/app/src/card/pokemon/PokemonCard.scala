@@ -80,7 +80,29 @@ abstract class PokemonCard(
   /**
    * Flag marking that this card cannot be moved from its current spot.
    */
-  def stuck : Boolean = false
+  //var stuck : Boolean = false
+
+  /**
+   * 50% chance the move will work.
+   */
+  var smokescreen : Boolean = false
+
+  /**
+   * Damage, but nothing else, is prevented on this card the following turn.
+   */
+   var withdrawn : Boolean = false
+
+   /**
+    * Damage, status conditions, and forced moves are prevented on this card
+    * the following turn.
+    */
+   var agility : Boolean = false
+
+   /**
+    * Tracker for the last effect made on this pokemon. Used for mirror move
+    */
+   var lastAttack : Int = -1
+
 
   def ownsMove(m : Move) : Boolean = existingMoves.filter(_ == m).length > 0
 
@@ -96,8 +118,8 @@ abstract class PokemonCard(
   }
 
   def pickUp() : Seq[Card] = {
-    if (stuck) {
-      throw new Exception("Tried to pick up card when it was stuck")
+    if (agility) {
+      throw new Exception("Tried to pick up card when agility was activated")
     }
     _currHp = maxHp
     poisonStatus = None
@@ -106,6 +128,9 @@ abstract class PokemonCard(
     energyCards = Nil
     res = res ++ preEvolutions(this)
     preEvolution = None
+    lastAttack = -1
+    smokescreen = false
+    withdrawn = false
     return List(this) ++ res
   }
 
@@ -132,16 +157,42 @@ abstract class PokemonCard(
   def updateMoves(owner : Player, opp : Player, turnSwapped : Boolean, isActive : Boolean) : Unit
     = (existingMoves ++ List(pass)).foreach(_.update(owner, opp, this, turnSwapped, isActive))
 
-  def updateCardOnTurnSwap(owner : Player, opp : Player, isActive : Boolean) : Unit = isActive match {
-    case true => ()
+  def updateCardOnTurnSwap(owner : Player, opp : Player, isActive : Boolean) : Unit = { isActive match {
+    case true => {
+      if (owner.isTurn) {
+        withdrawn = false
+        agility = false
+      } else {
+        smokescreen = false
+        lastAttack = -1
+      }
+    }
     case false => {
+      lastAttack = -1
       statusCondition = None
       poisonStatus = None
-      generalCondition = None
+      withdrawn = false
+      agility = false
+      smokescreen = false
     }
+    }
+    var cond =""
+    if (withdrawn) {
+      cond = cond + "Withdrawn"
+    }
+    if (smokescreen) {
+      cond = cond + "Smokescreen"
+    }
+    if (agility) {
+      cond = cond + "Agility"
+    }
+    generalCondition = Some(cond)
   }
 
   def calculateDmg(attacker : PokemonCard, dmg : Int) : Int = {
+    if (withdrawn || agility) {
+      return 0
+    }
     var modifiedDmg = dmg
     
     // Resistance / weakness modifier
@@ -156,9 +207,12 @@ abstract class PokemonCard(
     return math.max(modifiedDmg, 0)
   }
 
-	def takeDamage(amount : Int) : Unit = (amount <= 0) match {
-    case true => ()
-    case false => _currHp = math.max(_currHp - amount, 0)
+	def takeDamage(amount : Int) : Unit = {
+    if (withdrawn || agility) {
+      return
+    }
+    lastAttack = amount
+    _currHp = math.max(_currHp - amount, 0)
   }
 
   def heal(amount : Int) : Unit = (amount <= 0) match {

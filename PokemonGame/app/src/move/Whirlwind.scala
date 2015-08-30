@@ -16,30 +16,37 @@ import src.json.Jsonable
 import src.player.Player
 
 
-abstract class Whirlwind(
+class Whirlwind(
 	name : String,
-	totalEnergyReq : Int,
+    val ownerChooses : Boolean,
+    val moveNum : Int,
 	val dmg : Int,
-	specialEnergyReq : Map[EnergyType.Value, Int] = Map()) extends Move(
+    totalEnergyReq : Int,
+	specialEnergyReq : Map[EnergyType.Value, Int] = Map(),
+    val onFlip : Boolean = false) extends Move(
     	name,
     	totalEnergyReq,
     	specialEnergyReq) {
 
     class NextActiveSpecification(
         p : Player,
-        user : PokemonCard,
+        userName : String,
         benchCards : Seq[PokemonCard]) extends ClickableCardRequest(
         "Choose Active Pokemon",
-        user.displayName + " is whisking you away! Select a new active pokemon",
-        "FLIP<>MOVE<>ATTACK_FROM_ACTIVE<>1<>",
+        userName + " is whisking you away! Select a new active pokemon",
+        (if (ownerChooses) "" else "FLIP<>") + "MOVE<>ATTACK_FROM_ACTIVE<>" + moveNum + "<>",
         p,
         1,
         benchCards)
 
     override def additionalRequest(owner : Player, opp : Player, args : Seq[String]) : Option[IntermediaryRequest] = {
+        if (onFlip && !flippedHeads()) {
+            return None
+        }
         val benchCards = opp.bench.toList.flatten
-        if (benchCards.length > 1 && args.length == 0) {
-            return Some(new NextActiveSpecification(opp, owner.active.get, benchCards))
+        if (benchCards.length > 1 && args.length == 0) return ownerChooses match {
+            case true => Some(new NextActiveSpecification(owner, owner.active.get.displayName, benchCards))
+            case false => Some(new NextActiveSpecification(opp, owner.active.get.displayName, benchCards))
         }
         return None
     }

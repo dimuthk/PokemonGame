@@ -1,5 +1,6 @@
 package src.board.move
 
+import src.move.MoveBuilder._
 import src.board.intermediary.IntermediaryRequest
 import src.board.move.DefaultMoveInterpreter
 import src.card.Card
@@ -9,6 +10,7 @@ import src.card.energy.EnergyCard
 import src.card.pokemon.PokemonCard
 import src.board.drag._
 import src.player.Player
+import play.api.Logger
 
 object DefaultMoveInterpreter extends MoveInterpreter {
 
@@ -22,16 +24,27 @@ object DefaultMoveInterpreter extends MoveInterpreter {
           => owner.bench(i).get.getMove(moveNum).get.additionalRequest(owner, opp, args)
     }
 
-    def attack(owner : Player, opp : Player, move : Move, additional : Seq[String]) : Unit = {
+    def attackFromActive(owner : Player, opp : Player, move : Move, additional : Seq[String]) : Unit = move match {
+      case power : PokemonPower => performMove(owner, opp, power, additional)
+      case _ => {
+        if (!owner.active.get.smokescreen || flippedHeads()) {
+          performMove(owner, opp, move, additional)
+        }
+        flipTurn(owner, opp)
+      }
+    }
+
+    private def performMove(owner : Player, opp : Player, move : Move, additional : Seq[String]) {
       if (additional.length == 0) {
         move.perform(owner, opp)
-        } else {
-          move.performWithAdditional(owner, opp, additional)
-        }
-      move match {
-        case power : PokemonPower => ()
-        case _ => flipTurn(owner, opp)
+      } else {
+        move.performWithAdditional(owner, opp, additional)
       }
+    }
+
+    def attackFromBench(owner : Player, opp : Player, move : Move, additional : Seq[String]) : Unit = move match {
+      case power : PokemonPower => performMove(owner, opp, move, additional)
+      case _ => throw new Exception("Non pokemon power move called from bench!")
     }
 
 }

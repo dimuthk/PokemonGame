@@ -16,6 +16,7 @@ import src.card.energy._
 import src.card.pokemon._
 import src.card.pokemon.base_set._
 import src.card.pokemon.jungle._
+import src.card.pokemon.fossil._
 import src.move.Move
 import src.move.PokemonPower
 import src.move.Status
@@ -76,12 +77,12 @@ object Board {
 
     def populateMachop : Unit = {
       if (id == 1) {
-        p.setDeck(List.fill(20)(new GrassEnergy()) ++ List.fill(20)(new Venusaur()))
+        p.setDeck(List.fill(20)(new ThunderEnergy()))
         p.shuffleDeck()
-        p.active = Some(new Wartortle())
+        p.setActive(new Spearow())
         p.isTurn = false
       } else {
-        p.setDeck(List.fill(20)(new Rattata()) ++ List.fill(20)(new Raticate()) ++ List.fill(20)(new FireEnergy()))
+        p.setDeck(List.fill(20)(new Vileplume()) ++ List.fill(20)(new GrassEnergy()))
         p.shuffleDeck()
         p.isTurn = true
       }

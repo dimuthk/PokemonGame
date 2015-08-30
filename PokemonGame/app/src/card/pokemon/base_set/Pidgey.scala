@@ -21,8 +21,10 @@ class Pidgey extends BasicPokemon(
     maxHp = 40,
     firstMove = Some(new Whirlwind(
         "Whirlwind",
-        2,
-        10) {}),
+        ownerChooses = false,
+        moveNum = 1,
+        dmg = 10,
+        totalEnergyReq = 2)),
     energyType = EnergyType.COLORLESS,
     weakness = Some(EnergyType.THUNDER),
     resistance = Some(EnergyType.FIGHTING),

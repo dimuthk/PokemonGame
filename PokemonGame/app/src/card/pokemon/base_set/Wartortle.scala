@@ -1,13 +1,12 @@
 package src.card.pokemon.base_set
 
 import src.json.Identifier
-import src.move.Move
+import src.move._
 import src.move.MoveBuilder._
 import src.player.Player
 import src.card.condition.PreventDamageCondition
 import src.card.energy.EnergyType
 import src.card.pokemon._
-import src.card.pokemon.Withdrawable._
 import src.card.Deck
 
 class Wartortle extends BasicPokemon(
@@ -29,4 +28,4 @@ class Wartortle extends BasicPokemon(
       }),
     energyType = EnergyType.WATER,
     weakness = Some(EnergyType.THUNDER),
-    retreatCost = 1) with Withdrawable
+    retreatCost = 1)

@@ -24,8 +24,10 @@ class Butterfree extends BasicPokemon(
     maxHp = 70,
     firstMove = Some(new Whirlwind(
         "Whirlwind",
-        2,
-        20) {}),
+        ownerChooses = false,
+        moveNum = 1,
+        dmg = 20,
+        totalEnergyReq = 2)),
     secondMove = Some(new Move(
       "Mega Drain",
       4,
