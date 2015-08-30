@@ -99,6 +99,9 @@ object Identifier extends Enumeration {
   PIDGEY,
   PIDGEOTTO,
   PIDGEOT,
+  RATICATE,
+  SPEAROW,
+  FEAROW,
 
   /*
    * GENERAL ATTRIBUTES

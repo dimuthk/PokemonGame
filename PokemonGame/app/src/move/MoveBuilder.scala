@@ -18,7 +18,7 @@ object MoveBuilder {
 
   def roundUp(num : Int) : Int = num % 10 match {
     case 0 => num
-    case _ => num + 10
+    case x => num + (10 - x)
   }
   
   /**

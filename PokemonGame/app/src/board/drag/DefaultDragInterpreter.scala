@@ -61,13 +61,7 @@ object DefaultDragInterpreter extends DragInterpreter {
     val benchIndex : Int = cmd(0).toInt
     val eCardIndices : Seq[Int] = cmd(1).split(",").map(_.toInt)
     val active = p.active.get
-    if (p.bench(benchIndex).isDefined) {
-      val benchCard = p.bench(benchIndex).get
-      p.active = Some(benchCard)
-    } else {
-      p.active = None
-    }
-    p.bench(benchIndex) = Some(active)
+    p.swapActiveAndBench(benchIndex)
     p.bench(benchIndex).get.energyCards = p.bench(benchIndex).get.energyCards
       .zipWithIndex
       .filterNot { case (_, index) => eCardIndices.contains(index) }
@@ -75,84 +69,52 @@ object DefaultDragInterpreter extends DragInterpreter {
   }
 
     override def benchToBench(p : Player, benchIndex1 : Int, benchIndex2 : Int) {
-      val benchOne = p.bench(benchIndex1).get
-      if (p.bench(benchIndex2).isDefined) {
-        p.bench(benchIndex1) = Some(p.bench(benchIndex2).get)
-        p.bench(benchIndex2) = Some(benchOne)
-      } else {
-        p.bench(benchIndex2) = Some(benchOne)
-        p.bench(benchIndex1) = None
-      }
+      p.swapBenchCards(benchIndex1, benchIndex2)
     }
 
-    /**
-     * Assumes benchIndex points to a non-null bench card.
-     */
-    override def benchToActive(p : Player, benchIndex : Int) : Unit = p.active match {
-      case Some(_) => swapActiveAndBench(p, benchIndex)
-      case None => {
-        p.active = Some(p.bench(benchIndex).get)
-        p.bench(benchIndex) = None
-      }
-    }
-
-    override def activeToBench(p : Player, benchIndex : Int) : Unit = p.bench(benchIndex) match {
-      case Some(_) => swapActiveAndBench(p, benchIndex)
-      case None => {
-        val active = p.active.get
-        if (active.getTotalEnergy() >= active.retreatCost) {
-          active.energyCards = active.energyCards.dropRight(active.retreatCost)
-          p.bench(benchIndex) = Some(active)
-          p.active = None
+    override def benchToActive(p : Player, benchIndex : Int) {
+      if (p.active.isDefined) {
+        if (chargeRetreat(p, benchIndex)) {
+          p.swapActiveAndBench(benchIndex)
         }
+      } else  {
+        p.swapActiveAndBench(benchIndex)
       }
     }
 
-    private def swapActiveAndBench(p : Player, benchIndex : Int) {
+    override def activeToBench(p : Player, benchIndex : Int) {
+      if (chargeRetreat(p, benchIndex)) {
+        p.swapActiveAndBench(benchIndex)
+      }
+    }
+
+    private def chargeRetreat(p : Player, benchIndex : Int) : Boolean = {
       val active = p.active.get
-      val benchCard = p.bench(benchIndex).get
-      if (active.getTotalEnergy() >= active.retreatCost) {
+      if (active.getTotalEnergy() > active.retreatCost) {
         active.energyCards = active.energyCards.dropRight(active.retreatCost)
-        p.active = Some(benchCard)
-        p.bench(benchIndex) = Some(active)
+        return true
+      } else {
+        return false
       }
     }
 
     override def handToActive(p : Player, handIndex : Int) : Unit = (p.hand(handIndex), p.active) match {
       // Moving basic pokemon from hand to active slot.
-      case (bp : BasicPokemon, None) => {
-        p.active = Some(bp)
-        p.removeCardFromHand(handIndex)
-      }
+      case (bp : BasicPokemon, None) => p.moveHandToActive(handIndex)
       // Attaching energy card to active pokemon.
       case (ec : EnergyCard, Some(active)) => attachEnergyToPokemon(p, ec, handIndex, active)
       // Evolving active pokemon.
-      case (ep : EvolvedPokemon, Some(active)) => {
-        if (ep.isEvolutionOf(active)) {
-          ep.evolveOver(active)
-          p.active = Some(ep)
-          p.removeCardFromHand(handIndex)
-        }
-      }
+      case (ep : EvolvedPokemon, Some(active)) => p.evolveActiveCard(handIndex)
       case _ => ()
     }
 
     override def handToBench(p : Player, handIndex : Int, benchIndex : Int) : Unit = (p.hand(handIndex), p.bench(benchIndex)) match {
       // Moving basic pokemon to empty bench slot.
-      case (bp : BasicPokemon, None) => {
-        p.bench(benchIndex) = Some(bp)
-        p.removeCardFromHand(handIndex)
-      }
+      case (bp : BasicPokemon, None) => p.moveHandToBench(handIndex, benchIndex)
       // Attaching energy card to bench pokemon.
       case (ec : EnergyCard, Some(bc)) => attachEnergyToPokemon(p, ec, handIndex, bc)
       // Evolving this bench pokemon.
-      case (ep : EvolvedPokemon, Some(bc)) => {
-        if (ep.isEvolutionOf(bc)) {
-          ep.evolveOver(bc)
-          p.bench(benchIndex) = Some(ep)
-          p.removeCardFromHand(handIndex)
-        }
-      }
+      case (ep : EvolvedPokemon, Some(bc)) => p.evolveBenchCard(handIndex, benchIndex)
       case _ => ()
     }
 

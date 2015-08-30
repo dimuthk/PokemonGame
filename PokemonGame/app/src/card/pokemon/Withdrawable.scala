@@ -1,5 +1,6 @@
 package src.card.pokemon
 
+import src.card.Card
 import src.move.Move
 import src.card.energy.EnergyType
 import src.move.MoveBuilder._
@@ -32,6 +33,11 @@ trait Withdrawable extends PokemonCard {
   override def takeDamage(amount : Int) : Unit = withdrawn match {
     case true => ()
     case false => super.takeDamage(amount)
+  }
+
+  override def pickUp() : Seq[Card] = {
+    withdrawn = false
+    return super.pickUp()
   }
 
 }

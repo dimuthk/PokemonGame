@@ -31,7 +31,7 @@ abstract class Move(
 
   var status : Status.Value = Status.DISABLED
 
-  def additionalRequest(owner : Player, opp : Player) : Option[IntermediaryRequest] = None
+  def additionalRequest(owner : Player, opp : Player, args : Seq[String]) : Option[IntermediaryRequest] = None
 
   def hasEnoughEnergy(p : Player, energyCards : Seq[EnergyCard]) : Boolean = {
 		val total = energyCards.map { card => card.energyCount }.sum
@@ -67,6 +67,10 @@ abstract class Move(
       }
 
   def perform : (Player, Player) => Unit
+
+  def performWithAdditional(owner : Player, opp : Player, cmds : Seq[String]) {
+    throw new Exception("performWithAdditional() called with from base move client")
+  }
 
   override def toJsonImpl() = Json.obj(
     Identifier.MOVE_NAME.toString -> name,

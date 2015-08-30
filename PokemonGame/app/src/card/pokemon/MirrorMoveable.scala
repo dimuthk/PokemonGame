@@ -1,5 +1,6 @@
 package src.card.pokemon
 
+import src.card.Card
 import src.card.energy.EnergyType
 import src.move.Move
 import src.move.Status
@@ -32,6 +33,11 @@ trait MirrorMoveable extends PokemonCard {
     lastAttack = amount
     generalCondition = Some("Mirror Move: " + lastAttack + "damage")
     super.takeDamage(amount)
+  }
+
+  override def pickUp() : Seq[Card] = {
+    lastAttack = -1
+    return super.pickUp()
   }
 
 }

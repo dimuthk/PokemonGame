@@ -32,7 +32,9 @@ abstract class PokemonCard(
 
   val pass : Move = new Pass()
 
-  var currHp : Int = maxHp
+  private var _currHp : Int = maxHp
+
+  def currHp = _currHp
 
   var energyCards : Seq[EnergyCard] = List()
 
@@ -75,6 +77,11 @@ abstract class PokemonCard(
     case _ => None
   }
 
+  /**
+   * Flag marking that this card cannot be moved from its current spot.
+   */
+  def stuck : Boolean = false
+
   def ownsMove(m : Move) : Boolean = existingMoves.filter(_ == m).length > 0
 
   def getTotalEnergy(oEType : Option[EnergyType.Value] = None) : Int = oEType match {
@@ -86,6 +93,25 @@ abstract class PokemonCard(
     energyCards = pc.energyCards
     pc.energyCards = Nil
     preEvolution = Some(pc)
+  }
+
+  def pickUp() : Seq[Card] = {
+    if (stuck) {
+      throw new Exception("Tried to pick up card when it was stuck")
+    }
+    _currHp = maxHp
+    poisonStatus = None
+    statusCondition = None
+    var res : Seq[Card] = energyCards
+    energyCards = Nil
+    res = res ++ preEvolutions(this)
+    preEvolution = None
+    return List(this) ++ res
+  }
+
+  def preEvolutions(pc : PokemonCard) : Seq[PokemonCard] = pc.preEvolution match {
+    case None => Nil
+    case Some(preEvolution) => List(preEvolution) ++ preEvolutions(preEvolution)
   }
 
   def discardEnergy(eType : EnergyType.Value, cnt : Int = 1) : Seq[EnergyCard] = {
@@ -132,12 +158,12 @@ abstract class PokemonCard(
 
 	def takeDamage(amount : Int) : Unit = (amount <= 0) match {
     case true => ()
-    case false => currHp = math.max(currHp - amount, 0)
+    case false => _currHp = math.max(_currHp - amount, 0)
   }
 
   def heal(amount : Int) : Unit = (amount <= 0) match {
     case true => ()
-    case false => currHp = math.min(currHp + amount, maxHp)
+    case false => _currHp = math.min(_currHp + amount, maxHp)
   }
 
   def isEvolutionOf(pc : PokemonCard) : Boolean

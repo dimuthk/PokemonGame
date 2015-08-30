@@ -13,17 +13,21 @@ import src.player.Player
 object DefaultMoveInterpreter extends MoveInterpreter {
 
     override def additionalRequest(owner : Player, opp : Player, command : MoveCommand) = command match {
-      case AttackFromActive(moveNum : Int) => moveNum match {
+      case AttackFromActive(moveNum : Int, args : Seq[String]) => moveNum match {
         // There will never be an additional request for a pass
         case 3 => None
-        case _ => owner.active.get.getMove(moveNum).get.additionalRequest(owner, opp)
+        case _ => owner.active.get.getMove(moveNum).get.additionalRequest(owner, opp, args)
       }  
-      case AttackFromBench(i : Int, moveNum : Int) => owner.bench(i).get.getMove(moveNum).get.additionalRequest(owner, opp)
-      case Intermediary(cmd : Seq[String]) => None
+      case AttackFromBench(i : Int, moveNum : Int, args : Seq[String])
+          => owner.bench(i).get.getMove(moveNum).get.additionalRequest(owner, opp, args)
     }
 
-    def attack(owner : Player, opp : Player, move : Move) : Unit = {
-      move.perform(owner, opp)
+    def attack(owner : Player, opp : Player, move : Move, additional : Seq[String]) : Unit = {
+      if (additional.length == 0) {
+        move.perform(owner, opp)
+        } else {
+          move.performWithAdditional(owner, opp, additional)
+        }
       move match {
         case power : PokemonPower => ()
         case _ => flipTurn(owner, opp)

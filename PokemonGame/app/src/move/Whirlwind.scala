@@ -23,8 +23,7 @@ abstract class Whirlwind(
 	specialEnergyReq : Map[EnergyType.Value, Int] = Map()) extends Move(
     	name,
     	totalEnergyReq,
-    	specialEnergyReq,
-    	moveInterpreter = Some(new WhirlwindInterpreter(dmg))) {
+    	specialEnergyReq) {
 
     class NextActiveSpecification(
         p : Player,
@@ -32,29 +31,21 @@ abstract class Whirlwind(
         benchCards : Seq[PokemonCard]) extends ClickableCardRequest(
         "Choose Active Pokemon",
         user.displayName + " is whisking you away! Select a new active pokemon",
-        "FLIP<>MOVE<>INTERMEDIARY<>",
+        "FLIP<>MOVE<>ATTACK_FROM_ACTIVE<>1<>",
         p,
         1,
         benchCards)
 
-    override def additionalRequest(owner : Player, opp : Player) : Option[IntermediaryRequest] = {
+    override def additionalRequest(owner : Player, opp : Player, args : Seq[String]) : Option[IntermediaryRequest] = {
         val benchCards = opp.bench.toList.flatten
-        if (benchCards.length > 1) {
-            moveInterpreter.get.isActive = true
+        if (benchCards.length > 1 && args.length == 0) {
             return Some(new NextActiveSpecification(opp, owner.active.get, benchCards))
         }
         return None
     }
 
-    def perform = (owner, opp) => standardAttack(owner, opp, dmg)
-
-}
-
-class WhirlwindInterpreter(val dmg : Int) extends CustomMoveInterpreter {
-
-    override def handleIntermediary(owner : Player, opp : Player, cmds : Seq[String]) : Unit = {
-        // the response comes from a flattened bench, so you need to convert back
-        val benchIndex : Int = cmds(0).toInt
+    override def performWithAdditional(owner : Player, opp : Player, args : Seq[String]) {
+        val benchIndex : Int = args.head.toInt
         var matcher : Int = -1
         standardAttack(owner, opp, dmg)
         for (realIndex : Int <- 0 until 5) {
@@ -62,15 +53,12 @@ class WhirlwindInterpreter(val dmg : Int) extends CustomMoveInterpreter {
                 matcher = matcher + 1
             }
             if (matcher == benchIndex) {
-                var temp : Option[PokemonCard] = opp.active
-                opp.active = opp.bench(realIndex)
-                opp.bench(realIndex) = temp
-                flipTurn(opp, owner)
+                opp.swapActiveAndBench(realIndex)
                 return
             }
         }
-        isActive = false
     }
 
-    def attack(owner : Player, opp : Player, move : Move) : Unit = ()
+    def perform = (owner, opp) => standardAttack(owner, opp, dmg)
+
 }

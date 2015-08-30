@@ -13,7 +13,7 @@ class Charmeleon extends StageOnePokemon(
     "Charmeleon-Base-Set-24.jpg",
     Deck.BASE_SET,
     Identifier.CHARMELEON,
-    id = 2,
+    id = 5,
     maxHp = 80,
     firstMove = Some(new Move(
       "Slash",

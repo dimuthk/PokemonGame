@@ -4,7 +4,6 @@ import src.json.Identifier
 import src.move.Move
 import src.move.MoveBuilder._
 import src.player.Player
-import src.board.move.PreventDamageInterpreter
 import src.card.condition.PreventDamageCondition
 import src.card.energy.EnergyType
 import src.card.pokemon._

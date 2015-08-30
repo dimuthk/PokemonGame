@@ -26,21 +26,26 @@ object DefaultStateGenerator extends StateGenerator {
   private def orientStateForPlayer(p : Player, yourTurn : Boolean) : JsObject = {
     val yourCards = p.isTurn == yourTurn
     // You should only ever be able to click on the other player's cards.
-    for (oc : Option[PokemonCard] <- (p.bench ++ List(p.active))) {
-      if (oc.isDefined) {
-        // active and bench cards are always face up
-        oc.get.isFaceUp = true
-        oc.get.isDraggable = yourCards && yourTurn
-        oc.get.isClickable = true
-        oc.get.isDisplayable = true
-        oc.get.isUsable = yourCards && yourTurn
-      }
+    for (pc : PokemonCard <- p.existingActiveAndBenchCards) {
+      // active and bench cards are always face up
+      pc.isFaceUp = true
+      pc.isDraggable = yourCards && yourTurn
+      pc.isClickable = true
+      pc.isDisplayable = true
+      pc.isUsable = yourCards && yourTurn
     }
     for (c : Card <- p.hand) {
       c.isFaceUp = yourCards
       c.isDraggable = yourCards && yourTurn
       c.isClickable = yourCards && yourTurn
       c.isDisplayable = yourCards && yourTurn
+      c.isUsable = false
+    }
+    for (c : Card <- p.prizes.toList.flatten) {
+      c.isFaceUp = false
+      c.isDraggable = false
+      c.isClickable = false
+      c.isDisplayable = false
       c.isUsable = false
     }
     return p.toJson

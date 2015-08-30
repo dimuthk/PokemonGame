@@ -2,7 +2,6 @@ package src.board
 
 import actors.PlayerActor
 
-import scala.util.Random
 
 import src.card.Placeholder
 import src.json.Identifier
@@ -77,13 +76,13 @@ object Board {
 
     def populateMachop : Unit = {
       if (id == 1) {
-        p.deck = List.fill(20)(new GrassEnergy()) ++ List.fill(20)(new Venusaur())
-        p.deck = Random.shuffle(p.deck)
-        p.active = Some(new Butterfree())
+        p.setDeck(List.fill(20)(new GrassEnergy()) ++ List.fill(20)(new Venusaur()))
+        p.shuffleDeck()
+        p.active = Some(new Wartortle())
         p.isTurn = false
       } else {
-        p.deck = List.fill(20)(new Pidgeotto()) ++ List.fill(20)(new WaterEnergy())
-        p.deck = Random.shuffle(p.deck)
+        p.setDeck(List.fill(20)(new Rattata()) ++ List.fill(20)(new Raticate()) ++ List.fill(20)(new FireEnergy()))
+        p.shuffleDeck()
         p.isTurn = true
       }
 
@@ -138,13 +137,9 @@ object Board {
      * Takes deck and distributes original cards appropriately.
      */
     def distributeInitialCards() : Unit = {
-      for (i <- 0 until 6) {
-        p.prizes(i) = Some(p.deck(i))
-      }
-      p.deck = p.deck.slice(6, 60)
-      p.hand = p.deck.slice(0, 7)
+      p.dealPrizeCards()
+      p.dealCardsToHand(7)
       Logger.debug("init hand: " + p.hand)
-      p.deck = p.deck.slice(7, 54)
     }
 
     def terminateSocket() = onTerminateSocket(id)

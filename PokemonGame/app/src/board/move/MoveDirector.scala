@@ -15,9 +15,9 @@ object MoveDirector {
 
   def handleMoveCommand(owner : Player, opp : Player, contents : Seq[String]) : Option[IntermediaryRequest] = {
     val moveCmd : MoveCommand = contents(0) match {
-      case "ATTACK_FROM_ACTIVE" => AttackFromActive(contents(1).toInt)
-      case "ATTACK_FROM_BENCH" => AttackFromBench(contents(1).toInt - 1, contents(2).toInt)
-      case "INTERMEDIARY" => Intermediary(contents.tail)
+      case "ATTACK_FROM_ACTIVE" => AttackFromActive(contents(1).toInt, contents.drop(2))
+      case "ATTACK_FROM_BENCH" => AttackFromBench(contents(1).toInt - 1, contents(2).toInt, contents.drop(3))
+      //case "INTERMEDIARY" => Intermediary(contents.tail)
     }
     val intermediaryReq = DefaultMoveInterpreter.additionalRequest(owner, opp, moveCmd)
     if (intermediaryReq == None) {

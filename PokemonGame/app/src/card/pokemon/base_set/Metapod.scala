@@ -6,7 +6,6 @@ import src.card.pokemon.Withdrawable._
 import src.move.MoveBuilder._
 import src.player.Player
 import src.card.energy.EnergyType
-import src.board.move.PreventDamageInterpreter
 import src.card.condition.PreventDamageCondition
 import src.card.pokemon._
 import src.card.Deck
