@@ -59,7 +59,8 @@ abstract class CustomStateGenerator(
 
   var isActive : Boolean = false
 
-  def generateForOwner(owner : Player, opp : Player, hinge : PokemonCard) : (JsObject, JsObject) = null
+  def generateForOwner : (Player, Player, PokemonCard) => (JsObject, JsObject) = (_,_,_) => (null, null)
 
-  def generateForOpp(opp : Player, owner : Player, hinge : PokemonCard) : (JsObject, JsObject) = null
+  def generateForOpp : (Player, Player, PokemonCard) => (JsObject, JsObject) = (_,_,_) => (null, null)
+
 }

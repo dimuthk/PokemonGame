@@ -445,6 +445,7 @@ function generalConditionTag(item) {
 }
 
 function generateCardList(intermediary, forceCardUp) {
+  forceCardUp = true
   var cardList = ""
   for (var i=0; i<intermediary.CARD_LIST.length; i++) {
     var card = intermediary.CARD_LIST[i]

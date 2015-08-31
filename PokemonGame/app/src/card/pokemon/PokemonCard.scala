@@ -25,7 +25,7 @@ abstract class PokemonCard(
 	val maxHp : Int,
 	val firstMove: Option[Move] = None,
   val secondMove: Option[Move] = None,
-	val energyType : EnergyType.Value,
+	private val _energyType : EnergyType.Value,
 	val weakness : Option[EnergyType.Value] = None,
   val resistance : Option[EnergyType.Value] = None,
   val retreatCost : Int) extends Card(displayName, imgName, deck) {
@@ -35,6 +35,8 @@ abstract class PokemonCard(
   private var _currHp : Int = maxHp
 
   def currHp = _currHp
+
+  def energyType = _energyType
 
   var energyCards : Seq[EnergyCard] = List()
 
@@ -48,14 +50,19 @@ abstract class PokemonCard(
 
   override def getIdentifier() = identifier
 
-	override def toJsonImpl() = super.toJsonImpl() ++ Json.obj(
-		Identifier.DISPLAY_NAME.toString -> displayName,
-		Identifier.MAX_HP.toString -> maxHp,
-		Identifier.CURR_HP.toString -> currHp,
-		Identifier.IMG_NAME.toString -> imgName,
+	override def toJsonImpl() = customMoveJson(None)
+
+  def customMoveJson(customMoveArray : Option[JsArray]) : JsObject = super.toJsonImpl() ++ Json.obj(
+    Identifier.DISPLAY_NAME.toString -> displayName,
+    Identifier.MAX_HP.toString -> maxHp,
+    Identifier.CURR_HP.toString -> currHp,
+    Identifier.IMG_NAME.toString -> imgName,
     Identifier.ENERGY_CARDS.toString -> cardListToJsArray(energyCards),
     Identifier.ENERGY_TYPE.toString -> energyType,
-    Identifier.MOVES.toString -> optionMoveListToJsArray(List(firstMove, secondMove, Some(pass))),
+    Identifier.MOVES.toString -> (customMoveArray match {
+      case Some(moveArray) => moveArray
+      case None => optionMoveListToJsArray(List(firstMove, secondMove, Some(pass)))
+    }),
     Identifier.POISON_STATUS.toString -> (poisonStatus match {
       case Some(p : PoisonStatus.Value) => p.toString
       case None => "None"
@@ -102,6 +109,11 @@ abstract class PokemonCard(
     * Tracker for the last effect made on this pokemon. Used for mirror move
     */
    var lastAttack : Int = -1
+
+   /**
+    * Damage done to this pokemon this turn is reduced by 10.
+    */
+   var pounced : Boolean = false
 
 
   def ownsMove(m : Move) : Boolean = existingMoves.filter(_ == m).length > 0
@@ -161,6 +173,7 @@ abstract class PokemonCard(
     case true => {
       if (owner.isTurn) {
         withdrawn = false
+        pounced = false
         agility = false
       } else {
         smokescreen = false
@@ -170,6 +183,7 @@ abstract class PokemonCard(
     case false => {
       lastAttack = -1
       statusCondition = None
+      pounced = false
       poisonStatus = None
       withdrawn = false
       agility = false
@@ -185,6 +199,9 @@ abstract class PokemonCard(
     }
     if (agility) {
       cond = cond + "Agility"
+    }
+    if (pounced) {
+      cond = cond + "Pounced"
     }
     generalCondition = Some(cond)
   }
@@ -208,11 +225,16 @@ abstract class PokemonCard(
   }
 
 	def takeDamage(amount : Int) : Unit = {
+    var dmg = amount
     if (withdrawn || agility) {
       return
     }
-    lastAttack = amount
-    _currHp = math.max(_currHp - amount, 0)
+    if (pounced && dmg > 0) {
+      dmg = dmg - 10
+      pounced = false
+    }
+    lastAttack = dmg
+    _currHp = math.max(_currHp - dmg, 0)
   }
 
   def heal(amount : Int) : Unit = (amount <= 0) match {

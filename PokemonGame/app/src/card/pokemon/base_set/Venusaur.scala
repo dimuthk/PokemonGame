@@ -44,7 +44,7 @@ class Venusaur extends BasicPokemon(
 
 private class EnergyTransState extends CustomStateGenerator(true, false) {
 
-  override def generateForOwner(owner : Player, opp : Player, interceptor : PokemonCard) : (JsObject, JsObject) = {
+  override def generateForOwner = (owner, opp, interceptor) => {
     // Active and bench cards are visible and draggable to allow energy transfer.
     owner.setUIOrientationForActiveAndBench(Set(FACE_UP, DRAGGABLE))
     // Hand is deactivated.
@@ -56,7 +56,7 @@ private class EnergyTransState extends CustomStateGenerator(true, false) {
 
     // Venusaur must still be usable to deactivate power.
     owner.setUIOrientationForActiveAndBench(Set(FACE_UP, CLICKABLE, DISPLAYABLE, DRAGGABLE, USABLE))
-    return (owner.toJson, opp.toJson)
+    (owner.toJson, opp.toJson)
   }
 
 }

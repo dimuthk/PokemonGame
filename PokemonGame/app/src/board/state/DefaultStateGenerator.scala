@@ -11,13 +11,9 @@ import play.api.libs.json._
  */
 object DefaultStateGenerator extends StateGenerator {
 
-  def generateForPlayer1(p1 : Player, p2: Player) : (JsObject, JsObject) = {
-  	return (orientStateForPlayer(p1, p1.isTurn), orientStateForPlayer(p2, p1.isTurn))
-  }
+  def generateForPlayer1 = (p1, p2) => (orientStateForPlayer(p1, p1.isTurn), orientStateForPlayer(p2, p1.isTurn))
 
-  def generateForPlayer2(p1 : Player, p2 : Player) : (JsObject, JsObject) = {
-  	return (orientStateForPlayer(p2, p2.isTurn), orientStateForPlayer(p1, p2.isTurn))
-  }
+  def generateForPlayer2 = (p1, p2) => (orientStateForPlayer(p2, p2.isTurn), orientStateForPlayer(p1, p2.isTurn))
 
   /**
    * Update any UI specifications for this player. The specification hinges on whether

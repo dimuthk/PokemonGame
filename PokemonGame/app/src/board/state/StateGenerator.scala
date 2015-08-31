@@ -9,8 +9,8 @@ import play.api.libs.json._
  */
 abstract class StateGenerator {
 
-  def generateForPlayer1(p1 : Player, p2: Player) : (JsObject, JsObject)
+  def generateForPlayer1 : (Player, Player) => (JsObject, JsObject)
 
-  def generateForPlayer2(p1 : Player, p2: Player) : (JsObject, JsObject)
+  def generateForPlayer2 : (Player, Player) => (JsObject, JsObject)
 
 }

@@ -54,7 +54,7 @@ object MoveBuilder {
     return None
   }
 
-  def energyDrainAttack(owner : Player, opp : Player, baseDmg : Int) : Option[IntermediaryRequest] = {
+  def healthDrainAttack(owner : Player, opp : Player, baseDmg : Int) : Option[IntermediaryRequest] = {
     owner.active.get.heal(opp.active.get.calculateDmg(owner.active.get, baseDmg))
     return standardAttack(owner, opp, baseDmg)
   }

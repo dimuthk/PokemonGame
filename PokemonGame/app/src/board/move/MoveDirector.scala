@@ -14,16 +14,17 @@ import play.api.Logger
 object MoveDirector {
 
   def handleMoveCommand(owner : Player, opp : Player, contents : Seq[String]) : Option[IntermediaryRequest] = {
+    val interpreter = selectInterpreter()
     val maybeIntermediaryReq  : Option[IntermediaryRequest] = contents(0) match {
       case "ATTACK_FROM_ACTIVE" => contents(1).toInt match {
-        case 1 => attackFromActive(owner, opp, owner.active.get.firstMove.get, contents.drop(2))
-        case 2 => attackFromActive(owner, opp, owner.active.get.secondMove.get, contents.drop(2))
-        case 3 => attackFromActive(owner, opp, owner.active.get.pass, Nil)
+        case 1 => interpreter.attackFromActive(owner, opp, owner.active.get.firstMove.get, contents.drop(2))
+        case 2 => interpreter.attackFromActive(owner, opp, owner.active.get.secondMove.get, contents.drop(2))
+        case 3 => interpreter.attackFromActive(owner, opp, owner.active.get.pass, Nil)
         case _ => throw new Exception("Invalid move number")
       }
       case "ATTACK_FROM_BENCH" => (contents(1).toInt - 1, contents(2).toInt) match {
-        case (benchIndex, 1) => attackFromBench(owner, opp, owner.bench(benchIndex).get.firstMove.get, contents.drop(3))
-        case (benchIndex, 2) => attackFromBench(owner, opp, owner.bench(benchIndex).get.secondMove.get, contents.drop(3))
+        case (benchIndex, 1) => interpreter.attackFromBench(owner, opp, owner.bench(benchIndex).get.firstMove.get, contents.drop(3))
+        case (benchIndex, 2) => interpreter.attackFromBench(owner, opp, owner.bench(benchIndex).get.secondMove.get, contents.drop(3))
         case _ => throw new Exception("Invalid move number")
       }
     }
@@ -39,27 +40,7 @@ object MoveDirector {
 
   def flippedHeads() : Boolean = true
 
-  def attackFromActive(owner : Player, opp : Player, move : Move, args : Seq[String]) : Option[IntermediaryRequest] = move match {
-      case power : PokemonPower => power.perform(owner, opp, args)
-      case _ => {
-        val intermediary = (!owner.active.get.smokescreen || flippedHeads()) match {
-          case true => move.perform(owner, opp, args)
-          case false => None
-        }
-        flipTurn(owner, opp)
-        return intermediary
-      }
-    }
-
-    def attackFromBench(owner : Player, opp : Player, move : Move, args : Seq[String]) : Option[IntermediaryRequest] = move match {
-      case power : PokemonPower => power.perform(owner, opp, args)
-      case _ => throw new Exception("Non pokemon power move called from bench!")
-    }
-
-    def flipTurn(owner : Player, opp : Player) : Unit = {
-        owner.isTurn = !owner.isTurn
-        opp.isTurn = !opp.isTurn
-    }
+  def selectInterpreter() : MoveInterpreter = DefaultMoveInterpreter
 
 
 }

@@ -4,6 +4,7 @@ import src.board.intermediary.IntermediaryRequest
 import src.card.pokemon.PokemonCard
 import src.board.state.CustomStateGenerator
 import src.board.drag.CustomDragInterpreter
+import src.board.move.CustomMoveInterpreter
 import src.player.Player
 
 import play.api.Logger
@@ -11,9 +12,11 @@ import play.api.Logger
 abstract class ActivePokemonPower(
   name : String,
   dragInterpreter : Option[CustomDragInterpreter] = None,
+  moveInterpreter : Option[CustomMoveInterpreter] = None,
   stateGenerator : Option[CustomStateGenerator] = None) extends PokemonPower(
     name,
     dragInterpreter,
+    moveInterpreter,
     stateGenerator) {
 
   private var _isActive : Boolean = false
@@ -31,10 +34,10 @@ abstract class ActivePokemonPower(
     return None
   }
 
-  override def update = (owner, _, pc, _, _)
-      => (pc.statusCondition, owner.cardWithActivatedPower) match {
+  override def update = (owner, _, pc, _, _) =>
+      status = (pc.statusCondition.isDefined, owner.cardWithActivatedPower) match {
     // Inflicted with a status condition
-    case (Some(_), _) => Status.DISABLED
+    case (true, _) => Status.DISABLED
     // A different card of yours has an activated power
     case (_, Some(card)) if card != pc => Status.DISABLED
     case _ => if (isActive) Status.ACTIVATED else Status.ACTIVATABLE

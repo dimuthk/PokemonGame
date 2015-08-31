@@ -28,7 +28,7 @@ class Zubat extends BasicPokemon(
       "Leech Life",
       2,
       Map(EnergyType.GRASS -> 1)) {
-        def perform = (owner, opp, args) => energyDrainAttack(owner, opp, 10)
+        def perform = (owner, opp, args) => healthDrainAttack(owner, opp, 10)
       }),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.PSYCHIC),

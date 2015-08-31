@@ -127,6 +127,16 @@ object Identifier extends Enumeration {
   ODDISH,
   GLOOM,
   VILEPLUME,
+  PARAS,
+  PARASECT,
+  VENONAT,
+  VENOMOTH,
+  DIGLETT,
+  DUGTRIO,
+  MEOWTH,
+  PERSIAN,
+  PSYDUCK,
+  GOLDUCK,
 
   /*
    * GENERAL ATTRIBUTES

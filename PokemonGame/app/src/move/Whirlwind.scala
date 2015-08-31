@@ -4,6 +4,7 @@ import play.api.libs.json._
 import src.board.move.MoveCommand
 import src.move.MoveBuilder._
 import src.card.pokemon.PokemonCard
+import src.board.intermediary.IntermediaryRequest._
 import src.board.intermediary.IntermediaryRequest
 import src.board.intermediary.ClickableCardRequest
 import src.board.drag.CustomDragInterpreter
@@ -36,33 +37,37 @@ class Whirlwind(
         1,
         benchCards)
 
-    /*override def additionalRequest(owner : Player, opp : Player, args : Seq[String]) : Option[IntermediaryRequest] = {
-        if (onFlip && !flippedHeads()) {
-            return None
+    def perform = (owner, opp, args) => args.length match {
+        case 0 => (onFlip && !flippedHeads()) match {
+            // Failed the bench swap attempt. Do the damage and return
+            case true => standardAttack(owner, opp, dmg)
+            case false => {
+                val benchCards = opp.bench.toList.flatten
+                benchCards.length match {
+                    // No cards to swap. Just do the damage
+                    case 0 => standardAttack(owner, opp, dmg)
+                    // Only one bench card. Do the damage and swap
+                    case 1 => {
+                        standardAttack(owner, opp, dmg)
+                        opp.swapActiveAndBench(opp.bench.indexOf(Some(benchCards(0))))
+                        None
+                    }
+                    // Ambiguous. Have the player choose and come back
+                    case _ => ownerChooses match {
+                        case true => Some(new NextActiveSpecification(owner, owner.active.get.displayName, benchCards))
+                        case false => Some(new NextActiveSpecification(opp, owner.active.get.displayName, benchCards))
+                    }
+                }
+            }
         }
-        val benchCards = opp.bench.toList.flatten
-        if (benchCards.length > 1 && args.length == 0) return ownerChooses match {
-            case true => Some(new NextActiveSpecification(owner, owner.active.get.displayName, benchCards))
-            case false => Some(new NextActiveSpecification(opp, owner.active.get.displayName, benchCards))
+        case _ => {
+            val rawIndex : Int = args.head.toInt
+            var matcher : Int = -1
+            val realIndex = getRealIndexFor(rawIndex, opp.bench)
+            standardAttack(owner, opp, dmg)
+            opp.swapActiveAndBench(realIndex)
+            None
         }
-        return None
     }
-
-    override def performWithAdditional(owner : Player, opp : Player, args : Seq[String]) {
-        val benchIndex : Int = args.head.toInt
-        var matcher : Int = -1
-        standardAttack(owner, opp, dmg)
-        for (realIndex : Int <- 0 until 5) {
-            if (opp.bench(realIndex).isDefined) {
-                matcher = matcher + 1
-            }
-            if (matcher == benchIndex) {
-                opp.swapActiveAndBench(realIndex)
-                return
-            }
-        }
-    }*/
-
-    def perform = (owner, opp, args) => standardAttack(owner, opp, dmg)
 
 }

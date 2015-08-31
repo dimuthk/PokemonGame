@@ -17,6 +17,8 @@ class Player extends Jsonable {
 
   private var _deck : Seq[Card] = List()
 
+  var trainerBan : Boolean = false
+
   def deck = _deck
 
   def setDeck(cards : Seq[Card]) = _deck = cards
@@ -25,7 +27,7 @@ class Player extends Jsonable {
 
   def dealCardsToHand(count : Int) {
     _hand = _hand ++ _deck.slice(0, count)
-    _deck = _deck.slice(count + 1, _deck.length)
+    _deck = _deck.slice(count, _deck.length)
   }
 
   def dealPrizeCards() {
@@ -184,6 +186,46 @@ class Player extends Jsonable {
 
   def removeCardFromHand(handIndex : Int) {
     _hand = _hand.slice(0, handIndex) ++ _hand.slice(handIndex + 1, _hand.size)
+  }
+
+  def customJson(
+    activeMoves : Option[JsArray] = None,
+    benchMoves : Option[JsArray] = None,
+    handMoves : Option[JsObject] = None) : JsObject = {
+    val notifyJson = notification match {
+      case Some(s) => JsString(s)
+      case None => Placeholder.toJson
+    }
+    return Json.obj(
+       Identifier.ACTIVE.toString -> (active match {
+        case Some(a) => activeMoves match {
+          case Some(am) => a.customMoveJson(Some(am))
+          case None => optionCardToJson(active)
+        }
+        case None => Placeholder.toJson
+       }),
+       Identifier.DECK.toString -> cardListToJsArray(deck),
+       Identifier.HAND.toString -> (handMoves match {
+        case Some(m) => m
+        case None => cardListToJsArray(hand)
+       }),
+       Identifier.GARBAGE.toString -> cardListToJsArray(garbage),
+       Identifier.BENCH.toString -> (benchMoves match {
+        case Some(m) => benchForCustomJson(m)
+        case None => optionCardListToJsArray[PokemonCard](bench)
+       }),
+       Identifier.PRIZES.toString -> optionCardListToJsArray(prizes),
+       Identifier.NOTIFICATION.toString -> notifyJson,
+       Identifier.IS_TURN.toString -> JsBoolean(isTurn))
+  }
+
+  def benchForCustomJson(benchMoves : JsArray) : JsArray = {
+    return bench.foldRight(new JsArray())((c, curr) => curr.prepend(customMoveJson(c, benchMoves)))
+  }
+
+  def customMoveJson(pc : Option[PokemonCard], benchMoves : JsArray) : JsObject = pc match {
+    case Some(c) => c.customMoveJson((Some(benchMoves)))
+    case None => Placeholder.toJson
   }
 
   override def toJsonImpl : JsObject = {

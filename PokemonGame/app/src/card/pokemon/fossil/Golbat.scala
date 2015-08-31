@@ -28,7 +28,7 @@ class Golbat extends StageOnePokemon(
       "Leech Life",
       3,
       Map(EnergyType.GRASS -> 2)) {
-        def perform = (owner, opp, args) => energyDrainAttack(owner, opp, 20)
+        def perform = (owner, opp, args) => healthDrainAttack(owner, opp, 20)
       }),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.PSYCHIC),
