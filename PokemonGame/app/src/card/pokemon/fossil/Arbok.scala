@@ -24,7 +24,6 @@ class Arbok extends StageOnePokemon(
     firstMove = Some(new Whirlwind(
         "Terror Strike",
         ownerChooses = false,
-        moveNum = 1,
         dmg = 10,
         onFlip = true,
         totalEnergyReq = 1,
@@ -33,7 +32,7 @@ class Arbok extends StageOnePokemon(
       "Wrap",
       3,
       Map(EnergyType.GRASS -> 2)) {
-        def perform = (owner, opp) => poisonAttack(owner, opp, 20)
+        def perform = (owner, opp, args) => poisonAttack(owner, opp, 20)
       }),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.PSYCHIC),

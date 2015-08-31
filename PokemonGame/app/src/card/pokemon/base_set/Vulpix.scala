@@ -20,7 +20,7 @@ class Vulpix extends BasicPokemon(
       "Confuse Ray",
       2,
       Map(EnergyType.FIRE -> 2)) {
-        def perform = (owner, opp) => confuseChanceAttack(owner, opp, 10)
+        def perform = (owner, opp, args) => confuseAttackChance(owner, opp, 10)
       }),
     energyType = EnergyType.FIRE,
     weakness = Some(EnergyType.WATER),

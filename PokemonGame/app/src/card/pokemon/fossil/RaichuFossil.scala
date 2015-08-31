@@ -26,7 +26,7 @@ class RaichuFossil extends StageOnePokemon(
       benchDmg = 10,
       numBenchSelects = 3,
       4,
-      Map(EnergyType.THUNDER -> 4)) {}),
+      Map(EnergyType.THUNDER -> 4))),
     energyType = EnergyType.THUNDER,
     weakness = Some(EnergyType.FIGHTING),
     retreatCost = 1)

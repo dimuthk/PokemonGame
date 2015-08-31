@@ -7,7 +7,6 @@ import src.card.pokemon.PokemonCard
 import src.board.intermediary.IntermediaryRequest
 import src.board.intermediary.ClickableCardRequest
 import src.board.drag.CustomDragInterpreter
-import src.board.move.CustomMoveInterpreter
 import src.board.state.CustomStateGenerator
 import src.card.energy.EnergyCard
 import src.card.energy.EnergyType
@@ -23,7 +22,7 @@ class Withdraw(
       condName,
       totalEnergyReq,
       specialEnergyReq) {
-        def perform = (owner, opp) => {
+        def perform = (owner, opp, args) => {
             val active = owner.active.get
             flippedHeads() match {
                 case true => {
@@ -31,7 +30,10 @@ class Withdraw(
                     active.withdrawn = true
                     active.generalCondition = Some(condName)
                 }
-                case false => owner.notify(condName + " failed")
+                case false => {
+                  owner.notify(condName + " failed")
+                }
             }
+            None
         }
       }

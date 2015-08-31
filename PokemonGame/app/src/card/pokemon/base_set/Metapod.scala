@@ -23,7 +23,7 @@ class Metapod extends StageOnePokemon(
       "Stun Spore",
       2,
       Map(EnergyType.GRASS -> 2)) {
-        def perform = (owner, opp) => paralyzeChanceAttack(owner, opp, 20)
+        def perform = (owner, opp, args) => paralyzeAttackChance(owner, opp, 20)
       }),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.FIRE),

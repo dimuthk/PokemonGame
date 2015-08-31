@@ -22,7 +22,6 @@ class Pidgey extends BasicPokemon(
     firstMove = Some(new Whirlwind(
         "Whirlwind",
         ownerChooses = false,
-        moveNum = 1,
         dmg = 10,
         totalEnergyReq = 2)),
     energyType = EnergyType.COLORLESS,

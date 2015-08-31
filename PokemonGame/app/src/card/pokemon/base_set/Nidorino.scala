@@ -19,13 +19,13 @@ class Nidorino extends StageOnePokemon(
         "Double Kick",
         3,
         Map(EnergyType.GRASS -> 1)) {
-        def perform = (owner, opp) => multipleHitAttack(owner, opp, 30, 2)
+        def perform = (owner, opp, args) => multipleHitAttack(owner, opp, 30, 2)
     }),
     secondMove = Some(new Move(
         "Horn Drill",
         4,
         Map(EnergyType.GRASS -> 2)) {
-        def perform = (owner, opp) => standardAttack(owner, opp, 50)
+        def perform = (owner, opp, args) => standardAttack(owner, opp, 50)
         }),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.PSYCHIC),

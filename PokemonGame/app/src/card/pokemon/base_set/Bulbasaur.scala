@@ -1,5 +1,6 @@
 package src.card.pokemon.base_set
 
+import src.board.intermediary.IntermediaryRequest
 import src.json.Identifier
 import src.move.Move
 import src.move.MoveBuilder._
@@ -19,7 +20,7 @@ class Bulbasaur extends BasicPokemon(
         "Leech Seed",
         2,
         Map(EnergyType.GRASS -> 2)) {
-        def perform = (owner, opp) => {
+        def perform = (owner, opp, args) => {
             if (opp.active.get.calculateDmg(owner.active.get, 20) > 0) {
                 owner.active.get.heal(10)
             }

@@ -18,12 +18,12 @@ class Jigglypuff extends BasicPokemon(
 	firstMove = Some(new Move(
 		"Lullaby",
         1) {
-			def perform = (owner, opp) => sleepAttack(owner, opp)
+			def perform = (owner, opp, args) => sleepAttack(owner, opp)
         }),
 	secondMove = Some(new Move(
 		"Pound",
         2) {
-			def perform = (owner, opp) => standardAttack(owner, opp, 20)
+			def perform = (owner, opp, args) => standardAttack(owner, opp, 20)
         }),
 	energyType = EnergyType.COLORLESS,
 	weakness = Some(EnergyType.FIGHTING),

@@ -24,13 +24,13 @@ class Sandslash extends StageOnePokemon(
     firstMove = Some(new Move(
         "Slash",
         2) {
-        def perform = (owner, opp) => standardAttack(owner, opp, 20)
+        def perform = (owner, opp, args) => standardAttack(owner, opp, 20)
         }),
     secondMove = Some(new Move(
       "Fury Swipes",
       2,
       Map(EnergyType.FIGHTING -> 2)) {
-        def perform = (owner, opp) => multipleHitAttack(owner, opp, 20, 3)
+        def perform = (owner, opp, args) => multipleHitAttack(owner, opp, 20, 3)
       }),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.THUNDER),

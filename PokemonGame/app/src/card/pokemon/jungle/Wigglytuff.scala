@@ -18,12 +18,12 @@ class Wigglytuff extends StageOnePokemon(
 	firstMove = Some(new Move(
 		"Lullaby",
         1) {
-			def perform = (owner, opp) => sleepAttack(owner, opp)
+			def perform = (owner, opp, args) => sleepAttack(owner, opp)
         }),
 	secondMove = Some(new Move(
 		"Do The Wave",
         3) {
-			def perform = (owner, opp) => standardAttack(owner, opp, 10 + 10 * owner.bench.toList.flatten.length)
+			def perform = (owner, opp, args) => standardAttack(owner, opp, 10 + 10 * owner.bench.toList.flatten.length)
         }),
 	energyType = EnergyType.COLORLESS,
 	weakness = Some(EnergyType.FIGHTING),

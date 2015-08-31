@@ -13,10 +13,10 @@ class RetreatEnergySpecification(
   p : Player, clickCount : Int, energyCards : Seq[EnergyCard], benchIndex : Int) extends ClickableCardRequest(
   "Discard Energy",
   "Select the energy cards you want to discard.",
-  "DRAG<>INTERMEDIARY<>" + benchIndex + "<>",
   p,
   clickCount,
-  energyCards)
+  energyCards,
+  additionalTag = Some(benchIndex + ""))
 
 object DefaultDragInterpreter extends DragInterpreter {
 

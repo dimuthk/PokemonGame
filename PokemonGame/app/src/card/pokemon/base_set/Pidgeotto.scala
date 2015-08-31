@@ -22,7 +22,6 @@ class Pidgeotto extends StageOnePokemon(
     firstMove = Some(new Whirlwind(
         "Whirlwind",
         ownerChooses = false,
-        moveNum = 1,
         dmg = 20,
         totalEnergyReq = 2)),
     secondMove = Some(new MirrorMove(

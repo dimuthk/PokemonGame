@@ -19,13 +19,13 @@ class Ivysaur extends StageOnePokemon(
       "Vine Whip",
       3,
       Map(EnergyType.GRASS -> 1)) {
-        def perform = (owner, opp ) => standardAttack(owner, opp, 30)
+        def perform = (owner, opp, args) => standardAttack(owner, opp, 30)
     }),
     secondMove = Some(new Move(
       "Poisonpowder",
       3,
       Map(EnergyType.GRASS -> 3)) {
-        def perform = (owner, opp) => poisonAttack(owner, opp, 20)
+        def perform = (owner, opp, args) => poisonAttack(owner, opp, 20)
     }),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.FIRE),

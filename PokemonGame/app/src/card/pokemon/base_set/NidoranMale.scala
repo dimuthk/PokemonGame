@@ -19,7 +19,7 @@ class NidoranMale extends BasicPokemon(
         "Horn Hazard",
         1,
         Map(EnergyType.GRASS -> 1)) {
-        def perform = (owner, opp) => multipleHitAttack(owner, opp, 30, 1)
+        def perform = (owner, opp, args) => multipleHitAttack(owner, opp, 30, 1)
     }),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.PSYCHIC),

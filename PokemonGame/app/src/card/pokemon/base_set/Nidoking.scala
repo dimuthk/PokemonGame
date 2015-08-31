@@ -1,5 +1,6 @@
 package src.card.pokemon.base_set
 
+import src.board.intermediary.IntermediaryRequest
 import src.json.Identifier
 import src.move.Move
 import src.card.condition.PoisonStatus
@@ -20,17 +21,17 @@ class Nidoking extends StageTwoPokemon(
         "Thrash",
         3,
         Map(EnergyType.GRASS -> 1)) {
-        def perform = (owner, opp) => extraDamageOrHurtSelf(owner, opp, 30, 10)
+        def perform = (owner, opp, args) => extraDamageOrHurtSelf(owner, opp, 30, 10)
     }),
     secondMove = Some(new Move(
         "Toxic",
         3,
         Map(EnergyType.GRASS -> 3)) {
-        def perform = (owner, opp) => {
-            standardAttack(owner, opp, 20)
-            opp.active.get.poisonStatus = Some(PoisonStatus.TOXIC)    
-        }
-        }),
+            def perform = (owner, opp, args) => {
+                opp.active.get.poisonStatus = Some(PoisonStatus.TOXIC)
+                standardAttack(owner, opp, 20)
+            }
+    }),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.PSYCHIC),
     retreatCost = 3)

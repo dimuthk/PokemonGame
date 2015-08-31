@@ -19,7 +19,7 @@ class Machop extends BasicPokemon(
 		"Low Kick",
 		1,
 		Map(EnergyType.FIGHTING -> 1)) {
-			def perform = (owner, opp) => standardAttack(owner, opp, 20)
+			def perform = (owner, opp, args) => standardAttack(owner, opp, 20)
 		}),
 	energyType = EnergyType.FIGHTING,
 	weakness = Some(EnergyType.PSYCHIC),

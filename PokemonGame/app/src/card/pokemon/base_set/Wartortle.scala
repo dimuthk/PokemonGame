@@ -19,12 +19,12 @@ class Wartortle extends BasicPokemon(
     firstMove = Some(new Withdraw(
     "Withdraw",
     2,
-    Map(EnergyType.WATER -> 1)) {}),
+    Map(EnergyType.WATER -> 1))),
     secondMove = Some(new Move(
       "Bite",
       3,
       Map(EnergyType.WATER -> 1)) {
-        def perform = (owner, opp) => standardAttack(owner, opp, 40)
+        def perform = (owner, opp, args) => standardAttack(owner, opp, 40)
       }),
     energyType = EnergyType.WATER,
     weakness = Some(EnergyType.THUNDER),

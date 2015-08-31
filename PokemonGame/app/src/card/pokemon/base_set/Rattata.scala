@@ -18,7 +18,7 @@ class Rattata extends BasicPokemon(
 	firstMove = Some(new Move(
 		"Bite",
 		1) {
-			def perform = (owner, opp) => standardAttack(owner, opp, 20)
+			def perform = (owner, opp, args) => standardAttack(owner, opp, 20)
 		}),
 	energyType = EnergyType.COLORLESS,
 	weakness = Some(EnergyType.FIGHTING),

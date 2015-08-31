@@ -18,11 +18,11 @@ class Fearow extends StageOnePokemon(
 	firstMove = Some(new Agility(
 		"Agility",
 		3,
-		20) {}),
+		20)),
 	secondMove = Some(new Move(
 		"Drill Peck",
         4) {
-			def perform = (owner, opp) => standardAttack(owner, opp, 40)
+			def perform = (owner, opp, args) => standardAttack(owner, opp, 40)
         }),
 	energyType = EnergyType.COLORLESS,
 	weakness = Some(EnergyType.THUNDER),

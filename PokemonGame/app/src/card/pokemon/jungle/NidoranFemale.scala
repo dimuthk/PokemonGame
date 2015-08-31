@@ -5,8 +5,6 @@ import src.move._
 import src.move.MoveBuilder._
 import src.player.Player
 import src.card.energy.EnergyType
-import src.board.move.DefaultMoveInterpreter
-import src.board.move.CustomMoveInterpreter
 import src.board.intermediary.IntermediaryRequest
 import src.board.intermediary.ClickableCardRequest
 import src.card.condition.PreventDamageCondition
@@ -26,11 +24,10 @@ class NidoranFemale extends BasicPokemon(
       "Fury Swipes",
       1,
       Map(EnergyType.GRASS -> 1)) {
-        def perform = (owner, opp) => multipleHitAttack(owner, opp, 10, 3)
+        def perform = (owner, opp, args) => multipleHitAttack(owner, opp, 10, 3)
       }),
     secondMove = Some(new CallForFamily(
       "Call For Family",
-      moveNum = 2,
       selector = (card) => card match {
         case p : PokemonCard => p.id == 29 || p.id == 32
         case _ => false

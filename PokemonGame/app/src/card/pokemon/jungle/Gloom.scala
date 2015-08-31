@@ -1,5 +1,6 @@
 package src.card.pokemon.base_set
 
+import src.board.intermediary.IntermediaryRequest
 import src.json.Identifier
 import src.move.Move
 import src.move.MoveBuilder._
@@ -20,15 +21,16 @@ class Gloom extends StageOnePokemon(
 		"Poisonpowder",
         1,
         Map(EnergyType.GRASS -> 1)) {
-			def perform = (owner, opp) => poisonAttack(owner, opp)
+			def perform = (owner, opp, args) => poisonAttack(owner, opp)
         }),
 	secondMove = Some(new Move(
 		"Foul Odor",
         2,
         Map(EnergyType.GRASS -> 2)) {
-			def perform = (owner, opp) => {
+			def perform = (owner, opp, args) => {
 				confuseAttack(owner, opp, 20)
 				owner.active.get.statusCondition = Some(StatusCondition.CONFUSED)
+				None
 			}
         }),
 	energyType = EnergyType.GRASS,

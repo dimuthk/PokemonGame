@@ -10,11 +10,11 @@ import src.player.Player
 
 abstract class MoveInterpreter {
 
-    def additionalRequest(owner : Player, opp : Player, command : MoveCommand) : Option[IntermediaryRequest] = None
+    //def additionalRequest(owner : Player, opp : Player, command : MoveCommand) : Option[IntermediaryRequest] = None
 
-    def attackFromActive(owner : Player, opp : Player, move : Move, additional : Seq[String]) : Unit
+    def attackFromActive(owner : Player, opp : Player, move : Move, additional : Seq[String]) : Option[IntermediaryRequest]
 
-    def attackFromBench(owner : Player, opp : Player, move : Move, additional : Seq[String]) : Unit
+    def attackFromBench(owner : Player, opp : Player, move : Move, additional : Seq[String]) : Option[IntermediaryRequest]
 
     def handleMove(owner : Player, opp : Player, cmd : MoveCommand) = cmd match {
         case AttackFromActive(moveNum : Int, additional : Seq[String]) => moveNum match {

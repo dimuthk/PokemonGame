@@ -19,11 +19,10 @@ class Oddish extends BasicPokemon(
 		"Stun Spore",
         1,
         Map(EnergyType.GRASS -> 1)) {
-			def perform = (owner, opp) => paralyzeChanceAttack(owner, opp, 10)
+			def perform = (owner, opp, args) => paralyzeAttackChance(owner, opp, 10)
         }),
 	secondMove = Some(new CallForFamily(
       "Sprout",
-      moveNum = 2,
       selector = (card) => card match {
         case p : PokemonCard => p.id == 43
         case _ => false

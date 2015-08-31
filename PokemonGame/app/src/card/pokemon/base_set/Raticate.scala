@@ -1,5 +1,6 @@
 package src.card.pokemon.base_set
 
+import src.board.intermediary.IntermediaryRequest
 import src.json.Identifier
 import src.move.Move
 import src.move.MoveBuilder._
@@ -18,14 +19,15 @@ class Raticate extends StageOnePokemon(
 	firstMove = Some(new Move(
 		"Bite",
 		1) {
-			def perform = (owner, opp) => standardAttack(owner, opp, 20)
+			def perform = (owner, opp, args) => standardAttack(owner, opp, 20)
 		}),
 	secondMove = Some(new Move(
 		"Super Fang",
 		3) {
-			def perform = (owner, opp) => {
+			def perform = (owner, opp, args) => {
 				val dmg = roundUp(opp.active.get.currHp / 2)
 				opp.active.get.takeDamage(dmg)
+				None
 			}
 		}),
 	energyType = EnergyType.COLORLESS,

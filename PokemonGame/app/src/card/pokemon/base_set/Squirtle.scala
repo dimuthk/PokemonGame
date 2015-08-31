@@ -21,12 +21,12 @@ class Squirtle extends BasicPokemon(
 		"Bubble",
 		1,
 		Map(EnergyType.WATER -> 1)) {
-			def perform = (owner, opp) => paralyzeChanceAttack(owner, opp, 10)
+			def perform = (owner, opp, args) => paralyzeAttackChance(owner, opp, 10)
 	}),
 	secondMove = Some(new Withdraw(
 		"Withdraw",
 		2,
-		Map(EnergyType.WATER -> 1)) {}),
+		Map(EnergyType.WATER -> 1))),
 	energyType = EnergyType.WATER,
 	weakness = Some(EnergyType.THUNDER),
 	retreatCost = 1)

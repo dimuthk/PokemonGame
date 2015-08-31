@@ -8,7 +8,6 @@ import src.board.intermediary.IntermediaryRequest
 import src.board.intermediary.IntermediaryRequest._
 import src.board.intermediary.ClickableCardRequest
 import src.board.drag.CustomDragInterpreter
-import src.board.move.CustomMoveInterpreter
 import src.board.state.CustomStateGenerator
 import src.card.energy.EnergyCard
 import src.card.energy.EnergyType
@@ -17,7 +16,7 @@ import src.json.Jsonable
 import src.player.Player
 
 
-abstract class BenchSelectAttack(
+class BenchSelectAttack(
 	name : String,
 	val mainDmg : Int,
     val benchDmg : Int,
@@ -34,12 +33,11 @@ abstract class BenchSelectAttack(
         benchCards : Seq[PokemonCard]) extends ClickableCardRequest(
         "Select bench cards",
         "Select the bench pokemon you want " + user.displayName + " to attack!",
-        "MOVE<>ATTACK_FROM_ACTIVE<>1<>",
         p,
         numBenchSelects,
         benchCards)
 
-    override def additionalRequest(owner : Player, opp : Player, args : Seq[String]) : Option[IntermediaryRequest] = {
+    /*override def additionalRequest(owner : Player, opp : Player, args : Seq[String]) : Option[IntermediaryRequest] = {
         val benchCards = opp.bench.toList.flatten
         if (benchCards.length > numBenchSelects && args.length == 0) {
             return Some(new NextActiveSpecification(owner, owner.active.get, benchCards))
@@ -55,13 +53,13 @@ abstract class BenchSelectAttack(
             val realIndex = getRealIndexFor(i, opp.bench)
             opp.bench(realIndex).get.takeDamage(benchDmg)
         }
-    }
+    }*/
 
-    def perform = (owner, opp) => {
-        standardAttack(owner, opp, mainDmg)
+    def perform = (owner, opp, args) => {
         for (bc : PokemonCard <- opp.bench.toList.flatten) {
             bc.takeDamage(benchDmg)
         }
+        standardAttack(owner, opp, mainDmg)
     }
 
 }

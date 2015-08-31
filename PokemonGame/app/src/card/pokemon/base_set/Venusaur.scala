@@ -27,13 +27,15 @@ class Venusaur extends BasicPokemon(
     firstMove = Some(new ActivePokemonPower(
       "Energy Trans",
       dragInterpreter = Some(new EnergyTransDrag()),
-      stateGenerator = Some(new EnergyTransState())) {}
+      stateGenerator = Some(new EnergyTransState())) {
+        def perform = (owner, opp, args) => togglePower()
+    }
     ),
     secondMove = Some(new Move(
       "Solarbeam",
       4,
       Map(EnergyType.GRASS -> 4)) {
-      def perform = (owner, opp ) => standardAttack(owner, opp, 60)
+      def perform = (owner, opp, args) => standardAttack(owner, opp, 60)
     }),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.FIRE),

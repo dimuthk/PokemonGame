@@ -22,13 +22,13 @@ class Pikachu extends BasicPokemon(
     firstMove = Some(new Move(
       "Gnaw",
       1) {
-        def perform = (owner, opp) => standardAttack(owner, opp, 10)
+        def perform = (owner, opp, args) => standardAttack(owner, opp, 10)
       }),
     secondMove = Some(new Move(
       "Thunder Jolt",
       2,
       Map(EnergyType.THUNDER -> 1)) {
-        def perform = (owner, opp) => selfDamageChanceAttack(owner, opp, 30, 10)
+        def perform = (owner, opp, args) => selfDamageChanceAttack(owner, opp, 30, 10)
       }),
     energyType = EnergyType.THUNDER,
     weakness = Some(EnergyType.FIGHTING),

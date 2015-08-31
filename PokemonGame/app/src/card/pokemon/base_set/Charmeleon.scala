@@ -18,13 +18,13 @@ class Charmeleon extends StageOnePokemon(
     firstMove = Some(new Move(
       "Slash",
       3) {
-        def perform = (owner, opp) => standardAttack(owner, opp, 30)
+        def perform = (owner, opp, args) => standardAttack(owner, opp, 30)
       }),
     secondMove = Some(new Move(
       "Flamethrower",
       3,
       Map(EnergyType.FIRE -> 2)) {
-        def perform = (owner, opp) => energyDiscardAttack(owner, opp, 50, EnergyType.FIRE)
+        def perform = (owner, opp, args) => energyDiscardAttack(owner, opp, 50, EnergyType.FIRE)
       }),
     energyType = EnergyType.FIRE,
     weakness = Some(EnergyType.WATER),

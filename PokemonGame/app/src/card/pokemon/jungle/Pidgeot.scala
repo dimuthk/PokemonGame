@@ -5,8 +5,6 @@ import src.move._
 import src.move.MoveBuilder._
 import src.player.Player
 import src.card.energy.EnergyType
-import src.board.move.DefaultMoveInterpreter
-import src.board.move.CustomMoveInterpreter
 import src.board.intermediary.IntermediaryRequest
 import src.board.intermediary.ClickableCardRequest
 import src.card.condition.PreventDamageCondition
@@ -25,16 +23,17 @@ class Pidgeot extends BasicPokemon(
     firstMove = Some(new Move(
         "Wing Attack",
         2) {
-      def perform = (owner, opp) => standardAttack(owner, opp, 20)
+      def perform = (owner, opp, args) => standardAttack(owner, opp, 20)
     }),
     secondMove = Some(new Move(
       "Hurricane",
       3) {
-        def perform = (owner, opp) => {
+        def perform = (owner, opp, args) => {
           standardAttack(owner, opp, 20)
           if (opp.active.get.currHp > 0) {
             opp.moveActiveToHand()
           }
+          None
         }
     }),
     energyType = EnergyType.COLORLESS,

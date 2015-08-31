@@ -5,8 +5,6 @@ import src.move._
 import src.move.MoveBuilder._
 import src.player.Player
 import src.card.energy.EnergyType
-import src.board.move.DefaultMoveInterpreter
-import src.board.move.CustomMoveInterpreter
 import src.board.intermediary.IntermediaryRequest
 import src.board.intermediary.ClickableCardRequest
 import src.card.condition.PreventDamageCondition
@@ -26,13 +24,13 @@ class Nidorina extends StageOnePokemon(
       "Supersonic",
       1,
       Map(EnergyType.GRASS -> 1)) {
-        def perform = (owner, opp) => confuseChanceAttack(owner, opp)
+        def perform = (owner, opp, args) => confuseAttackChance(owner, opp)
       }),
     secondMove = Some(new Move(
       "Double Kick",
       3,
       Map(EnergyType.GRASS -> 1)) {
-        def perform = (owner, opp) => multipleHitAttack(owner, opp, 30, 2)
+        def perform = (owner, opp, args) => multipleHitAttack(owner, opp, 30, 2)
       }),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.PSYCHIC),

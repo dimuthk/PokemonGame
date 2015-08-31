@@ -25,9 +25,10 @@ class Vileplume extends BasicPokemon(
 		"Petal Dance",
         3,
         Map(EnergyType.GRASS -> 3)) {
-			def perform = (owner, opp) => {
+      def perform = (owner, opp, args) => {
         multipleHitAttack(owner, opp, 40, 3)
 				owner.active.get.statusCondition = Some(StatusCondition.CONFUSED)
+        None
 			}
         }),
 	energyType = EnergyType.GRASS,
@@ -39,19 +40,18 @@ class Vileplume extends BasicPokemon(
 
 private class Heal extends ActivePokemonPower("Heal") {
 
-	class HealChooseSpecification(
+  var usedHeal : Boolean = false
+
+    class HealChooseSpecification(
         p : Player,
         benchAndActiveCards : Seq[PokemonCard]) extends ClickableCardRequest(
         "Select Pokemon",
         "Choose a pokemon to heal.",
-        "MOVE<>ATTACK_FROM_ACTIVE<>1<>",
         p,
         1,
         benchAndActiveCards)
 
-  var usedHeal : Boolean = false
-
-  override def update(owner : Player, opp : Player, pc : PokemonCard, turnSwapped : Boolean, isActive : Boolean) : Unit = {
+  override def update = (owner, opp, pc, turnSwapped, isActive) => {
     super.update(owner, opp, pc, turnSwapped, isActive)
     if (turnSwapped && owner.isTurn) {
       usedHeal = false
@@ -61,30 +61,30 @@ private class Heal extends ActivePokemonPower("Heal") {
     }
   }
 
-	override def perform = (owner, opp) => ()
+	override def perform = (owner, opp, args) => args.length match {
+    case 0 => Some(new HealChooseSpecification(owner, owner.existingActiveAndBenchCards))
+    case _ =>  usedHeal match {
+      case true => throw new Exception("Attempted to reuse heal after it had been used this turn!")
+      case false => {
+        usedHeal = true
+        var rawIndex = args.head.toInt
+        (owner.active.isDefined, args.head.toInt) match {
+          case (true, 0) => {
+            owner.active.get.heal(10)
+          }
+          case (false, _) => {
+            rawIndex = rawIndex - 1
+            val benchIndex = getRealIndexFor(rawIndex, owner.bench)
+            owner.bench(benchIndex).get.heal(10)
+          }
+          case _ => {
+            val benchIndex = getRealIndexFor(rawIndex, owner.bench)
+            owner.bench(benchIndex).get.heal(10)
+          }
+        }
+        None
+      }
+    }
+  }
 
-  	override def additionalRequest(owner : Player, opp : Player, args : Seq[String]) : Option[IntermediaryRequest] = usedHeal match {
-  		case true => None
-  		case false => {
-  			usedHeal = true
-  			return flippedHeads() match {
-  				case true => Some(new HealChooseSpecification(owner, owner.existingActiveAndBenchCards))
-  				case false => None
-  			}
-  		}
-  	}
-
-  	override def performWithAdditional(owner : Player, opp : Player, args : Seq[String]) {
-  		var rawIndex = args.head.toInt
-  		if (owner.active.isDefined) {
-  			if (rawIndex == 0) {
-  				owner.active.get.heal(10)
-          return
-  			} else {
-  				rawIndex = rawIndex - 1
-  			}
-  		}
-  		val benchIndex = getRealIndexFor(rawIndex, owner.bench)
-  		owner.bench(benchIndex).get.heal(10)
-  	}
 }

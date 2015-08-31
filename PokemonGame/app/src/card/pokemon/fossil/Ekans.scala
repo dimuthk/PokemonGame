@@ -23,13 +23,13 @@ class Ekans extends BasicPokemon(
       "Spit Poison",
       1,
       Map(EnergyType.GRASS -> 1)) {
-        def perform = (owner, opp) => poisonChanceAttack(owner, opp, 0)
+        def perform = (owner, opp, args) => poisonAttackChance(owner, opp, 0)
       }),
     secondMove = Some(new Move(
       "Wrap",
       2,
       Map(EnergyType.GRASS -> 1)) {
-        def perform = (owner, opp) => paralyzeChanceAttack(owner, opp, 20)
+        def perform = (owner, opp, args) => paralyzeAttackChance(owner, opp, 20)
       }),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.PSYCHIC),

@@ -21,14 +21,13 @@ class Ninetales extends StageOnePokemon(
     firstMove = Some(new Whirlwind(
         "Lure",
         ownerChooses = true,
-        moveNum = 1,
         dmg = 20,
         totalEnergyReq = 2)),
     secondMove = Some(new Move(
       "Fire Blast",
       4,
       Map(EnergyType.FIRE -> 4)) {
-        def perform = (owner, opp) => energyDiscardAttack(owner, opp, 80, EnergyType.FIRE)
+        def perform = (owner, opp, args) => energyDiscardAttack(owner, opp, 80, EnergyType.FIRE)
       }),
     energyType = EnergyType.FIRE,
     weakness = Some(EnergyType.WATER),

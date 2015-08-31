@@ -19,7 +19,7 @@ class Weedle extends BasicPokemon(
 		"Poison Sting",
 		1,
 		Map(EnergyType.GRASS -> 1)) {
-			def perform = (owner, opp) => poisonChanceAttack(owner, opp, 10)
+			def perform = (owner, opp, args) => poisonAttackChance(owner, opp, 10)
 		}),
 	energyType = EnergyType.GRASS,
 	weakness = Some(EnergyType.FIRE),

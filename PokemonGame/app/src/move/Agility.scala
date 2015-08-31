@@ -7,7 +7,6 @@ import src.card.pokemon.PokemonCard
 import src.board.intermediary.IntermediaryRequest
 import src.board.intermediary.ClickableCardRequest
 import src.board.drag.CustomDragInterpreter
-import src.board.move.CustomMoveInterpreter
 import src.board.state.CustomStateGenerator
 import src.card.energy.EnergyCard
 import src.card.energy.EnergyType
@@ -24,7 +23,7 @@ class Agility(
       condName,
       totalEnergyReq,
       specialEnergyReq) {
-        def perform = (owner, opp) =>  {
+        def perform = (owner, opp, args) => {
           val active = owner.active.get
           if (flippedHeads()) {
             owner.notify(active.displayName + " successfully performed " + condName + "!")

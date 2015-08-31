@@ -7,7 +7,6 @@ import src.card.pokemon.PokemonCard
 import src.board.intermediary.IntermediaryRequest
 import src.board.intermediary.ClickableCardRequest
 import src.board.drag.CustomDragInterpreter
-import src.board.move.CustomMoveInterpreter
 import src.board.state.CustomStateGenerator
 import src.card.energy.EnergyCard
 import src.card.energy.EnergyType
@@ -19,7 +18,6 @@ import src.player.Player
 class Whirlwind(
 	name : String,
     val ownerChooses : Boolean,
-    val moveNum : Int,
 	val dmg : Int,
     totalEnergyReq : Int,
 	specialEnergyReq : Map[EnergyType.Value, Int] = Map(),
@@ -34,12 +32,11 @@ class Whirlwind(
         benchCards : Seq[PokemonCard]) extends ClickableCardRequest(
         "Choose Active Pokemon",
         userName + " is whisking you away! Select a new active pokemon",
-        (if (ownerChooses) "" else "FLIP<>") + "MOVE<>ATTACK_FROM_ACTIVE<>" + moveNum + "<>",
         p,
         1,
         benchCards)
 
-    override def additionalRequest(owner : Player, opp : Player, args : Seq[String]) : Option[IntermediaryRequest] = {
+    /*override def additionalRequest(owner : Player, opp : Player, args : Seq[String]) : Option[IntermediaryRequest] = {
         if (onFlip && !flippedHeads()) {
             return None
         }
@@ -64,8 +61,8 @@ class Whirlwind(
                 return
             }
         }
-    }
+    }*/
 
-    def perform = (owner, opp) => standardAttack(owner, opp, dmg)
+    def perform = (owner, opp, args) => standardAttack(owner, opp, dmg)
 
 }

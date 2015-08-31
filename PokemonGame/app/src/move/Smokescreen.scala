@@ -7,7 +7,6 @@ import src.card.pokemon.PokemonCard
 import src.board.intermediary.IntermediaryRequest
 import src.board.intermediary.ClickableCardRequest
 import src.board.drag.CustomDragInterpreter
-import src.board.move.CustomMoveInterpreter
 import src.board.state.CustomStateGenerator
 import src.card.energy.EnergyCard
 import src.card.energy.EnergyType
@@ -24,11 +23,11 @@ class Smokescreen(
       condName,
       totalEnergyReq,
       specialEnergyReq) {
-        def perform = (owner, opp) => owner.active.get match {
+        def perform = (owner, opp, args) => owner.active.get match {
           case _ : PokemonCard => {
-            standardAttack(owner, opp, dmg)
             opp.active.get.smokescreen = true
             opp.active.get.generalCondition = Some(condName)
+            standardAttack(owner, opp, dmg)
           }
           case _ => throw new Exception("Tried to use smokescreen with no card")
         }

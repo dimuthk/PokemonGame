@@ -25,7 +25,12 @@ object DragDirector {
 			val interpreter = selectDragInterpreter(owner, opp)
 			interpreter.handleDrag(owner, dragCmd)
 		} else {
-			Logger.debug("intermediaryReq: " + intermediaryReq)
+			val flip : String = if (intermediaryReq.get.p == owner) "" else "FLIP<>"
+      		intermediaryReq.get.serverTag = flip + "DRAG<>" + contents.mkString("<>") + "<>"
+      		if (intermediaryReq.get.additionalTag.isDefined) {
+      			intermediaryReq.get.serverTag = intermediaryReq.get.serverTag + intermediaryReq.get.additionalTag.get + "<>"
+      		}
+			Logger.debug("dragintermediaryReq: " + intermediaryReq)
 		}
 		return intermediaryReq
 	}

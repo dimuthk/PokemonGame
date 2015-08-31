@@ -22,13 +22,13 @@ class Beedrill extends StageTwoPokemon(
     firstMove = Some(new Move(
       "Twineedle",
       3) {
-        def perform = (owner, opp) => multipleHitAttack(owner, opp, 30, 2)
+        def perform = (owner, opp, args) => multipleHitAttack(owner, opp, 30, 2)
       }),
     secondMove = Some(new Move(
       "Poison String",
       3,
       Map(EnergyType.GRASS -> 3)) {
-        def perform = (owner, opp) => poisonChanceAttack(owner, opp, 40)
+        def perform = (owner, opp, args) => poisonAttackChance(owner, opp, 40)
       }),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.FIRE),

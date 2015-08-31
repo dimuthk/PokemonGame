@@ -21,12 +21,14 @@ class Blastoise extends StageTwoPokemon(
     maxHp = 100,
     firstMove = Some(new ActivePokemonPower(
       "Rain Dance",
-      dragInterpreter = Some(new RainDanceDrag())) {}),
+      dragInterpreter = Some(new RainDanceDrag())) {
+        def perform = (owner, opp, args) => togglePower()
+      }),
     secondMove = Some(new Move(
       "Hydro Pump",
       3,
       Map(EnergyType.WATER -> 3)) {
-        def perform = (owner, opp) => standardAttackPlusExtra(owner, opp, 40, EnergyType.WATER, 3)
+        def perform = (owner, opp, args) => standardAttackPlusExtra(owner, opp, 40, EnergyType.WATER, 3)
       }),
     energyType = EnergyType.WATER,
     weakness = Some(EnergyType.THUNDER),

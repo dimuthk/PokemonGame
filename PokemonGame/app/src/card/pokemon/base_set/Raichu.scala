@@ -23,12 +23,12 @@ class Raichu extends StageOnePokemon(
       "Agility",
       3,
       20,
-      Map(EnergyType.THUNDER -> 1)) {}),
+      Map(EnergyType.THUNDER -> 1))),
     secondMove = Some(new Move(
       "Thunder",
       4,
       Map(EnergyType.THUNDER -> 3)) {
-        def perform = (owner, opp) => selfDamageChanceAttack(owner, opp, 60, 30)
+        def perform = (owner, opp, args) => selfDamageChanceAttack(owner, opp, 60, 30)
       }),
     energyType = EnergyType.THUNDER,
     weakness = Some(EnergyType.FIGHTING),

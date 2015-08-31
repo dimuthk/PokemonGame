@@ -27,8 +27,10 @@ import play.api.libs.json._
 abstract class IntermediaryRequest(
 	val requestTitle : String,
 	val requestMsg : String,
-	var serverTag : String,
-	val p : Player) extends Jsonable {
+	val p : Player,
+	val additionalTag : Option[String] = None) extends Jsonable {
+
+	var serverTag : String = ""
 
 	override def toJsonImpl() = Json.obj(
 		Identifier.REQUEST_TITLE.toString -> requestTitle,
@@ -60,10 +62,10 @@ object IntermediaryRequest {
 abstract class ClickableCardRequest(
 	requestTitle : String,
 	requestMsg : String,
-	serverTag : String,
 	p : Player,
 	val clickCount : Int,
-	val cardList : Seq[Card]) extends IntermediaryRequest(requestTitle, requestMsg, serverTag, p) {
+	val cardList : Seq[Card],
+	additionalTag : Option[String] = None) extends IntermediaryRequest(requestTitle, requestMsg, p, additionalTag) {
 
 	override def getIdentifier() = Identifier.CLICK_CARD_REQUEST
 
@@ -80,10 +82,9 @@ abstract class ClickableCardRequest(
 abstract class SpecificClickableCardRequest(
 	requestTitle : String,
 	requestMsg : String,
-	serverTag : String,
 	p : Player,
 	val clickCount : Int,
-	val cardList : Seq[Card]) extends IntermediaryRequest(requestTitle, requestMsg, serverTag, p) {
+	val cardList : Seq[Card]) extends IntermediaryRequest(requestTitle, requestMsg, p) {
 
 	override def getIdentifier() = Identifier.SPECIFIC_CLICK_CARD_REQUEST
 

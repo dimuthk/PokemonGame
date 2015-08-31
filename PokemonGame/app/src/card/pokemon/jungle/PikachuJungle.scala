@@ -5,8 +5,6 @@ import src.move._
 import src.move.MoveBuilder._
 import src.player.Player
 import src.card.energy.EnergyType
-import src.board.move.DefaultMoveInterpreter
-import src.board.move.CustomMoveInterpreter
 import src.board.intermediary.IntermediaryRequest
 import src.board.intermediary.ClickableCardRequest
 import src.card.condition.PreventDamageCondition
@@ -28,7 +26,7 @@ class PikachuJungle extends BasicPokemon(
       benchDmg = 10,
       numBenchSelects = 1,
       2,
-      Map(EnergyType.THUNDER -> 2)) {}),
+      Map(EnergyType.THUNDER -> 2))),
     energyType = EnergyType.THUNDER,
     weakness = Some(EnergyType.FIGHTING),
     retreatCost = 1)

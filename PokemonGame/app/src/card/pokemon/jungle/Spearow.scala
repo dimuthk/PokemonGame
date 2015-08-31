@@ -19,10 +19,10 @@ class Spearow extends BasicPokemon(
 	firstMove = Some(new Move(
 		"Peck",
 		1) {
-			def perform = (owner, opp) => standardAttack(owner, opp, 10)
+			def perform = (owner, opp, args) => standardAttack(owner, opp, 10)
 		}),
 	secondMove = Some(new MirrorMove(
-        3) {}),
+        3)),
 	energyType = EnergyType.COLORLESS,
 	weakness = Some(EnergyType.THUNDER),
 	resistance = Some(EnergyType.FIGHTING),

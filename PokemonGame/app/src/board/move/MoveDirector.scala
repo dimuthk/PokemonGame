@@ -14,34 +14,52 @@ import play.api.Logger
 object MoveDirector {
 
   def handleMoveCommand(owner : Player, opp : Player, contents : Seq[String]) : Option[IntermediaryRequest] = {
-    val originalCmd = contents.head
-    val moveCmd : MoveCommand = originalCmd match {
-      case "ATTACK_FROM_ACTIVE" => AttackFromActive(contents(1).toInt, contents.drop(2))
-      case "ATTACK_FROM_BENCH" => AttackFromBench(contents(1).toInt - 1, contents(2).toInt, contents.drop(3))
-    }
-    val maybeIntermediaryReq = DefaultMoveInterpreter.additionalRequest(owner, opp, moveCmd)
-    maybeIntermediaryReq match {
-      case Some(intermediaryReq) => {
-        intermediaryReq.serverTag = "MOVE<>" + contents.mkString("<>") + "<>"
+    val maybeIntermediaryReq  : Option[IntermediaryRequest] = contents(0) match {
+      case "ATTACK_FROM_ACTIVE" => contents(1).toInt match {
+        case 1 => attackFromActive(owner, opp, owner.active.get.firstMove.get, contents.drop(2))
+        case 2 => attackFromActive(owner, opp, owner.active.get.secondMove.get, contents.drop(2))
+        case 3 => attackFromActive(owner, opp, owner.active.get.pass, Nil)
+        case _ => throw new Exception("Invalid move number")
       }
-      case None => {
-        val interpreter = selectMoveInterpreter(owner, opp)
-        interpreter.handleMove(owner, opp, moveCmd)
+      case "ATTACK_FROM_BENCH" => (contents(1).toInt - 1, contents(2).toInt) match {
+        case (benchIndex, 1) => attackFromBench(owner, opp, owner.bench(benchIndex).get.firstMove.get, contents.drop(3))
+        case (benchIndex, 2) => attackFromBench(owner, opp, owner.bench(benchIndex).get.secondMove.get, contents.drop(3))
+        case _ => throw new Exception("Invalid move number")
+      }
+    }
+    if (maybeIntermediaryReq.isDefined) {
+      val flip : String = if (maybeIntermediaryReq.get.p == owner) "" else "FLIP<>"
+      maybeIntermediaryReq.get.serverTag = flip + "MOVE<>" + contents.mkString("<>") + "<>"
+      if (maybeIntermediaryReq.get.additionalTag.isDefined) {
+        maybeIntermediaryReq.get.serverTag = maybeIntermediaryReq.get.serverTag + maybeIntermediaryReq.get.additionalTag.get + "<>"
       }
     }
     return maybeIntermediaryReq
   }
 
-  def selectMoveInterpreter(owner : Player, opp : Player) : MoveInterpreter = {
-    for (pc : PokemonCard <- (owner.existingActiveAndBenchCards ++ opp.existingActiveAndBenchCards)) {
-      for (m : Move <- pc.existingMoves) {
-        if (m.moveInterpreter.isDefined && m.moveInterpreter.get.isActive) {
-          Logger.debug("got special interpreter")
-          return m.moveInterpreter.get
+  def flippedHeads() : Boolean = true
+
+  def attackFromActive(owner : Player, opp : Player, move : Move, args : Seq[String]) : Option[IntermediaryRequest] = move match {
+      case power : PokemonPower => power.perform(owner, opp, args)
+      case _ => {
+        val intermediary = (!owner.active.get.smokescreen || flippedHeads()) match {
+          case true => move.perform(owner, opp, args)
+          case false => None
         }
+        flipTurn(owner, opp)
+        return intermediary
       }
     }
-    return DefaultMoveInterpreter
-  }
+
+    def attackFromBench(owner : Player, opp : Player, move : Move, args : Seq[String]) : Option[IntermediaryRequest] = move match {
+      case power : PokemonPower => power.perform(owner, opp, args)
+      case _ => throw new Exception("Non pokemon power move called from bench!")
+    }
+
+    def flipTurn(owner : Player, opp : Player) : Unit = {
+        owner.isTurn = !owner.isTurn
+        opp.isTurn = !opp.isTurn
+    }
+
 
 }

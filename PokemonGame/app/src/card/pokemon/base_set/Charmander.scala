@@ -19,13 +19,13 @@ class Charmander extends BasicPokemon(
 		"Scratch",
 		1,
 		Map()) {
-			def perform = (owner, opp) => standardAttack(owner, opp, 10)
+			def perform = (owner, opp, args) => standardAttack(owner, opp, 10)
 	}),
 	secondMove = Some(new Move(
 		"Ember",
 		2,
 		Map(EnergyType.FIRE -> 1)) {
-			def perform = (owner, opp) => energyDiscardAttack(owner, opp, 30, EnergyType.FIRE)
+			def perform = (owner, opp, args) => energyDiscardAttack(owner, opp, 30, EnergyType.FIRE)
 	}),
 	energyType = EnergyType.FIRE,
 	weakness = Some(EnergyType.WATER),

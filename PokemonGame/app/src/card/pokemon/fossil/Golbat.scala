@@ -22,13 +22,13 @@ class Golbat extends StageOnePokemon(
     firstMove = Some(new Move(
       "Wing Attack",
       3) {
-        def perform = (owner, opp) => standardAttack(owner, opp, 30)
+        def perform = (owner, opp, args) => standardAttack(owner, opp, 30)
       }),
     secondMove = Some(new Move(
       "Leech Life",
       3,
       Map(EnergyType.GRASS -> 2)) {
-        def perform = (owner, opp) => energyDrainAttack(owner, opp, 20)
+        def perform = (owner, opp, args) => energyDrainAttack(owner, opp, 20)
       }),
     energyType = EnergyType.GRASS,
     weakness = Some(EnergyType.PSYCHIC),
