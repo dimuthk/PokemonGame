@@ -10,9 +10,11 @@ import src.player.Player
 
 abstract class MoveInterpreter {
 
-    def attackFromActive : (Player, Player, Move, Seq[String]) => Option[IntermediaryRequest]
+	// owner, opp, moveNum, args
+	def attackFromActive : (Player, Player, Int, Seq[String]) => Option[IntermediaryRequest]
 
-    def attackFromBench : (Player, Player, Move, Seq[String]) => Option[IntermediaryRequest]
+	// owner, opp, benchIndex, moveNum, args
+    def attackFromBench : (Player, Player, Int, Int, Seq[String]) => Option[IntermediaryRequest]
 
     def flipTurn(owner : Player, opp : Player) : Unit = {
         owner.isTurn = !owner.isTurn

@@ -2,6 +2,7 @@ package src.card.pokemon.base_set
 
 import src.json.Identifier
 import src.move._
+import src.move.Status._
 import src.board.intermediary.IntermediaryRequest
 import src.board.intermediary.IntermediaryRequest._
 import src.board.move.CustomMoveInterpreter
@@ -39,27 +40,20 @@ class Vileplume extends BasicPokemon(
         }),
 	energyType = EnergyType.GRASS,
 	weakness = Some(EnergyType.FIRE),
-	retreatCost = 1) {
+	retreatCost = 2) {
 
 
 }
 
-private class Heal extends ActivePokemonPower("Heal", stateGenerator = Some(new HealStateGenerator())) {
+private class Heal extends ActivePokemonPower(
+  "Heal",
+  stateGenerator = Some(new HealStateGenerator()),
+  moveInterpreter = Some(new HealMoveInterpreter())) {
 
   var usedHeal : Boolean = false
 
-    class HealChooseSpecification(
-        p : Player,
-        benchAndActiveCards : Seq[PokemonCard]) extends ClickableCardRequest(
-        "Select Pokemon",
-        "Choose a pokemon to heal.",
-        p,
-        1,
-        benchAndActiveCards)
-
   override def update = (owner, opp, pc, turnSwapped, isActive) => {
     super.update(owner, opp, pc, turnSwapped, isActive)
-    Logger.debug("updated venomoth?")
     if (turnSwapped && owner.isTurn) {
       usedHeal = false
     }
@@ -68,46 +62,59 @@ private class Heal extends ActivePokemonPower("Heal", stateGenerator = Some(new 
     }
   }
 
-  override def perform = (owner, opp, args) => togglePower()
-
-	/*override def perform = (owner, opp, args) => args.length match {
-    case 0 => Some(new HealChooseSpecification(owner, owner.existingActiveAndBenchCards))
-    case _ =>  usedHeal match {
-      case true => throw new Exception("Attempted to reuse heal after it had been used this turn!")
-      case false => {
-        usedHeal = true
-        var rawIndex = args.head.toInt
-        (owner.active.isDefined, args.head.toInt) match {
-          case (true, 0) => {
-            owner.active.get.heal(10)
-          }
-          case (false, _) => {
-            rawIndex = rawIndex - 1
-            val benchIndex = getRealIndexFor(rawIndex, owner.bench)
-            owner.bench(benchIndex).get.heal(10)
-          }
-          case _ => {
-            val benchIndex = getRealIndexFor(rawIndex, owner.bench)
-            owner.bench(benchIndex).get.heal(10)
-          }
-        }
-        None
-      }
-    }
-  }*/
+  override def perform = (owner, opp, args) => {
+    usedHeal = true
+    togglePower()
+  }
 
 }
 
 class HealMoveInterpreter extends CustomMoveInterpreter {
 
-  def attackFromActive = (owner, opp, move, args) => {
-    val pc = owner.cardWithActivatedPower
-    pc.get.firstMove.get.perform(owner, opp, args)
+  def getHealMove(owner : Player) : ActivePokemonPower = owner.cardWithActivatedPower match {
+    case Some(v : Vileplume) => v.firstMove match {
+      case Some(ap : ActivePokemonPower) => ap
+      case _ => throw new Exception("Vileplume did not have heal as its move for some reason")
+    }
+    case _ => throw new Exception("Did not find Vileplume as the activated card")
   }
 
-  def attackFromBench = (owner, opp, move, args) => {
-    val pc = owner.cardWithActivatedPower
-    pc.get.firstMove.get.perform(owner, opp, args)
+  def attackFromActive = (owner, opp, moveNum, args) => {
+    val active = owner.active.get
+    val ap = getHealMove(owner)
+    moveNum match {
+      case 1 => owner.cardWithActivatedPower.get == active match {
+        case true => ap.togglePower()
+        case false => {
+          active.heal(10)
+          ap.togglePower()
+        }
+      }
+      case 2 => {
+        active.heal(10)
+        ap.togglePower()
+      }
+      case _ => throw new Exception("Unexpected move num for Vileplume heal")
+    }
+  }
+
+  def attackFromBench = (owner, opp, benchIndex, moveNum, args) => {
+    val bc = owner.bench(benchIndex).get
+    val ap = getHealMove(owner)
+    moveNum match {
+      case 1 => owner.cardWithActivatedPower.get == bc match {
+        case true => ap.togglePower()
+        case false => {
+          bc.heal(10)
+          ap.togglePower()
+        }
+      }
+      case 2 => {
+        bc.heal(10)
+        ap.togglePower()
+      }
+      case _ => throw new Exception("Unexpected move num for Vileplume heal")
+    }
   }
 
 }
@@ -124,21 +131,29 @@ class HealStateGenerator extends CustomStateGenerator(true, false) {
     opp.setUIOrientationForActiveAndBench(Set(FACE_UP))
     opp.setUiOrientationForHand(Set())
 
-    val activeJson = moveListToJsArray(List(header, healMoveJson))
-    val benchJson = moveListToJsArray(List(healMoveJson))
+    val activeJson = jsonForCard(owner, owner.active, interceptor)
+    val benchJson = for (obc <- owner.bench) yield jsonForCard(owner, obc, interceptor)
 
     val ownerJson = owner.customJson(activeMoves = Some(activeJson), benchMoves = Some(benchJson))
     Logger.debug("VILEPLUME " + ownerJson \ "ACTIVE" \ "MOVES" + "")
     (ownerJson, opp.toJson)
   }
 
-  val header : JsObject = Json.obj(
-    Identifier.MOVE_NAME.toString -> "Heal",
-    Identifier.MOVE_STATUS.toString -> Status.ACTIVATED)
+  def jsonForCard(owner : Player, opc : Option[PokemonCard], interceptor : PokemonCard) : JsArray = opc match {
+    case Some(pc) => pc == interceptor match {
+      case true => moveListToJsArray(List(mainCard(pc), otherCard(pc)))
+      case false => moveListToJsArray(List(otherCard(pc)))
+    }
+    case None => moveListToJsArray(List(Placeholder.toJson))
+  }
 
-  val healMoveJson : JsObject = Json.obj(
+  def otherCard(pc : PokemonCard) : JsObject = Json.obj(
     Identifier.MOVE_NAME.toString -> "Heal",
-    Identifier.MOVE_STATUS.toString -> Status.ENABLED)
+    Identifier.MOVE_STATUS.toString -> (if (pc.currHp == pc.maxHp) DISABLED else ENABLED))
+
+  def mainCard(pc : PokemonCard) : JsObject = Json.obj(
+    Identifier.MOVE_NAME.toString -> "Heal",
+    Identifier.MOVE_STATUS.toString -> ACTIVATED)
 
   def moveListToJsArray(list : Seq[JsObject]) : JsArray = {
     return list.foldRight(new JsArray())((m, curr) => curr.prepend(m))

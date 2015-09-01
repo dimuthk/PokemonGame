@@ -31,6 +31,9 @@ abstract class ActivePokemonPower(
     if (stateGenerator.isDefined) {
       stateGenerator.get.isActive = !stateGenerator.get.isActive
     }
+    if (moveInterpreter.isDefined) {
+      moveInterpreter.get.isActive = !moveInterpreter.get.isActive
+    }
     return None
   }
 

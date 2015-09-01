@@ -9,5 +9,7 @@ import src.board.drag._
 import src.player.Player
 
 abstract class CustomMoveInterpreter extends MoveInterpreter {
+
 	var isActive : Boolean = false
+
 }

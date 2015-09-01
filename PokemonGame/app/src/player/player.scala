@@ -162,9 +162,18 @@ class Player extends Jsonable {
     }
   }
 
-  def cardWithActivatedPower : Option[PokemonCard] = existingActiveAndBenchCards.find {
-    case ap : ActivePokemonPower => ap.isActive
-    case _ => false
+  def cardWithActivatedPower : Option[PokemonCard] = {
+    for (pc : PokemonCard <- existingActiveAndBenchCards) {
+      pc.existingMoves.foreach {
+        case ap : ActivePokemonPower => {
+          if (ap.isActive) {
+            return Some(pc)
+          }
+        }
+        case _ => ()
+      }
+    }
+    return None
   }
 
   def setUIOrientationForActiveAndBench(uiSet : Set[CardUI.Value]) {
@@ -190,7 +199,7 @@ class Player extends Jsonable {
 
   def customJson(
     activeMoves : Option[JsArray] = None,
-    benchMoves : Option[JsArray] = None,
+    benchMoves : Option[Seq[JsArray]] = None,
     handMoves : Option[JsObject] = None) : JsObject = {
     val notifyJson = notification match {
       case Some(s) => JsString(s)
@@ -219,8 +228,9 @@ class Player extends Jsonable {
        Identifier.IS_TURN.toString -> JsBoolean(isTurn))
   }
 
-  def benchForCustomJson(benchMoves : JsArray) : JsArray = {
-    return bench.foldRight(new JsArray())((c, curr) => curr.prepend(customMoveJson(c, benchMoves)))
+  def benchForCustomJson(benchMoves : Seq[JsArray]) : JsArray = {
+    return bench.zipWithIndex.foldRight(new JsArray())((c, curr) => curr.prepend(customMoveJson(c._1, benchMoves(c._2))))
+    //return bench.zipWithIndex.foldRight(new JsArray())((c, curr) => curr.prepend(customJson(c._1, benchMoves(c._2))))
   }
 
   def customMoveJson(pc : Option[PokemonCard], benchMoves : JsArray) : JsObject = pc match {

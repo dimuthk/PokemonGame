@@ -14,19 +14,10 @@ import play.api.Logger
 object MoveDirector {
 
   def handleMoveCommand(owner : Player, opp : Player, contents : Seq[String]) : Option[IntermediaryRequest] = {
-    val interpreter = selectInterpreter()
+    val interpreter = selectMoveInterpreter(owner, opp)
     val maybeIntermediaryReq  : Option[IntermediaryRequest] = contents(0) match {
-      case "ATTACK_FROM_ACTIVE" => contents(1).toInt match {
-        case 1 => interpreter.attackFromActive(owner, opp, owner.active.get.firstMove.get, contents.drop(2))
-        case 2 => interpreter.attackFromActive(owner, opp, owner.active.get.secondMove.get, contents.drop(2))
-        case 3 => interpreter.attackFromActive(owner, opp, owner.active.get.pass, Nil)
-        case _ => throw new Exception("Invalid move number")
-      }
-      case "ATTACK_FROM_BENCH" => (contents(1).toInt - 1, contents(2).toInt) match {
-        case (benchIndex, 1) => interpreter.attackFromBench(owner, opp, owner.bench(benchIndex).get.firstMove.get, contents.drop(3))
-        case (benchIndex, 2) => interpreter.attackFromBench(owner, opp, owner.bench(benchIndex).get.secondMove.get, contents.drop(3))
-        case _ => throw new Exception("Invalid move number")
-      }
+      case "ATTACK_FROM_ACTIVE" => interpreter.attackFromActive(owner, opp, contents(1).toInt, contents.drop(2))
+      case "ATTACK_FROM_BENCH" => interpreter.attackFromBench(owner, opp, contents(1).toInt - 1, contents(2).toInt, contents.drop(3))
     }
     if (maybeIntermediaryReq.isDefined) {
       val flip : String = if (maybeIntermediaryReq.get.p == owner) "" else "FLIP<>"
@@ -40,7 +31,17 @@ object MoveDirector {
 
   def flippedHeads() : Boolean = true
 
-  def selectInterpreter() : MoveInterpreter = DefaultMoveInterpreter
+  def selectMoveInterpreter(owner : Player, opp : Player) : MoveInterpreter = {
+    for (pc : PokemonCard <- (owner.existingActiveAndBenchCards ++ opp.existingActiveAndBenchCards)) {
+      for (m : Move <- pc.existingMoves) {
+        if (m.moveInterpreter.isDefined && m.moveInterpreter.get.isActive) {
+          Logger.debug("got special interpreter")
+          return m.moveInterpreter.get
+        }
+      }
+    }
+    return DefaultMoveInterpreter
+  }
 
 
 }
