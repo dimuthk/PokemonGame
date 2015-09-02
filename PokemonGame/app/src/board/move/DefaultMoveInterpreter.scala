@@ -26,7 +26,9 @@ object DefaultMoveInterpreter extends MoveInterpreter {
           case true => move.perform(owner, opp, args)
           case false => None
         }
-        flipTurn(owner, opp)
+        if (intermediary.isEmpty) {
+          flipTurn(owner, opp)
+        }
         return intermediary
       }
     }

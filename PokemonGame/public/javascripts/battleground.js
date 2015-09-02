@@ -37,6 +37,9 @@ function processIntermediary(data) {
       case "SINGLE_DISPLAY":
         showSingleDisplay(data.intermediary)
         break;
+      case "OPPONENT_CARD_INTERFACE":
+        showOpponentCardInterface(data.intermediary)
+        break;
     }
   }
 }
@@ -487,6 +490,7 @@ function sendClickIntermediary() {
   $(".popUp").dialog("close")
 }
 
+
 function contains(matcher, value) {
   for (var i=0; i<matcher.length; i++) {
     if (matcher[i] == value) {
@@ -562,6 +566,74 @@ function showSpecificClickableCardRequest(intermediary) {
         title: intermediary.REQUEST_TITLE
     })
   }
+
+function drawMirrorMoveButtons(card, tag) {
+  var res = ""
+  for (var i=0; i<card.MOVES.length; i++) {
+    if (!isPlaceholder(card.MOVES[i])) {
+      var move = card.MOVES[i]
+      var name = ""
+      switch (move.MOVE_STATUS) {
+        case "ACTIVATABLE":
+          name = "<font style=\"color:red;\">Activate " + move.MOVE_NAME + "</font>"
+          break;
+        case "ACTIVATED":
+          name = "<font style=\"color:red;\">Deactivate " + move.MOVE_NAME + "</font>"
+          break;
+        case "PASSIVE":
+          name = "<font style=\"color:blue;\">" + move.MOVE_NAME + "</font>"
+          break;
+        default:
+          name = move.MOVE_NAME
+          break;
+      }
+      var disabledStr = (move.MOVE_STATUS == "DISABLED" || move.MOVE_STATUS == "PASSIVE") ? "disabled" : ""
+      res += "<button style=\"width: 100%; left: -15%; top: -20%; position: relative;\" class=\"actionButton\" " + disabledStr
+        + " onclick=\"sendOpponentCardInterfaceIntermediary('" + (i+1) + "');\">" + name + "</button><br><br>"
+    }
+  }
+  return res
+}
+
+function sendOpponentCardInterfaceIntermediary(index) {
+  var intermediary = $("#intermediaryPanel").data("intermediary")
+  var tag = intermediary.SERVER_TAG + index
+  $("#content").data("socket").send(tag)
+  $(".popUp").dialog("close")
+}
+
+function showOpponentCardInterface(intermediary, tag) {
+  var popUp = "<div style=\"background-color: #888888;\" class=\"popUp\">" +
+        "<div class=\"col col-3-5\">" +
+          "<div class=\"row row-1-10\"></div>" +
+          "<div class=\"row row-8-10\">" +
+            "<div class=\"col col-1-5\"></div>" +
+            "<div class=\"col col-3-5\">" +
+              imgTag.replace("[IMG_NAME]", intermediary.DISPLAY_CARD.IMG_NAME) +
+            "</div>" +
+            "<div class=\"col col-1-5\"></div>" +
+          "</div>" +
+          "<div class=\"row row-1-10\"></div>" +
+        "</div>" +
+        "<div class=\"col col-2-5\" style=\"color: white;\">" +
+            "<div class\"row row-1-3\" style=\"font-size: 12px;\">" +
+            "</div>" +
+          "<div class=\"row row-1-3\">" +            
+          "</div>" +
+          "<div class=\"row row-1-3\" id=\"intermediaryPanel\">" +
+            drawMirrorMoveButtons(intermediary.DISPLAY_CARD, tag) +
+          "</div>" +
+        "</div>" +
+      "</div>"
+    $(popUp).dialog({
+      modal: true,
+        height: 400,
+        width: 550,
+        title: intermediary.DISPLAY_CARD.DISPLAY_NAME
+    })
+
+    $("#intermediaryPanel").data("intermediary", intermediary)
+}
 
 function showClickableCardRequest(intermediary) {
   var popUp = "<div style=\"background-color: #888888;\" class=\"popUp\">" +

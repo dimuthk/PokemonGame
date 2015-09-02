@@ -88,6 +88,17 @@ class SingleDisplay(
 		Identifier.DISPLAY_CARD.toString -> c.toJson)
 }
 
+class OpponentCardInterface(
+	requestTitle : String,
+	requestMsg : String,
+	p : Player,
+	c : Card) extends IntermediaryRequest(requestTitle, requestMsg, p, None) {
+	override def getIdentifier() = Identifier.OPPONENT_CARD_INTERFACE
+
+	override def toJsonImpl() = super.toJsonImpl() ++ Json.obj(
+		Identifier.DISPLAY_CARD.toString -> c.toJson)
+}
+
 /**
  * Same as ClickableCardRequest, but only certain cards are clickable.
  * TODO: This request needs to be exitable, since it's possible you have no matches.
@@ -111,6 +122,5 @@ abstract class SpecificClickableCardRequest(
 	def selectersToJsArray(list : Seq[Card]) : JsArray = {
     	return list.foldRight(new JsArray())((c, curr) => curr.prepend(JsBoolean(isSelectable(c))))
   	}
-
-
 }
+

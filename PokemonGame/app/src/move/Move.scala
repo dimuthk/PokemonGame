@@ -31,6 +31,8 @@ abstract class Move(
 
   var status : Status.Value = Status.DISABLED
 
+  var amnesia : Boolean = false
+
   def hasEnoughEnergy(p : Player, energyCards : Seq[EnergyCard]) : Boolean = {
 		val total = energyCards.map { card => card.energyCount }.sum
 		if (total < totalEnergyReq) {
@@ -52,17 +54,23 @@ abstract class Move(
   }
 
   def update : (Player, Player, PokemonCard, Boolean, Boolean)  => Unit
-    = (owner, opp, pc, turnSwapped, isActive) => status = (
+    = (owner, opp, pc, turnSwapped, isActive) => {
+      status = (
       // Status is enabled iff it's your turn, this card is in the active slot,
       // the card has enough energy to perform the move, and you don't currently
       // have an activated power on the board.
       owner.isTurn,
       isActive,
       hasEnoughEnergy(owner, pc.energyCards),
-      owner.cardWithActivatedPower == None) match {
-        case (true, true, true, true) =>  Status.ENABLED
+      owner.cardWithActivatedPower == None,
+      amnesia) match {
+        case (true, true, true, true, false) =>  Status.ENABLED
         case _ => Status.DISABLED
       }
+      if (opp.isTurn && turnSwapped) {
+        amnesia = false
+      }
+    }
 
   def perform : (Player, Player, Seq[String]) => Option[IntermediaryRequest]
 

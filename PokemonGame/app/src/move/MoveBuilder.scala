@@ -59,6 +59,12 @@ object MoveBuilder {
     return standardAttack(owner, opp, baseDmg)
   }
 
+  def attackAndHurtSelf(owner : Player, opp : Player, baseDmg : Int, selfDmg : Int) : Option[IntermediaryRequest] = {
+    standardAttack(owner, opp, baseDmg)
+    owner.active.get.takeDamage(selfDmg)
+    return None
+  }
+
   def extraDamageOrHurtSelf(owner : Player, opp : Player, baseDmg : Int, extraDmg : Int) : Option[IntermediaryRequest] = {
     standardAttack(owner, opp, baseDmg)
     flippedHeads() match {

@@ -17,6 +17,7 @@ object Identifier extends Enumeration {
   SPECIFIC_CLICK_CARD_REQUEST,
   SINGLE_DISPLAY,
   DISPLAY_CARD,
+  OPPONENT_CARD_INTERFACE,
   CLICK_COUNT,
   CARD_LIST,
   MATCHER,
@@ -141,6 +142,11 @@ object Identifier extends Enumeration {
   GOLDUCK,
   MANKEY,
   PRIMEAPE,
+  GROWLITHE,
+  ARCANINE,
+  POLIWAG,
+  POLIWHIRL,
+  POLIWRATH,
 
   /*
    * GENERAL ATTRIBUTES
