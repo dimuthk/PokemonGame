@@ -15,6 +15,8 @@ object Identifier extends Enumeration {
   SERVER_TAG,
   CLICK_CARD_REQUEST,
   SPECIFIC_CLICK_CARD_REQUEST,
+  SINGLE_DISPLAY,
+  DISPLAY_CARD,
   CLICK_COUNT,
   CARD_LIST,
   MATCHER,
@@ -137,6 +139,8 @@ object Identifier extends Enumeration {
   PERSIAN,
   PSYDUCK,
   GOLDUCK,
+  MANKEY,
+  PRIMEAPE,
 
   /*
    * GENERAL ATTRIBUTES

@@ -154,13 +154,21 @@ class Player extends Jsonable {
     }
   }
 
-  def setUIOrientationForBench(uiSet : Set[CardUI.Value]) {
-    for (bc : Option[PokemonCard] <- bench) {
-      if (bc.isDefined) {
-        bc.get.setUiOrientation(uiSet)
-      }
+  private def setUiOrientationForList(uiSet : Set[CardUI.Value], list : Seq[Card]) {
+    for (c : Card <- list) {
+      c.setUiOrientation(uiSet)
     }
   }
+
+  def setUiOrientationForPrize(uiSet : Set[CardUI.Value]) = setUiOrientationForList(uiSet, prizes.toList.flatten)
+
+  def setUiOrientationForDeck(uiSet : Set[CardUI.Value]) = setUiOrientationForList(uiSet, deck)
+
+  def setUIOrientationForBench(uiSet : Set[CardUI.Value]) = setUiOrientationForList(uiSet, bench.toList.flatten)
+
+  def setUiOrientationForHand(uiSet : Set[CardUI.Value]) = setUiOrientationForList(uiSet, hand)
+
+  def setUIOrientationForActiveAndBench(uiSet : Set[CardUI.Value]) = setUiOrientationForList(uiSet, existingActiveAndBenchCards)
 
   def cardWithActivatedPower : Option[PokemonCard] = {
     for (pc : PokemonCard <- existingActiveAndBenchCards) {
@@ -176,18 +184,8 @@ class Player extends Jsonable {
     return None
   }
 
-  def setUIOrientationForActiveAndBench(uiSet : Set[CardUI.Value]) {
-    if (active.isDefined) {
-      active.get.setUiOrientation(uiSet)
-    }
-    setUIOrientationForBench(uiSet)
-  }
+  
 
-  def setUiOrientationForHand(uiSet : Set[CardUI.Value]) {
-    for (hc : Card <- hand) {
-      hc.setUiOrientation(uiSet)
-    }
-  }
 
   def notify(msg : String) {
     notification = Some(msg)
@@ -200,7 +198,9 @@ class Player extends Jsonable {
   def customJson(
     activeMoves : Option[JsArray] = None,
     benchMoves : Option[Seq[JsArray]] = None,
-    handMoves : Option[JsObject] = None) : JsObject = {
+    handMoves : Option[Seq[JsArray]] = None,
+    deckMoves : Option[Seq[JsArray]] = None,
+    prizeMoves : Option[Seq[JsArray]] = None) : JsObject = {
     val notifyJson = notification match {
       case Some(s) => JsString(s)
       case None => Placeholder.toJson
@@ -213,27 +213,44 @@ class Player extends Jsonable {
         }
         case None => Placeholder.toJson
        }),
-       Identifier.DECK.toString -> cardListToJsArray(deck),
-       Identifier.HAND.toString -> (handMoves match {
-        case Some(m) => m
-        case None => cardListToJsArray(hand)
+       Identifier.DECK.toString -> (deckMoves match {
+        case Some(m) => deckForCustomJson(m)
+        case None => cardListToJsArray(deck)
        }),
+       Identifier.HAND.toString -> (handMoves match {
+        case Some(m) => handForCustomJson(m)
+        case None => cardListToJsArray(hand)
+        }),
        Identifier.GARBAGE.toString -> cardListToJsArray(garbage),
        Identifier.BENCH.toString -> (benchMoves match {
         case Some(m) => benchForCustomJson(m)
         case None => optionCardListToJsArray[PokemonCard](bench)
        }),
-       Identifier.PRIZES.toString -> optionCardListToJsArray(prizes),
+       Identifier.PRIZES.toString -> (prizeMoves match {
+        case Some(m) => prizeForCustomJson(m)
+        case None => optionCardListToJsArray(prizes)
+       }),
        Identifier.NOTIFICATION.toString -> notifyJson,
        Identifier.IS_TURN.toString -> JsBoolean(isTurn))
   }
 
   def benchForCustomJson(benchMoves : Seq[JsArray]) : JsArray = {
     return bench.zipWithIndex.foldRight(new JsArray())((c, curr) => curr.prepend(customMoveJson(c._1, benchMoves(c._2))))
-    //return bench.zipWithIndex.foldRight(new JsArray())((c, curr) => curr.prepend(customJson(c._1, benchMoves(c._2))))
   }
 
-  def customMoveJson(pc : Option[PokemonCard], benchMoves : JsArray) : JsObject = pc match {
+  def prizeForCustomJson(prizeMoves : Seq[JsArray]) : JsArray = {
+    return prizes.zipWithIndex.foldRight(new JsArray())((c, curr) => curr.prepend(customMoveJson(c._1, prizeMoves(c._2))))
+  }
+
+  def deckForCustomJson(deckMoves : Seq[JsArray]) : JsArray = {
+    return deck.zipWithIndex.foldRight(new JsArray())((c, curr) => curr.prepend(customMoveJson(Some(c._1), deckMoves(c._2))))
+  }
+
+  def handForCustomJson(handMoves : Seq[JsArray]) : JsArray = {
+    return hand.zipWithIndex.foldRight(new JsArray())((c, curr) => curr.prepend(customMoveJson(Some(c._1), handMoves(c._2))))
+  }
+
+  def customMoveJson(pc : Option[Card], benchMoves : JsArray) : JsObject = pc match {
     case Some(c) => c.customMoveJson((Some(benchMoves)))
     case None => Placeholder.toJson
   }

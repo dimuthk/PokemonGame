@@ -27,6 +27,12 @@ abstract class Card(val displayName : String, val imgName : String, val deck : D
 		isDisplayable = uiSet.contains(CardUI.DISPLAYABLE)
 	}
 
+	def customMoveJson(customMoveArray : Option[JsArray]) : JsObject = toJsonImpl() ++ Json.obj(
+		Identifier.MOVES.toString -> (customMoveArray match {
+      		case Some(moveArray) => moveArray
+      		case None => throw new Exception("There is no default impl for base card")
+    	}))
+
 	override def toJsonImpl() = Json.obj(
 		Identifier.FACE_UP.toString -> JsBoolean(isFaceUp),
 		Identifier.DRAGGABLE.toString -> JsBoolean(isDraggable),

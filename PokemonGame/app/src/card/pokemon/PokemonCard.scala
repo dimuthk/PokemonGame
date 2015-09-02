@@ -52,7 +52,7 @@ abstract class PokemonCard(
 
 	override def toJsonImpl() = customMoveJson(None)
 
-  def customMoveJson(customMoveArray : Option[JsArray]) : JsObject = super.toJsonImpl() ++ Json.obj(
+  override def customMoveJson(customMoveArray : Option[JsArray]) : JsObject = super.toJsonImpl() ++ Json.obj(
     Identifier.DISPLAY_NAME.toString -> displayName,
     Identifier.MAX_HP.toString -> maxHp,
     Identifier.CURR_HP.toString -> currHp,

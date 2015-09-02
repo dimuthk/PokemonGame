@@ -15,9 +15,13 @@ object MoveDirector {
 
   def handleMoveCommand(owner : Player, opp : Player, contents : Seq[String]) : Option[IntermediaryRequest] = {
     val interpreter = selectMoveInterpreter(owner, opp)
+    val isOwner = contents(1) == "1"
     val maybeIntermediaryReq  : Option[IntermediaryRequest] = contents(0) match {
-      case "ATTACK_FROM_ACTIVE" => interpreter.attackFromActive(owner, opp, contents(1).toInt, contents.drop(2))
-      case "ATTACK_FROM_BENCH" => interpreter.attackFromBench(owner, opp, contents(1).toInt - 1, contents(2).toInt, contents.drop(3))
+      case "ATTACK_FROM_ACTIVE" => interpreter.attackFromActive(owner, opp, isOwner, contents(2).toInt, contents.drop(3))
+      case "ATTACK_FROM_BENCH" => interpreter.attackFromBench(owner, opp, isOwner, contents(2).toInt - 1, contents(3).toInt, contents.drop(4))
+      case "ATTACK_FROM_DECK" => interpreter.attackFromDeck(owner, opp, isOwner, contents(2).toInt - 1, contents.drop(3))
+      case "ATTACK_FROM_HAND" => interpreter.attackFromHand(owner, opp, isOwner, contents(2).toInt - 1, contents(3).toInt, contents.drop(4))
+      case "ATTACK_FROM_PRIZE" => interpreter.attackFromPrize(owner, opp, isOwner, contents(2).toInt - 1, contents(3).toInt, contents.drop(4))
     }
     if (maybeIntermediaryReq.isDefined) {
       val flip : String = if (maybeIntermediaryReq.get.p == owner) "" else "FLIP<>"

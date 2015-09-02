@@ -79,7 +79,7 @@ class HealMoveInterpreter extends CustomMoveInterpreter {
     case _ => throw new Exception("Did not find Vileplume as the activated card")
   }
 
-  def attackFromActive = (owner, opp, moveNum, args) => {
+  def attackFromActive = (owner, opp, _, moveNum, args) => {
     val active = owner.active.get
     val ap = getHealMove(owner)
     moveNum match {
@@ -98,7 +98,7 @@ class HealMoveInterpreter extends CustomMoveInterpreter {
     }
   }
 
-  def attackFromBench = (owner, opp, benchIndex, moveNum, args) => {
+  def attackFromBench = (owner, opp, _, benchIndex, moveNum, args) => {
     val bc = owner.bench(benchIndex).get
     val ap = getHealMove(owner)
     moveNum match {
@@ -116,6 +116,12 @@ class HealMoveInterpreter extends CustomMoveInterpreter {
       case _ => throw new Exception("Unexpected move num for Vileplume heal")
     }
   }
+
+  def attackFromHand = (_, _, _, _, _, _) => throw new Exception("unsupported")
+
+  def attackFromPrize = (_, _, _, _, _, _) => throw new Exception("unsupported")
+
+  def attackFromDeck = (_, _, _, _, _) => throw new Exception("unsupported") 
 
 }
 

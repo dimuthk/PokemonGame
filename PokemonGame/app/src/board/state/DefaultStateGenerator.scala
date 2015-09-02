@@ -2,6 +2,7 @@ package src.board.state
 
 import src.card.Card
 import src.card.pokemon.PokemonCard
+import src.card.energy.EnergyCard
 import src.player.Player
 import play.api.libs.json._
 
@@ -34,7 +35,7 @@ object DefaultStateGenerator extends StateGenerator {
       c.isFaceUp = yourCards
       c.isDraggable = yourCards && yourTurn
       c.isClickable = yourCards && yourTurn
-      c.isDisplayable = yourCards && yourTurn
+      c.isDisplayable = false
       c.isUsable = false
     }
     for (c : Card <- p.prizes.toList.flatten) {

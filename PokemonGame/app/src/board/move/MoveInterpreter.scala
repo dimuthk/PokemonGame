@@ -10,11 +10,20 @@ import src.player.Player
 
 abstract class MoveInterpreter {
 
-	// owner, opp, moveNum, args
-	def attackFromActive : (Player, Player, Int, Seq[String]) => Option[IntermediaryRequest]
+	// owner, opp, whether is was owner's card, moveNum, args
+	def attackFromActive : (Player, Player, Boolean, Int, Seq[String]) => Option[IntermediaryRequest]
 
 	// owner, opp, benchIndex, moveNum, args
-    def attackFromBench : (Player, Player, Int, Int, Seq[String]) => Option[IntermediaryRequest]
+    def attackFromBench : (Player, Player, Boolean, Int, Int, Seq[String]) => Option[IntermediaryRequest]
+
+    // owner, opp, handIndex, moveNum, args
+    def attackFromHand : (Player, Player, Boolean, Int, Int, Seq[String]) => Option[IntermediaryRequest]
+
+    // owner, opp, moveNum, args
+    def attackFromDeck : (Player, Player, Boolean, Int, Seq[String]) => Option[IntermediaryRequest]
+
+    // owner, opp, prizeIndex, moveNum, args
+    def attackFromPrize : (Player, Player, Boolean, Int, Int, Seq[String]) => Option[IntermediaryRequest]
 
     def flipTurn(owner : Player, opp : Player) : Unit = {
         owner.isTurn = !owner.isTurn

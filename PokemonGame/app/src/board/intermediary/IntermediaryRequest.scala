@@ -28,7 +28,8 @@ abstract class IntermediaryRequest(
 	val requestTitle : String,
 	val requestMsg : String,
 	val p : Player,
-	val additionalTag : Option[String] = None) extends Jsonable {
+	val additionalTag : Option[String] = None,
+	val shouldContinue : Boolean = false) extends Jsonable {
 
 	var serverTag : String = ""
 
@@ -73,6 +74,18 @@ abstract class ClickableCardRequest(
 		Identifier.CLICK_COUNT.toString -> clickCount,
 		Identifier.CARD_LIST.toString -> cardListToJsArray(cardList))
 
+}
+
+class SingleDisplay(
+	requestTitle : String,
+	requestMsg : String,
+	p : Player,
+	c : Card) extends IntermediaryRequest(requestTitle, requestMsg, p, None, shouldContinue = true) {
+
+	override def getIdentifier() = Identifier.SINGLE_DISPLAY
+
+	override def toJsonImpl() = super.toJsonImpl() ++ Json.obj(
+		Identifier.DISPLAY_CARD.toString -> c.toJson)
 }
 
 /**

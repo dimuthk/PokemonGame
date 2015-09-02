@@ -34,6 +34,9 @@ function processIntermediary(data) {
       case "SPECIFIC_CLICK_CARD_REQUEST":
         showSpecificClickableCardRequest(data.intermediary)
         break;
+      case "SINGLE_DISPLAY":
+        showSingleDisplay(data.intermediary)
+        break;
     }
   }
 }
@@ -125,6 +128,8 @@ function colorBoardIfActivatedForCard(card) {
           case "WATER":
             $("#content").animate({backgroundColor: "blue"}, 2000);
             break;
+          case "FIGHTING":
+            $("#content").animate({backgroundColor: "#A52A2A"}, 2000);
           default: break;
         }
         return true
@@ -236,10 +241,10 @@ function processCard(card, displayTag, imageTag, forHand) {
     $("#" + imageTag).click(function() {
       if ($(this).hasClass("noClick")) {
         $(this).removeClass("noClick")
-      } else if (card.DISPLAYABLE) {
+      } else if (card.DISPLAYABLE || card.USABLE) {
         showPopUpActive($(this).data("card_data"), $(this).attr("id"))
       } else {
-        showNonActionPopUp($(this).data("card_data"))
+        showNonActionPopUp($(this).data("card_data"), $(this).attr("id"))
       }
     })
   }
@@ -321,25 +326,7 @@ function closeUp(tag) {
   })
 }
 
-function showNonActionPopUp(item) {
-	var popUp = "<div style=\"background-color: #888888;\">" +
-	        "<div class=\"row row-1-10\"></div>" +
-	        "<div class=\"row row-8-10\">" +
-	          "<div class=\"col col-1-5\"></div>" +
-	          "<div class=\"col col-3-5\">" +
-	            imgTag.replace("[IMG_NAME]", item.IMG_NAME) +
-	          "</div>" +
-	          "<div class=\"col col-1-5\"></div>" +
-	        "</div>" +
-	        "<div class=\"row row-1-10\"></div>" +
-	    "</div>"
-    $(popUp).dialog({
-    	modal: true,
-        height: 400,
-        width: 350,
-        title: item.DISPLAY_NAME
-    })
-}
+
 
 function energyDisplayStringForPopup(card) {
 	var energyCnts = {colorless:0, fire:0, water:0, fighting:0, grass:0, psychic:0, thunder:0}
@@ -386,11 +373,20 @@ function energyDisplayStringForPopup(card) {
 
 function useAttack(moveNum, tag) {
   var socket = $("#content").data("socket")
+  var pNum = tag.includes("p1") ? 1 : 2
   if (tag.includes("Bench")) {
     var benchIndex = tag.charAt(tag.length - 1)
-    socket.send("MOVE<>ATTACK_FROM_BENCH<>" + benchIndex + "<>" + moveNum)
+    socket.send("MOVE<>ATTACK_FROM_BENCH<>" + pNum +"<>" + benchIndex + "<>" + moveNum)
   } else if (tag.includes("Active")) {
-    socket.send("MOVE<>ATTACK_FROM_ACTIVE<>" + moveNum)
+    socket.send("MOVE<>ATTACK_FROM_ACTIVE<>" + pNum +"<>" + moveNum)
+  } else if (tag.includes("Deck")) {
+    socket.send("MOVE<>ATTACK_FROM_DECK<>" + pNum + "<>" + moveNum)
+  } else if (tag.includes("Hand")) {
+    var handIndex = tag.charAt(tag.length - 1)
+    socket.send("MOVE<>ATTACK_FROM_HAND<>" + pNum + "<>" + handIndex + "<>" + moveNum)
+  } else if (tag.includes("Prize")) {
+    var prizeIndex = tag.charAt(tag.length - 1)
+    socket.send("MOVE<>ATTACK_FROM_PRIZE<>" + pNum + "<>" + prizeIndex + "<>" + moveNum)
   }
 	$(".popUp").dialog("close")
 }
@@ -540,6 +536,33 @@ function showSpecificClickableCardRequest(intermediary) {
     }
   }
 
+  function showSingleDisplay(intermediary) {
+    var popUp = "<div style=\"background-color: #888888;\" class=\"popUp\">" +
+          "<div class=\"row row-1-5\">" +
+            "<div style=\"text-align: center; top: 10%; position: relative; font-size:15px; color: white;\">" + intermediary.REQUEST_MSG + "</div>" +
+          "</div>" +
+          "<div class=\"row row-3-5\">" +
+            "<div class=\"col col-1-10\"></div>" +
+            "<div class=\"col col-8-10\">" +
+              imgTag.replace("[IMG_NAME]", intermediary.DISPLAY_CARD.IMG_NAME) +
+            "</div>" +
+            "<div class=\"col col-1-10\"></div>" +
+          "</div>" +
+          "<div class=\"row row-1-5\">" +
+            "<div class=\"col col-1-3\"></div>" +
+            "<div class=\"col col-1-3\">" +
+            "</div>" +
+            "<div class=\"col col-1-3\"></div>" +
+          "</div>" +
+      "</div>"
+    $(popUp).dialog({
+      modal: true,
+        height: 400,
+        width: 300,
+        title: intermediary.REQUEST_TITLE
+    })
+  }
+
 function showClickableCardRequest(intermediary) {
   var popUp = "<div style=\"background-color: #888888;\" class=\"popUp\">" +
           "<div class=\"row row-1-5\">" +
@@ -578,6 +601,28 @@ function showClickableCardRequest(intermediary) {
     }
 }
 
+function showNonActionPopUp(item, tag) {
+  var popUp = "<div style=\"background-color: #888888;\">" +
+          "<div class=\"row row-1-10\"></div>" +
+          "<div class=\"row row-8-10\">" +
+            "<div class=\"col col-1-5\"></div>" +
+            "<div class=\"col col-3-5\">" +
+              imgTag.replace("[IMG_NAME]", item.IMG_NAME) +
+            "</div>" +
+            "<div class=\"col col-1-5\"></div>" +
+          "</div>" +
+          "<div class=\"row row-1-10\">" +
+            drawMoveButtons(item, tag) +
+          "</div>" +
+      "</div>"
+    $(popUp).dialog({
+      modal: true,
+        height: 400,
+        width: 350,
+        title: item.DISPLAYABLE ? (item.DISPLAY_NAME) : ""
+    })
+}
+
 function showPopUpActive(item, tag) {
 	var popUp = "<div style=\"background-color: #888888;\" class=\"popUp\">" +
 	      "<div class=\"col col-3-5\">" +
@@ -585,7 +630,7 @@ function showPopUpActive(item, tag) {
 	        "<div class=\"row row-8-10\">" +
 	          "<div class=\"col col-1-5\"></div>" +
 	          "<div class=\"col col-3-5\">" +
-	            imgTag.replace("[IMG_NAME]", item.IMG_NAME) +
+	            imgTag.replace("[IMG_NAME]", item.FACE_UP ? item.IMG_NAME : cardBackImg) +
 	          "</div>" +
 	          "<div class=\"col col-1-5\"></div>" +
 	        "</div>" +
@@ -593,15 +638,15 @@ function showPopUpActive(item, tag) {
 	      "</div>" +
 	      "<div class=\"col col-2-5\" style=\"color: white;\">" +
             "<div class\"row row-1-3\" style=\"font-size: 12px;\">" +
-	             "<br><br>Current HP: " + item.CURR_HP + "/" + item.MAX_HP + "<br><br>" +
+	             (item.DISPLAYABLE ? ("<br><br>Current HP: " + item.CURR_HP + "/" + item.MAX_HP + "<br><br>" +
 	             "Status Condition: " + statusConditionTag(item) + "<br><br>" +
-	             "Other Conditions: " + generalConditionTag(item) + "<br><br>" +
+	             "Other Conditions: " + generalConditionTag(item) + "<br><br>") : "") +
 	          "</div>" +
 	        "<div class=\"row row-1-3\">" +
-	            energyDisplayStringForPopup(item) +	            
+	            (item.DISPLAYABLE ? energyDisplayStringForPopup(item) : "") +	            
 	        "</div>" +
 	        "<div class=\"row row-1-3\">" +
-	        	drawMoveButtons(item, tag) +
+	        	(item.CLICKABLE ? drawMoveButtons(item, tag) : "") +
 	        "</div>" +
 	      "</div>" +
 	    "</div>"
@@ -609,6 +654,6 @@ function showPopUpActive(item, tag) {
     	modal: true,
         height: 400,
         width: 550,
-        title: item.DISPLAY_NAME
+        title: item.DISPLAYABLE ? item.DISPLAY_NAME : ""
     })
 }

@@ -82,7 +82,7 @@ object Board {
         p.setActive(new Vileplume())
         p.isTurn = false
       } else {
-        p.setDeck(List.fill(20)(new NidoranFemale()) ++ List.fill(20)(new GrassEnergy()) ++ List.fill(20)(new FireEnergy()))
+        p.setDeck(List.fill(20)(new Mankey()) ++ List.fill(20)(new GrassEnergy()) ++ List.fill(20)(new FireEnergy()))
         p.shuffleDeck()
         p.isTurn = true
       }
@@ -107,9 +107,14 @@ object Board {
     def handleMove(contents : Seq[String]) {
       val intermediary = MoveDirector.handleMoveCommand(p, getOpponent(p), contents)
       if (intermediary.isDefined) {
-        rebroadcastStateWithIntermediary(intermediary.get)
+        Logger.debug("intermediary: " + intermediary.get)
+        if (intermediary.get.shouldContinue) {
+          sendIntermediaryWithCleanedUpBoard(intermediary.get)
+        } else {
+          rebroadcastStateWithIntermediary(intermediary.get)
+        }
       } else {
-          cleanupBoardAndPassBackState()
+         cleanupBoardAndPassBackState()
       }
     }
 
@@ -117,10 +122,20 @@ object Board {
       val intermediary = DragDirector.handleDragCommand(p, getOpponent(p), contents)
       if (intermediary.isDefined) {
         Logger.debug("intermediary: " + intermediary.get)
-        rebroadcastStateWithIntermediary(intermediary.get)
+        if (intermediary.get.shouldContinue) {
+          sendIntermediaryWithCleanedUpBoard(intermediary.get)
+        } else {
+          rebroadcastStateWithIntermediary(intermediary.get)
+        }
       } else {
          cleanupBoardAndPassBackState()
       }
+    }
+
+    def sendIntermediaryWithCleanedUpBoard(intermediary : IntermediaryRequest) {
+      BoardCleaner.cleanUpBoardState(p, getOpponent(p))
+      val state = StateGeneratorDirector.generateState(c1.get.p, c2.get.p, isPlayer1(p))
+      broadcastState(state._1, state._2, Some(intermediary))
     }
 
     def rebroadcastStateWithIntermediary(intermediary : IntermediaryRequest) {

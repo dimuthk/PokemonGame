@@ -12,7 +12,7 @@ import src.player.Player
 
 object DefaultMoveInterpreter extends MoveInterpreter {
 
-    def attackFromActive = (owner, opp, moveNum, args) => moveNum match {
+    def attackFromActive = (owner, opp, _, moveNum, args) => moveNum match {
       case 1 => useMove(owner, opp, owner.active.get.firstMove.get, args)
       case 2 => useMove(owner, opp, owner.active.get.secondMove.get, args)
       case 3 => useMove(owner, opp, owner.active.get.pass, Nil)
@@ -31,9 +31,15 @@ object DefaultMoveInterpreter extends MoveInterpreter {
       }
     }
 
-    def attackFromBench = (owner, opp, benchIndex, moveNum, args) => owner.bench(benchIndex).get.existingMoves(moveNum - 1) match {
+    def attackFromBench = (owner, opp, _, benchIndex, moveNum, args) => owner.bench(benchIndex).get.existingMoves(moveNum - 1) match {
       case power : PokemonPower => power.perform(owner, opp, args)
       case _ => throw new Exception("Non pokemon power move called from bench!")
     }
+
+    def attackFromPrize = (_, _, _, _, _, _) => throw new Exception("Prize attack not supported by default")
+
+    def attackFromHand = (_, _, _, _, _, _) => throw new Exception("Hand attack not supported by default")
+
+    def attackFromDeck = (_, _, _, _, _) => throw new Exception("Deck attack not supported by default")
 
 }
