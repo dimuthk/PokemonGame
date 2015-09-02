@@ -16,7 +16,7 @@ import src.json.Jsonable
 import src.player.Player
 
 
-abstract class CallForFamily(
+class CallForFamily(
 	name : String,
     selector : Card => Boolean,
 	totalEnergyReq : Int,

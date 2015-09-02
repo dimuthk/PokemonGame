@@ -27,7 +27,7 @@ object MoveBuilder {
    */
   def standardAttack(owner : Player, opp : Player, baseDmg : Int) : Option[IntermediaryRequest] = {
     var dmg = opp.active.get.calculateDmg(owner.active.get, baseDmg)
-    opp.active.get.takeDamage(dmg)
+    opp.active.get.takeDamage(owner.active, dmg)
     return None
   }
 
@@ -61,7 +61,7 @@ object MoveBuilder {
 
   def attackAndHurtSelf(owner : Player, opp : Player, baseDmg : Int, selfDmg : Int) : Option[IntermediaryRequest] = {
     standardAttack(owner, opp, baseDmg)
-    owner.active.get.takeDamage(selfDmg)
+    owner.active.get.takeDamage(None, selfDmg)
     return None
   }
 
@@ -69,14 +69,14 @@ object MoveBuilder {
     standardAttack(owner, opp, baseDmg)
     flippedHeads() match {
       case true => standardAttack(owner, opp, extraDmg)
-      case false => owner.active.get.takeDamage(extraDmg)
+      case false => owner.active.get.takeDamage(None, extraDmg)
     }
     return None
   }
 
   def selfDamageChanceAttack(owner : Player, opp : Player, baseDmg : Int, selfDmg : Int) : Option[IntermediaryRequest] = {
     if (flippedHeads()) {
-      owner.active.get.takeDamage(selfDmg)
+      owner.active.get.takeDamage(None, selfDmg)
       owner.notify(owner.active.get.displayName + " hurt itself while attacking!")
     }
     return standardAttack(owner, opp, baseDmg)
@@ -136,6 +136,29 @@ object MoveBuilder {
     val discardedCards = owner.active.get.discardEnergy(eType, cnt)
     owner.garbage = owner.garbage ++ discardedCards
     return standardAttack(owner, opp, baseDmg)
+  }
+
+  def discardAndRecover(owner : Player, eType : EnergyType.Value) : Option[IntermediaryRequest] = {
+    val discardedCards = owner.active.get.discardEnergy(eType, 1)
+    owner.garbage = owner.garbage ++ discardedCards
+    owner.active.get.heal(owner.active.get.maxHp)
+    return None
+  }
+
+  def harden(owner : Player) : Option[IntermediaryRequest] = {
+    owner.active.get.harden = true
+    return None
+  }
+
+  def selfDestruct(owner : Player, opp : Player, mainDmg : Int, selfDmg : Int, benchDmg : Int) : Option[IntermediaryRequest] = {
+    for (bc : PokemonCard <- owner.bench.toList.flatten) {
+      bc.takeDamage(owner.active, benchDmg)
+    }
+    for (bc : PokemonCard <- opp.bench.toList.flatten) {
+      bc.takeDamage(None, benchDmg)
+    }
+    owner.active.get.takeDamage(None, selfDmg)
+    standardAttack(owner, opp, mainDmg)
   }
 
   def flippedHeads() = true //Random.nextBoolean()

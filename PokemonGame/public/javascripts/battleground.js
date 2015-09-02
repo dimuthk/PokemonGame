@@ -133,6 +133,10 @@ function colorBoardIfActivatedForCard(card) {
             break;
           case "FIGHTING":
             $("#content").animate({backgroundColor: "#A52A2A"}, 2000);
+            break;
+          case "PSYCHIC":
+            $("#content").animate({backgroundColor: "purple"}, 2000);
+            break;
           default: break;
         }
         return true

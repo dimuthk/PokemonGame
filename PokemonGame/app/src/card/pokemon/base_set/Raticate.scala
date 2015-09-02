@@ -26,7 +26,7 @@ class Raticate extends StageOnePokemon(
 		3) {
 			def perform = (owner, opp, args) => {
 				val dmg = roundUp(opp.active.get.currHp / 2)
-				opp.active.get.takeDamage(dmg)
+				opp.active.get.takeDamage(owner.ownerOfMove(this), dmg)
 				None
 			}
 		}),

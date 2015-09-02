@@ -106,6 +106,11 @@ abstract class PokemonCard(
    var agility : Boolean = false
 
    /**
+    * This pokemon can't move this turn.
+    */
+   var acid : Boolean = false
+
+   /**
     * Tracker for the last effect made on this pokemon. Used for mirror move
     */
    var lastAttack : Int = -1
@@ -114,6 +119,13 @@ abstract class PokemonCard(
     * Damage done to this pokemon this turn is reduced by 10.
     */
    var pounced : Boolean = false
+
+   /**
+    * Damage done to this pokemon this turn is reduced by 30.
+    */
+   var harden : Boolean = false
+
+
 
 
   def ownsMove(m : Move) : Boolean = existingMoves.filter(_ == m).length > 0
@@ -130,9 +142,6 @@ abstract class PokemonCard(
   }
 
   def pickUp() : Seq[Card] = {
-    if (agility) {
-      throw new Exception("Tried to pick up card when agility was activated")
-    }
     _currHp = maxHp
     poisonStatus = None
     statusCondition = None
@@ -142,6 +151,9 @@ abstract class PokemonCard(
     preEvolution = None
     lastAttack = -1
     smokescreen = false
+    harden = false
+    acid = false
+    agility = false
     withdrawn = false
     return List(this) ++ res
   }
@@ -174,16 +186,19 @@ abstract class PokemonCard(
       if (owner.isTurn) {
         withdrawn = false
         pounced = false
+        harden = false
         agility = false
       } else {
         smokescreen = false
         lastAttack = -1
+        acid = false
       }
     }
     case false => {
       lastAttack = -1
       statusCondition = None
       pounced = false
+      harden = false
       poisonStatus = None
       withdrawn = false
       agility = false
@@ -203,6 +218,12 @@ abstract class PokemonCard(
     if (pounced) {
       cond = cond + "Pounced"
     }
+    if (acid) {
+      cond = cond + "Acid"
+    }
+    if (harden ) {
+      cond = cond + "Harden"
+    }
     generalCondition = Some(cond)
   }
 
@@ -221,10 +242,14 @@ abstract class PokemonCard(
       modifiedDmg -= 30
     }
 
+    if (harden && modifiedDmg <= 30) {
+      modifiedDmg = 0
+    }
+
     return math.max(modifiedDmg, 0)
   }
 
-	def takeDamage(amount : Int) : Unit = {
+	def takeDamage(attacker : Option[PokemonCard], amount : Int) : Unit = {
     var dmg = amount
     if (withdrawn || agility) {
       return

@@ -28,7 +28,7 @@ class Dugtrio extends BasicPokemon(
         Map(EnergyType.FIGHTING -> 4)) {
             def perform = (owner, opp, args) => {
                 for (pc : PokemonCard <- owner.bench.toList.flatten) {
-                    pc.takeDamage(10)
+                    pc.takeDamage(owner.ownerOfMove(this), 10)
                 }
                 standardAttack(owner, opp, 70)
             }

@@ -37,29 +37,28 @@ class BenchSelectAttack(
         numBenchSelects,
         benchCards)
 
-    /*override def additionalRequest(owner : Player, opp : Player, args : Seq[String]) : Option[IntermediaryRequest] = {
-        val benchCards = opp.bench.toList.flatten
-        if (benchCards.length > numBenchSelects && args.length == 0) {
-            return Some(new NextActiveSpecification(owner, owner.active.get, benchCards))
+    def perform = (owner, opp, args) => args.length match {
+        case 0 => {
+            val benchCards = opp.bench.toList.flatten
+            (benchCards.length > numBenchSelects) match {
+                case true => Some(new NextActiveSpecification(owner, owner.active.get, benchCards))
+                case false => {
+                    for (bc : PokemonCard <- opp.bench.toList.flatten) {
+                        bc.takeDamage(owner.ownerOfMove(this), benchDmg)
+                    }
+                    standardAttack(owner, opp, mainDmg)
+                }
+            }
         }
-        return None
-    }
-
-    override def performWithAdditional(owner : Player, opp : Player, args : Seq[String]) {
-        val benchIndices : Seq[Int] = args.head.split(",").map(_.toInt)
-        var matcher : Int = -1
-        standardAttack(owner, opp, mainDmg)
-        for (i : Int <- benchIndices) {
-            val realIndex = getRealIndexFor(i, opp.bench)
-            opp.bench(realIndex).get.takeDamage(benchDmg)
+        case _ => {
+            val benchIndices : Seq[Int] = args.head.split(",").map(_.toInt)
+            var matcher : Int = -1
+            for (i : Int <- benchIndices) {
+                val realIndex = getRealIndexFor(i, opp.bench)
+                opp.bench(realIndex).get.takeDamage(owner.ownerOfMove(this), benchDmg)
+            }
+            standardAttack(owner, opp, mainDmg)
         }
-    }*/
-
-    def perform = (owner, opp, args) => {
-        for (bc : PokemonCard <- opp.bench.toList.flatten) {
-            bc.takeDamage(benchDmg)
-        }
-        standardAttack(owner, opp, mainDmg)
     }
 
 }

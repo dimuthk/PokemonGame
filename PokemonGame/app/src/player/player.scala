@@ -30,6 +30,10 @@ class Player extends Jsonable {
     _deck = _deck.slice(count, _deck.length)
   }
 
+  def addCardToHand(c : Card) {
+    _hand = _hand ++ List(c)
+  }
+
   def dealPrizeCards() {
     for (i <- 0 until 6) {
       prizes(i) = Some(_deck(i))
@@ -54,7 +58,14 @@ class Player extends Jsonable {
   private var _active : Option[PokemonCard] = None
 
   def setActive(pc : PokemonCard) {
+    if (_active != None) {
+      throw new Exception("Tried to overwrite current active")
+    }
     _active = Some(pc)
+  }
+
+  def clearActive() {
+    _active = None
   }
 
   def active = _active
@@ -67,6 +78,8 @@ class Player extends Jsonable {
 
   def ownsMove(m : Move) : Boolean = existingActiveAndBenchCards.filter(_.ownsMove(m)).length > 0
 
+  def ownerOfMove(m : Move) : Option[PokemonCard] = existingActiveAndBenchCards.find(_.ownsMove(m))
+
   def existingActiveAndBenchCards : Seq[PokemonCard] = return (List(active) ++ bench.toList).flatten
 
   def moveActiveToHand() {
@@ -77,8 +90,10 @@ class Player extends Jsonable {
   }
 
   def swapActiveAndBench(benchIndex : Int) {
-    if (_active.isDefined && _active.get.agility) {
-      return
+    if (_active.isDefined) {
+      if (_active.get.agility || _active.get.acid) {
+        return
+      }
     }
     val tmp = _active
     _active = _bench(benchIndex)
