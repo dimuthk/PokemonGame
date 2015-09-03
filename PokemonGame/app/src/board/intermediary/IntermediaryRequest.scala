@@ -76,6 +76,19 @@ abstract class ClickableCardRequest(
 
 }
 
+class ShuffleCardRequest(
+	requestTitle : String,
+	requestMsg : String,
+	p : Player,
+	val cardList : Seq[Card],
+	additionalTag : Option[String] = None) extends IntermediaryRequest(requestTitle, requestMsg, p, additionalTag) {
+
+	override def getIdentifier() = Identifier.SHUFFLE_CARD_REQUEST
+
+	override def toJsonImpl() = super.toJsonImpl() ++ Json.obj(
+		Identifier.CARD_LIST.toString -> cardListToJsArray(cardList))
+}
+
 class SingleDisplay(
 	requestTitle : String,
 	requestMsg : String,
