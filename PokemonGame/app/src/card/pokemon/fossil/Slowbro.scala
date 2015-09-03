@@ -1,48 +1,44 @@
-package src.card.pokemon.base_set
+package src.card.pokemon.fossil
 
+import src.card.Deck
+import src.card.pokemon._
 import src.json.Identifier
 import src.move.Move
-import src.move.MoveBuilder._
-import src.move.ActivePokemonPower
-import src.board.intermediary.IntermediaryRequest
 import src.board.drag.CustomDragInterpreter
 import src.board.state.CustomStateGenerator
+import src.move.MoveBuilder._
+import src.move.ActivePokemonPower
 import src.player.Player
-import src.card.energy.EnergyCard
-import src.card.energy.EnergyType
 import src.card.CardUI
 import src.card.CardUI._
-import src.card.pokemon._
-import src.card.Deck
-import play.api.libs.json._
-import play.api.Logger
+import src.card.energy.EnergyCard
+import src.card.energy.EnergyType
+import src.card.energy.WaterEnergy
 
-class Alakazam extends BasicPokemon(
-    "Alakazam",
-    "Alakazam-Base-Set-1.jpg",
-    Deck.BASE_SET,
-    Identifier.ALAKAZAM,
-    id = 65,
-    maxHp = 80,
+class Slowbro extends StageOnePokemon(
+    "Slowbro",
+    "Slowbro-Fossil-43.jpg",
+    Deck.FOSSIL,
+    Identifier.SLOWBRO,
+    id = 80,
+    maxHp = 60,
     firstMove = Some(new ActivePokemonPower(
-      "Damage Swap",
-      dragInterpreter = Some(new DamageSwapDrag()),
-      stateGenerator = Some(new DamageSwapState())) {
+      "Strange Behavior",
+      dragInterpreter = Some(new StrangeBehaviorDrag()),
+      stateGenerator = Some(new StrangeBehaviorState())) {
         def perform = (owner, opp, args) => togglePower()
-    }
-    ),
-    secondMove = Some(new Move(
-      "Confuse Ray",
-      3,
-      Map(EnergyType.PSYCHIC -> 3)) {
-      def perform = (owner, opp, args) => confuseAttackChance(owner, opp, 30)
     }),
+    secondMove = Some(new Move(
+      "Psyshock",
+      2,
+      Map(EnergyType.PSYCHIC -> 2)) {
+        def perform = (owner, opp, args) => paralyzeAttackChance(owner, opp, 20)
+      }),
     energyType = EnergyType.PSYCHIC,
     weakness = Some(EnergyType.PSYCHIC),
-    retreatCost = 3)
+    retreatCost = 1)
 
-
-private class DamageSwapState extends CustomStateGenerator(true, false) {
+private class StrangeBehaviorState extends CustomStateGenerator(true, false) {
 
   override def generateForOwner = (owner, opp, interceptor) => {
     // Active and bench cards are visible and draggable to allow energy transfer.
@@ -61,23 +57,29 @@ private class DamageSwapState extends CustomStateGenerator(true, false) {
 
 }
 
-private class DamageSwapDrag extends CustomDragInterpreter {
+private class StrangeBehaviorDrag extends CustomDragInterpreter {
 
   override def benchToBench(p : Player, benchIndex1 : Int, benchIndex2 : Int) : Unit = {
-    if (p.bench(benchIndex2).isDefined) {
-      swapDamage(p.bench(benchIndex1).get, p.bench(benchIndex2).get)
+    val card = p.cardWithActivatedPower
+    p.bench(benchIndex2) match {
+      case Some(card) => swapDamage(p.bench(benchIndex1).get, card)
+      case _ => ()
     }
   }
 
   override def benchToActive(p : Player, benchIndex : Int) : Unit = {
-    if (p.active.isDefined) {
-      swapDamage(p.bench(benchIndex).get, p.active.get)
+    val card = p.cardWithActivatedPower
+    p.active match {
+      case Some(card) => swapDamage(p.bench(benchIndex).get, card)
+      case _ => ()
     }
   }
 
   override def activeToBench(p : Player, benchIndex : Int) : Unit = {
-    if (p.bench(benchIndex).isDefined) {
-      swapDamage(p.active.get, p.bench(benchIndex).get)
+    val card = p.cardWithActivatedPower
+    p.bench(benchIndex) match {
+      case Some(card) => swapDamage(p.active.get, card)
+      case _ => ()
     }
   }
 
@@ -89,4 +91,3 @@ private class DamageSwapDrag extends CustomDragInterpreter {
   }
 
 }
-

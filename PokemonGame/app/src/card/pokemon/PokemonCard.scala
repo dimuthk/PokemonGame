@@ -121,11 +121,19 @@ abstract class PokemonCard(
    var pounced : Boolean = false
 
    /**
-    * Damage done to this pokemon this turn is reduced by 30.
+    * Damage done is prevented if the damage is <= 30
     */
    var harden : Boolean = false
 
+   /**
+    * Damage done is reduced by 20
+    */
+   var minimize : Boolean = false
 
+   /**
+    * If pokemon dies, the opponent dies too
+    */
+   var destinyBond : Boolean = false
 
 
   def ownsMove(m : Move) : Boolean = existingMoves.filter(_ == m).length > 0
@@ -152,6 +160,8 @@ abstract class PokemonCard(
     lastAttack = -1
     smokescreen = false
     harden = false
+    minimize = false
+    destinyBond = false
     acid = false
     agility = false
     withdrawn = false
@@ -187,6 +197,8 @@ abstract class PokemonCard(
         withdrawn = false
         pounced = false
         harden = false
+        minimize = false
+        destinyBond = false
         agility = false
       } else {
         smokescreen = false
@@ -199,6 +211,8 @@ abstract class PokemonCard(
       statusCondition = None
       pounced = false
       harden = false
+      destinyBond = false
+      minimize = false
       poisonStatus = None
       withdrawn = false
       agility = false
@@ -224,26 +238,36 @@ abstract class PokemonCard(
     if (harden ) {
       cond = cond + "Harden"
     }
+    if (minimize) {
+      cond = cond + "Minimize"
+    }
+    if (destinyBond) {
+      cond = cond + "Destiny Bond"
+    }
     generalCondition = Some(cond)
   }
 
-  def calculateDmg(attacker : PokemonCard, dmg : Int) : Int = {
+  def calculateDmg(attacker : PokemonCard, dmg : Int, ignoreTypes : Boolean = false) : Int = {
     if (withdrawn || agility) {
       return 0
     }
     var modifiedDmg = dmg
     
     // Resistance / weakness modifier
-    if (weakness.exists { eType => eType == attacker.energyType }) {
+    if (!ignoreTypes && weakness.exists { eType => eType == attacker.energyType }) {
       modifiedDmg *= 2
     }
     
-    if (resistance.exists { eType => eType == attacker.energyType }) {
+    if (!ignoreTypes && resistance.exists { eType => eType == attacker.energyType }) {
       modifiedDmg -= 30
     }
 
     if (harden && modifiedDmg <= 30) {
       modifiedDmg = 0
+    }
+
+    if (minimize) {
+      modifiedDmg -= 20
     }
 
     return math.max(modifiedDmg, 0)
@@ -260,6 +284,9 @@ abstract class PokemonCard(
     }
     lastAttack = dmg
     _currHp = math.max(_currHp - dmg, 0)
+    if (destinyBond && _currHp <= 0 && attacker.isDefined) {
+      attacker.get.takeDamage(attacker, attacker.get.maxHp)
+    }
   }
 
   def heal(amount : Int) : Unit = (amount <= 0) match {

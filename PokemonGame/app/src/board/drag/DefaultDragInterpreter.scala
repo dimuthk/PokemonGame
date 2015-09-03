@@ -6,6 +6,7 @@ import src.board.intermediary.IntermediaryRequest
 import src.card.Card
 import src.card.energy.EnergyCard
 import src.card.pokemon._
+import src.card.pokemon.jungle.Dodrio
 import src.board.drag._
 import src.player.Player
 
@@ -28,10 +29,18 @@ object DefaultDragInterpreter extends DragInterpreter {
     case _ => None
   }
 
+  private def retreatCost(owner : Player) : Int = {
+    val numDodrios = owner.bench.toList.flatten.filter{
+      case d : Dodrio => true
+      case _ => false
+      }.length
+    return math.max(owner.active.get.retreatCost - numDodrios, 0)
+  }
+
   private def checkActiveRestoreAmbiguity(p : Player, active : Option[PokemonCard], benchIndex : Int): Option[RetreatEnergySpecification] = {
-    if (active.isDefined && active.get.retreatCost > 0 && active.get.energyCards.length > 1) {
+    if (active.isDefined && retreatCost(p) > 0 && active.get.energyCards.length > 1) {
       if (hasMultipleEnergyTypes(active.get.energyCards)) {
-        return Some(new RetreatEnergySpecification(p, active.get.retreatCost, active.get.energyCards, benchIndex))
+        return Some(new RetreatEnergySpecification(p, retreatCost(p), active.get.energyCards, benchIndex))
       }
     }
     return None
@@ -90,8 +99,8 @@ object DefaultDragInterpreter extends DragInterpreter {
 
     private def chargeRetreat(p : Player, benchIndex : Int) : Boolean = {
       val active = p.active.get
-      if (active.getTotalEnergy() >= active.retreatCost) {
-        active.energyCards = active.energyCards.dropRight(active.retreatCost)
+      if (active.getTotalEnergy() >= retreatCost(p)) {
+        active.energyCards = active.energyCards.dropRight(retreatCost(p))
         return true
       } else {
         return false

@@ -77,12 +77,12 @@ object Board {
 
     def populateMachop : Unit = {
       if (id == 1) {
-        p.setDeck(List.fill(20)(new Bulbasaur()))
+        p.setDeck(List.fill(20)(new PsychicEnergy()))
         p.shuffleDeck()
-        p.setActive(new Golem())
+        p.setActive(new Gengar())
         p.isTurn = false
       } else {
-        p.setDeck(List.fill(20)(new Tentacool()))
+        p.setDeck(List.fill(20)(new Machop()))
         p.shuffleDeck()
         p.isTurn = true
       }

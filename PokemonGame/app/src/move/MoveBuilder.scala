@@ -31,6 +31,12 @@ object MoveBuilder {
     return None
   }
 
+  def ignoreTypesAttack(owner : Player, opp : Player, baseDmg : Int) : Option[IntermediaryRequest] = {
+    var dmg = opp.active.get.calculateDmg(owner.active.get, baseDmg, ignoreTypes = true)
+    opp.active.get.takeDamage(owner.active, dmg)
+    return None
+  }
+
   def standardAttackPlusExtra(
       owner : Player,
       opp : Player,
@@ -94,6 +100,9 @@ object MoveBuilder {
   def confuseAttackChance(owner : Player, opp : Player, baseDmg : Int = 0) : Option[IntermediaryRequest]
     = setStatusConditionAttack(owner, opp, StatusCondition.CONFUSED, baseDmg, true)
 
+  def paralyzeAttack(owner : Player, opp : Player, baseDmg : Int = 0) : Option[IntermediaryRequest]
+    = setStatusConditionAttack(owner, opp, StatusCondition.PARALYZED, baseDmg, false)
+
   def paralyzeAttackChance(owner : Player, opp : Player, baseDmg : Int = 0) : Option[IntermediaryRequest]
     = setStatusConditionAttack(owner, opp, StatusCondition.PARALYZED, baseDmg, true)
 
@@ -147,6 +156,11 @@ object MoveBuilder {
 
   def harden(owner : Player) : Option[IntermediaryRequest] = {
     owner.active.get.harden = true
+    return None
+  }
+
+  def minimize(owner : Player) : Option[IntermediaryRequest] = {
+    owner.active.get.minimize = true
     return None
   }
 

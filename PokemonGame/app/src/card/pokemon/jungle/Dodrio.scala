@@ -1,4 +1,4 @@
-package src.card.pokemon.fossil
+package src.card.pokemon.jungle
 
 import src.json.Identifier
 import src.move._
@@ -8,21 +8,21 @@ import src.card.energy.EnergyType
 import src.card.pokemon._
 import src.card.Deck
 
-class Fearow extends StageOnePokemon(
-	"Fearow",
-	"Fearow-Jungle-36.jpg",
+class Dodrio extends BasicPokemon(
+	"Dodrio",
+	"Dodrio-Jungle-34.jpg",
 	Deck.JUNGLE,
-	Identifier.FEAROW,
-	id = 22,
+	Identifier.DODRIO,
+	id = 85,
 	maxHp = 70,
-	firstMove = Some(new Agility(
-		"Agility",
-		3,
-		20)),
+	firstMove = Some(new PassivePokemonPower("Retreat Aid") {}),
 	secondMove = Some(new Move(
-		"Drill Peck",
-        4) {
-			def perform = (owner, opp, args) => standardAttack(owner, opp, 40)
+		"Rage",
+        3) {
+			def perform = (owner, opp, args) => {
+				val dmg = 10 + 10 * (owner.active.get.maxHp - owner.active.get.currHp)
+				standardAttack(owner, opp, dmg)
+			}
         }),
 	energyType = EnergyType.COLORLESS,
 	weakness = Some(EnergyType.THUNDER),
