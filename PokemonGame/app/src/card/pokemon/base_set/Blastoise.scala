@@ -37,15 +37,25 @@ class Blastoise extends StageTwoPokemon(
 
 private class RainDanceDrag extends CustomDragInterpreter {
 
-  override def handToActive(p : Player, handIndex : Int) : Unit = p.active match {
-    case Some(pc) => attachWaterEnergy(p, pc, handIndex)
-    case None => ()
+  def handToActive = (p, _, _, handIndex) => {
+    if (p.active.isDefined) {
+      attachWaterEnergy(p, p.active.get, handIndex)
+    }
+    None
   }
 
-  override def handToBench(p : Player, handIndex : Int, benchIndex : Int) : Unit = p.bench(benchIndex) match {
-    case Some(pc) => attachWaterEnergy(p, p.bench(benchIndex).get, handIndex)
-    case None => ()
+  def  handToBench = (p, _, _, handIndex, benchIndex) => {
+    if (p.bench(benchIndex).isDefined) {
+      attachWaterEnergy(p, p.bench(benchIndex).get, handIndex)
+    }
+    None
   }
+
+  def activeToBench = (_, _, _, _) => None
+
+  def benchToActive = (_, _, _, _) => None
+
+  def benchToBench = (_, _, _, _, _) => None 
 
   private def attachWaterEnergy(p : Player, pc : PokemonCard, handIndex : Int) : Unit = p.hand(handIndex) match {
     case ec : EnergyCard => {

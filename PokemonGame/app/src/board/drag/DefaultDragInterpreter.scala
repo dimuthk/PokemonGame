@@ -23,11 +23,11 @@ object DefaultDragInterpreter extends DragInterpreter {
 
   val restrictEnergyAttach = false
 
-  override def additionalRequest(p : Player, cmd : DragCommand) : Option[IntermediaryRequest] = cmd match {
+  /*override def additionalRequest(p : Player, cmd : DragCommand) : Option[IntermediaryRequest] = cmd match {
     case BenchToActive(benchIndex : Int) => checkActiveRestoreAmbiguity(p, p.active, benchIndex)
     case ActiveToBench(benchIndex : Int) => checkActiveRestoreAmbiguity(p, p.active, benchIndex)
     case _ => None
-  }
+  }*/
 
   private def retreatCost(owner : Player) : Int = {
     val numDodrios = owner.bench.toList.flatten.filter{
@@ -66,7 +66,7 @@ object DefaultDragInterpreter extends DragInterpreter {
    * Corresponds to a specification on which energy cards to discard when retreating an active pokemon
    * to the bench.
    */
-  override def handleIntermediary(p : Player, cmd : Seq[String]) {
+  /*override def handleIntermediary(p : Player, cmd : Seq[String]) {
     val benchIndex : Int = cmd(0).toInt
     val eCardIndices : Seq[Int] = cmd(1).split(",").map(_.toInt)
     val active = p.active.get
@@ -75,27 +75,30 @@ object DefaultDragInterpreter extends DragInterpreter {
       .zipWithIndex
       .filterNot { case (_, index) => eCardIndices.contains(index) }
       .map(_._1)
+  }*/
+
+  def benchToBench = (p, _, _, benchIndex1, benchIndex2) => {
+    p.swapBenchCards(benchIndex1, benchIndex2)
+    None
   }
 
-    override def benchToBench(p : Player, benchIndex1 : Int, benchIndex2 : Int) {
-      p.swapBenchCards(benchIndex1, benchIndex2)
-    }
-
-    override def benchToActive(p : Player, benchIndex : Int) {
-      if (p.active.isDefined) {
-        if (chargeRetreat(p, benchIndex)) {
-          p.swapActiveAndBench(benchIndex)
-        }
-      } else  {
-        p.swapActiveAndBench(benchIndex)
-      }
-    }
-
-    override def activeToBench(p : Player, benchIndex : Int) {
+  def benchToActive = (p, _, _, benchIndex) => {
+    if (p.active.isDefined) {
       if (chargeRetreat(p, benchIndex)) {
         p.swapActiveAndBench(benchIndex)
       }
+    } else  {
+      p.swapActiveAndBench(benchIndex)
     }
+    None
+  }
+
+  def activeToBench = (p, _, _, benchIndex) => {
+    if (chargeRetreat(p, benchIndex)) {
+      p.swapActiveAndBench(benchIndex)
+    }
+    None
+  }
 
     private def chargeRetreat(p : Player, benchIndex : Int) : Boolean = {
       val active = p.active.get
@@ -107,7 +110,8 @@ object DefaultDragInterpreter extends DragInterpreter {
       }
     }
 
-    override def handToActive(p : Player, handIndex : Int) : Unit = (p.hand(handIndex), p.active) match {
+  def handToActive = (p, _, _, handIndex) => {
+    (p.hand(handIndex), p.active) match {
       // Moving basic pokemon from hand to active slot.
       case (bp : BasicPokemon, None) => p.moveHandToActive(handIndex)
       // Attaching energy card to active pokemon.
@@ -116,8 +120,11 @@ object DefaultDragInterpreter extends DragInterpreter {
       case (ep : EvolvedPokemon, Some(active)) => p.evolveActiveCard(handIndex)
       case _ => ()
     }
+    None
+  }
 
-    override def handToBench(p : Player, handIndex : Int, benchIndex : Int) : Unit = (p.hand(handIndex), p.bench(benchIndex)) match {
+  def handToBench = (p, _, _, handIndex, benchIndex) => {
+    (p.hand(handIndex), p.bench(benchIndex)) match {
       // Moving basic pokemon to empty bench slot.
       case (bp : BasicPokemon, None) => p.moveHandToBench(handIndex, benchIndex)
       // Attaching energy card to bench pokemon.
@@ -126,5 +133,7 @@ object DefaultDragInterpreter extends DragInterpreter {
       case (ep : EvolvedPokemon, Some(bc)) => p.evolveBenchCard(handIndex, benchIndex)
       case _ => ()
     }
+    None
+  }
 
 }

@@ -10,30 +10,27 @@ object DragDirector {
 
 	def handleDragCommand(
 		owner : Player, opp : Player, contents : Seq[String]) : Option[IntermediaryRequest] = {
-		val dragCmd : DragCommand = contents(0) match {
-			case "HAND_TO_ACTIVE" => HandToActive(contents(1).toInt)
-			case "HAND_TO_BENCH" => HandToBench(contents(1).toInt, contents(2).toInt - 1)
-			case "ACTIVE_TO_BENCH" => ActiveToBench(contents(1).toInt - 1)
-			case "BENCH_TO_ACTIVE" => BenchToActive(contents(1).toInt - 1)
-			case "BENCH_TO_BENCH" => BenchToBench(contents(1).toInt - 1, contents(2).toInt - 1)
-			case "INTERMEDIARY" => Intermediary(contents.tail)
-			case _ => throw new Exception("Unrecognized drag request:  " + contents) 
+		val isOwner = contents(1) == "1"
+		val interpreter = selectDragInterpreter(owner, opp)
+
+		val maybeIntermediaryReq : Option[IntermediaryRequest] = contents(0) match {
+			case "HAND_TO_ACTIVE" => interpreter.handToActive(owner, opp, isOwner, contents(2).toInt)
+			case "HAND_TO_BENCH" => interpreter.handToBench(owner, opp, isOwner, contents(2).toInt, contents(3).toInt -1)
+			case "ACTIVE_TO_BENCH" => interpreter.activeToBench(owner, opp, isOwner, contents(2).toInt - 1)
+			case "BENCH_TO_ACTIVE" => interpreter.benchToActive(owner, opp, isOwner, contents(2).toInt - 1)
+			case "BENCH_TO_BENCH" => interpreter.benchToBench(owner, opp, isOwner, contents(2).toInt - 1, contents(3).toInt - 1)
+			case _ => throw new Exception("Unrecognized drag request: " + contents)
 		}
 
-		val intermediaryReq = DefaultDragInterpreter.additionalRequest(owner, dragCmd)
-		if (intermediaryReq == None) {
-			val interpreter = selectDragInterpreter(owner, opp)
-			interpreter.handleDrag(owner, dragCmd)
-		} else {
-			val flip : String = if (intermediaryReq.get.p == owner) "" else "FLIP<>"
-      		intermediaryReq.get.serverTag = flip + "DRAG<>" + contents.mkString("<>") + "<>"
-      		if (intermediaryReq.get.additionalTag.isDefined) {
-      			intermediaryReq.get.serverTag = intermediaryReq.get.serverTag + intermediaryReq.get.additionalTag.get + "<>"
+		if (maybeIntermediaryReq.isDefined) {
+      		val flip : String = if (maybeIntermediaryReq.get.p == owner) "" else "FLIP<>"
+      		maybeIntermediaryReq.get.serverTag = flip + "MOVE<>" + contents.mkString("<>") + "<>"
+      		if (maybeIntermediaryReq.get.additionalTag.isDefined) {
+        		maybeIntermediaryReq.get.serverTag = maybeIntermediaryReq.get.serverTag + maybeIntermediaryReq.get.additionalTag.get + "<>"
       		}
-			Logger.debug("dragintermediaryReq: " + intermediaryReq)
-		}
-		return intermediaryReq
-	}
+      	}
+      	return maybeIntermediaryReq
+    }
 
 	/**
 	 * For now, only allow custom interpreters to intercept drags made by their owner.

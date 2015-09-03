@@ -59,29 +59,36 @@ private class StrangeBehaviorState extends CustomStateGenerator(true, false) {
 
 private class StrangeBehaviorDrag extends CustomDragInterpreter {
 
-  override def benchToBench(p : Player, benchIndex1 : Int, benchIndex2 : Int) : Unit = {
+  def benchToBench = (p, _, _, benchIndex1, benchIndex2) => {
     val card = p.cardWithActivatedPower
     p.bench(benchIndex2) match {
       case Some(card) => swapDamage(p.bench(benchIndex1).get, card)
       case _ => ()
     }
+    None
   }
 
-  override def benchToActive(p : Player, benchIndex : Int) : Unit = {
+  def benchToActive = (p, _, _, benchIndex) => {
     val card = p.cardWithActivatedPower
     p.active match {
       case Some(card) => swapDamage(p.bench(benchIndex).get, card)
       case _ => ()
     }
+    None
   }
 
-  override def activeToBench(p : Player, benchIndex : Int) : Unit = {
+  def activeToBench = (p, _, _, benchIndex) => {
     val card = p.cardWithActivatedPower
     p.bench(benchIndex) match {
       case Some(card) => swapDamage(p.active.get, card)
       case _ => ()
     }
+    None
   }
+
+  def handToActive = (_, _, _, _) => None
+
+  def handToBench = (_, _, _, _, _) => None
 
   private def swapDamage(drag : PokemonCard, drop : PokemonCard) : Unit = {
     if (drop.currHp > 10 && drag.currHp < drag.maxHp) {

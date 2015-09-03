@@ -60,6 +60,7 @@ private class Heal extends ActivePokemonPower(
     if (usedHeal) {
       status = Status.DISABLED
     }
+    Logger.debug("heal status? " + status)
   }
 
   override def perform = (owner, opp, args) => {

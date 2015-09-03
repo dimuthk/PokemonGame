@@ -50,49 +50,6 @@ function processIntermediary(data) {
 function repaintBoard(data, socket) {
 	repaintForPlayer(data.player1, true)
 	repaintForPlayer(data.player2, false)
-	
-	$("#p1ActiveDisplay").droppable({
-			accept: "*",
-			drop: function(event, ui) {
-          var tag = $(ui.draggable).attr("id")
-          if (tag.includes("Active")) {
-          	// active to active
-          } else if (tag.includes("Bench")) {
-          	// bench to active
-            var benchIndex = tag.charAt(tag.length - 1)
-            benchToActive(benchIndex)
-          } else if (tag.includes("Hand")) {
-          	// hand to active
-          	var handIndex = tag.charAt(tag.length - 1)
-		  	    handToActive(handIndex)
-          }
-          
-		} });
-
-  for (var i = 1; i < 6; i++) {
-    $("#p1BenchDisplay" + i).droppable({
-        accept: "*",
-        drop : function(event, ui) {
-          var tag = $(ui.draggable).attr("id")
-          var benchTag = $(this).attr("id")
-          var benchIndex = benchTag.charAt(benchTag.length - 1)
-          if (tag.includes("Active")) {
-          	// active to bench
-            activeToBench(benchIndex)
-          } else if (tag.includes("Bench")) {
-          	// bench to bench
-            var benchIndex2 = tag.charAt(tag.length - 1)
-            benchToBench(benchIndex2, benchIndex)
-          } else if (tag.includes("Hand")) {
-          	// hand to bench
-          	var handIndex = tag.charAt(tag.length - 1)
-          	handToBench(handIndex, benchIndex)
-          }
-          
-        }
-    })
-  }
-
   colorBoardIfActivated(data)
 }
 
@@ -189,6 +146,7 @@ function repaintForPlayer(player, p1Orient) {
     processCard(hand[i], handPanelTag, handTag, true)
   }
 
+  var pNum = p1Orient ? 1 : 2
   var bench = player.BENCH
   var benchTag = p1Orient ? "p1Bench" : "p2Bench"
   for (var i = 0; i < bench.length; i++) {
@@ -201,6 +159,30 @@ function repaintForPlayer(player, p1Orient) {
       $("#" + benchTag + "Descriptor" + (i+1)).html(populateDescriptor(bench[i]))
     }
   }
+
+  for (var i = 1; i < 6; i++) {
+    $("#" + benchTag + "Display" + i).droppable({
+        accept: "*",
+        drop : function(event, ui) {
+          var tag = $(ui.draggable).attr("id")
+          var benchTag = $(this).attr("id")
+          var benchIndex = benchTag.charAt(benchTag.length - 1)
+          if (tag.includes("Active")) {
+            // active to bench
+            activeToBench(pNum, benchIndex)
+          } else if (tag.includes("Bench")) {
+            // bench to bench
+            var benchIndex2 = tag.charAt(tag.length - 1)
+            benchToBench(pNum, benchIndex2, benchIndex)
+          } else if (tag.includes("Hand")) {
+            // hand to bench
+            var handIndex = tag.charAt(tag.length - 1)
+            handToBench(pNum, handIndex, benchIndex)
+          }
+          
+        }
+    })
+  }
 	
   var active = player.ACTIVE
   var activeTag = p1Orient ? "p1Active" : "p2Active"
@@ -212,6 +194,24 @@ function repaintForPlayer(player, p1Orient) {
     energyDescription("#" + activeTag + "EnergyIcon", active)
     $("#" + activeTag + "Descriptor").html(populateDescriptor(active))
   }
+
+  $("#" + activeTag + "Display").droppable({
+    accept: "*",
+    drop : function(event, ui) {
+      var tag = $(ui.draggable).attr("id")
+      if (tag.includes("Active")) {
+            // active to active
+      } else if (tag.includes("Bench")) {
+            // bench to active
+        var benchIndex = tag.charAt(tag.length - 1)
+        benchToActive(pNum, benchIndex)
+      } else if (tag.includes("Hand")) {
+            // hand to active
+        var handIndex = tag.charAt(tag.length - 1)
+        handToActive(pNum, handIndex)
+      }
+    }
+  })
 }
 
 function addCardToDisplay(card, displayTag, imageTag) {
@@ -291,24 +291,24 @@ function energyDescription(tag, card) {
   $(tag).html(energyIcons)
 }
 
-function handToActive(handIndex) {
-  $("#content").data("socket").send("DRAG<>HAND_TO_ACTIVE<>" + handIndex)
+function handToActive(pNum ,handIndex) {
+  $("#content").data("socket").send("DRAG<>HAND_TO_ACTIVE<>" + pNum + "<>" + handIndex)
 }
 
-function handToBench(handIndex, benchIndex) {
-  $("#content").data("socket").send("DRAG<>HAND_TO_BENCH<>" + handIndex + "<>" + benchIndex)
+function handToBench(pNum, handIndex, benchIndex) {
+  $("#content").data("socket").send("DRAG<>HAND_TO_BENCH<>" + pNum + "<>" + handIndex + "<>" + benchIndex)
 }
 
-function benchToBench(benchIndex1, benchIndex2) {
-  $("#content").data("socket").send("DRAG<>BENCH_TO_BENCH<>" + benchIndex1 + "<>" + benchIndex2)
+function benchToBench(pNum, benchIndex1, benchIndex2) {
+  $("#content").data("socket").send("DRAG<>BENCH_TO_BENCH<>" + pNum + "<>" + benchIndex1 + "<>" + benchIndex2)
 }
 
-function benchToActive(benchIndex) {
-	$("#content").data("socket").send("DRAG<>BENCH_TO_ACTIVE<>" + benchIndex)
+function benchToActive(pNum, benchIndex) {
+	$("#content").data("socket").send("DRAG<>BENCH_TO_ACTIVE<>" + pNum + "<>" + benchIndex)
 }
 
-function activeToBench(benchIndex) {
-  $("#content").data("socket").send("DRAG<>ACTIVE_TO_BENCH<>" + benchIndex)
+function activeToBench(pNum, benchIndex) {
+  $("#content").data("socket").send("DRAG<>ACTIVE_TO_BENCH<>" + pNum + "<>" + benchIndex)
 }
 
 function isPlaceholder(item) {
