@@ -77,9 +77,9 @@ object Board {
 
     def populateMachop : Unit = {
       if (id == 1) {
-        p.setDeck(List.fill(20)(new PsychicEnergy()))
+        p.setDeck(List.fill(20)(new Rattata()))
         p.shuffleDeck()
-        p.setActive(new Gengar())
+        p.setActive(new Electrode())
         p.isTurn = false
       } else {
         p.setDeck(List.fill(20)(new Machop()))

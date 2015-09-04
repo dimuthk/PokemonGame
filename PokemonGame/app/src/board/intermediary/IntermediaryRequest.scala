@@ -136,4 +136,3 @@ abstract class SpecificClickableCardRequest(
     	return list.foldRight(new JsArray())((c, curr) => curr.prepend(JsBoolean(isSelectable(c))))
   	}
 }
-

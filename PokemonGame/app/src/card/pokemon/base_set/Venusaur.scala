@@ -63,30 +63,30 @@ private class EnergyTransState extends CustomStateGenerator(true, false) {
 
 private class EnergyTransDrag extends CustomDragInterpreter {
 
-  def benchToBench = (p, _, _, benchIndex1, benchIndex2) => {
+  def benchToBench = (p, _, _, benchIndex1, benchIndex2, _) => {
     if (p.bench(benchIndex2).isDefined) {
       transferLeafEnergy(p.bench(benchIndex1).get, p.bench(benchIndex2).get)
     }
     None
   }
 
-  def benchToActive = (p, _, _, benchIndex) => {
+  def benchToActive = (p, _, _, benchIndex, _) => {
     if (p.active.isDefined) {
       transferLeafEnergy(p.bench(benchIndex).get, p.active.get)
     }
     None
   }
 
-  def activeToBench = (p, _, _, benchIndex) => {
+  def activeToBench = (p, _, _, benchIndex, _) => {
     if (p.bench(benchIndex).isDefined) {
       transferLeafEnergy(p.active.get, p.bench(benchIndex).get)
     }
     None
   }
 
-  def handToActive = (_, _, _, _) => None
+  def handToActive = (_, _, _, _, _) => None
 
-  def handToBench = (_, _, _, _, _) => None
+  def handToBench = (_, _, _, _, _, _) => None
 
   private def transferLeafEnergy(drag : PokemonCard, drop : PokemonCard) {
     for (i <- 0 until drag.energyCards.length) {

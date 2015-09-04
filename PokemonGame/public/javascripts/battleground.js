@@ -94,6 +94,9 @@ function colorBoardIfActivatedForCard(card) {
           case "PSYCHIC":
             $("#content").animate({backgroundColor: "purple"}, 2000);
             break;
+          case "THUNDER":
+            $("#content").animate({backgroundColor: "yellow"}, 2000);
+            break;
           default: break;
         }
         return true

@@ -17,9 +17,11 @@ abstract class EnergyCard(
     displayName : String,
     imgName : String,
     identifier : Identifier.Value,
-    val eType : EnergyType.Value,
+    val _eType : EnergyType.Value,
     val energyCount : Int = 1,
     deck : Deck.Value = Deck.BASE_SET) extends Card(displayName, imgName, deck) {
+
+  def eType = _eType
 
   override def toJsonImpl() = super.toJsonImpl() ++ Json.obj(
       Identifier.DISPLAY_NAME.toString -> displayName,

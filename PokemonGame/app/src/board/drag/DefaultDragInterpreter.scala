@@ -77,12 +77,12 @@ object DefaultDragInterpreter extends DragInterpreter {
       .map(_._1)
   }*/
 
-  def benchToBench = (p, _, _, benchIndex1, benchIndex2) => {
+  def benchToBench = (p, _, _, benchIndex1, benchIndex2, _) => {
     p.swapBenchCards(benchIndex1, benchIndex2)
     None
   }
 
-  def benchToActive = (p, _, _, benchIndex) => {
+  def benchToActive = (p, _, _, benchIndex, _) => {
     if (p.active.isDefined) {
       if (chargeRetreat(p, benchIndex)) {
         p.swapActiveAndBench(benchIndex)
@@ -93,7 +93,7 @@ object DefaultDragInterpreter extends DragInterpreter {
     None
   }
 
-  def activeToBench = (p, _, _, benchIndex) => {
+  def activeToBench = (p, _, _, benchIndex, _) => {
     if (chargeRetreat(p, benchIndex)) {
       p.swapActiveAndBench(benchIndex)
     }
@@ -110,7 +110,7 @@ object DefaultDragInterpreter extends DragInterpreter {
       }
     }
 
-  def handToActive = (p, _, _, handIndex) => {
+  def handToActive = (p, _, _, handIndex, _) => {
     (p.hand(handIndex), p.active) match {
       // Moving basic pokemon from hand to active slot.
       case (bp : BasicPokemon, None) => p.moveHandToActive(handIndex)
@@ -123,7 +123,7 @@ object DefaultDragInterpreter extends DragInterpreter {
     None
   }
 
-  def handToBench = (p, _, _, handIndex, benchIndex) => {
+  def handToBench = (p, _, _, handIndex, benchIndex, _) => {
     (p.hand(handIndex), p.bench(benchIndex)) match {
       // Moving basic pokemon to empty bench slot.
       case (bp : BasicPokemon, None) => p.moveHandToBench(handIndex, benchIndex)

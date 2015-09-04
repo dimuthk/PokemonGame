@@ -86,7 +86,7 @@ private class CurseDrag extends CustomDragInterpreter {
       case _ => throw new Exception("Couldn't find curse")
     }
 
-	def benchToBench = (owner, opp, _, benchIndex1, benchIndex2) => {
+	def benchToBench = (owner, opp, _, benchIndex1, benchIndex2, _) => {
 		if (opp.bench(benchIndex2).isDefined) {
       swapDamage(opp.bench(benchIndex1).get, opp.bench(benchIndex2).get)
       findCurse(owner).togglePower()
@@ -94,7 +94,7 @@ private class CurseDrag extends CustomDragInterpreter {
     None
 	}
 
-	def benchToActive = (owner, opp, _, benchIndex) => {
+	def benchToActive = (owner, opp, _, benchIndex, _) => {
 		if (opp.active.isDefined) {
       		swapDamage(opp.bench(benchIndex).get, opp.active.get)
           findCurse(owner).togglePower()
@@ -102,7 +102,7 @@ private class CurseDrag extends CustomDragInterpreter {
     	None
 	}
 
-	def activeToBench = (owner, opp, _, benchIndex) => {
+	def activeToBench = (owner, opp, _, benchIndex, _) => {
 		if (opp.bench(benchIndex).isDefined) {
       		swapDamage(opp.active.get, opp.bench(benchIndex).get)
           findCurse(owner).togglePower()
@@ -110,9 +110,9 @@ private class CurseDrag extends CustomDragInterpreter {
     	None
 	}
 
-	def handToActive = (_, _, _, _) => None
+	def handToActive = (_, _, _, _, _) => None
 
-	def handToBench = (_, _, _, _, _) => None
+	def handToBench = (_, _, _, _, _, _) => None
 
   private def swapDamage(drag : PokemonCard, drop : PokemonCard) : Unit = {
     if (drop.currHp > 10 && drag.currHp < drag.maxHp) {

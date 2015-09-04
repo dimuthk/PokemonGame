@@ -63,30 +63,30 @@ private class DamageSwapState extends CustomStateGenerator(true, false) {
 
 private class DamageSwapDrag extends CustomDragInterpreter {
 
-  def benchToBench = (p, _, _, benchIndex1, benchIndex2) => {
+  def benchToBench = (p, _, _, benchIndex1, benchIndex2, _) => {
     if (p.bench(benchIndex2).isDefined) {
       swapDamage(p.bench(benchIndex1).get, p.bench(benchIndex2).get)
     }
     None
   }
 
-  def benchToActive = (p, _, _, benchIndex) => {
+  def benchToActive = (p, _, _, benchIndex, _) => {
     if (p.active.isDefined) {
       swapDamage(p.bench(benchIndex).get, p.active.get)
     }
     None
   }
 
-  def activeToBench = (p, _, _, benchIndex) => {
+  def activeToBench = (p, _, _, benchIndex, _) => {
     if (p.bench(benchIndex).isDefined) {
       swapDamage(p.active.get, p.bench(benchIndex).get)
     }
     None
   }
 
-  def handToActive = (_, _, _, _) => None
+  def handToActive = (_, _, _, _, _) => None
 
-  def handToBench = (_, _, _, _, _) => None
+  def handToBench = (_, _, _, _, _, _) => None
 
   private def swapDamage(drag : PokemonCard, drop : PokemonCard) : Unit = {
     if (drop.currHp > 10 && drag.currHp < drag.maxHp) {
