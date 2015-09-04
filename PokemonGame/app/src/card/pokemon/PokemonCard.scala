@@ -26,8 +26,8 @@ abstract class PokemonCard(
 	val firstMove: Option[Move] = None,
   val secondMove: Option[Move] = None,
 	private val _energyType : EnergyType.Value,
-	val weakness : Option[EnergyType.Value] = None,
-  val resistance : Option[EnergyType.Value] = None,
+	val _weakness : Option[EnergyType.Value] = None,
+  val _resistance : Option[EnergyType.Value] = None,
   val retreatCost : Int) extends Card(displayName, imgName, deck) {
 
   val pass : Move = new Pass()
@@ -36,7 +36,17 @@ abstract class PokemonCard(
 
   def currHp = _currHp
 
-  def energyType = _energyType
+  var currEnergyType = _energyType
+
+  var currResistance = _resistance
+
+  def resistance = currResistance
+
+  var currWeakness = _weakness
+
+  def weakness = currWeakness
+
+  def energyType = currEnergyType
 
   var energyCards : Seq[EnergyCard] = List()
 
@@ -135,6 +145,8 @@ abstract class PokemonCard(
     */
    var destinyBond : Boolean = false
 
+   var swordsDance : Boolean = false
+
 
   def ownsMove(m : Move) : Boolean = existingMoves.filter(_ == m).length > 0
 
@@ -159,6 +171,7 @@ abstract class PokemonCard(
     preEvolution = None
     lastAttack = -1
     smokescreen = false
+    swordsDance = false
     harden = false
     minimize = false
     destinyBond = false
@@ -213,6 +226,7 @@ abstract class PokemonCard(
       harden = false
       destinyBond = false
       minimize = false
+      swordsDance = false
       poisonStatus = None
       withdrawn = false
       agility = false

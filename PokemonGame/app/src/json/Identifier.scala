@@ -210,6 +210,20 @@ object Identifier extends Enumeration {
   STARYU,
   STARMIE,
   MR_MIME,
+  SCYTHER,
+  JYNX,
+  ELECTABUZZ,
+  MAGMAR,
+  PINSIR,
+  TAUROS,
+  MAGIKARP,
+  GYARADOS,
+  LAPRAS,
+  EEVEE,
+  VAPOREON,
+  JOLTEON,
+  FLAREON,
+  PORYGON,
 
   /*
    * GENERAL ATTRIBUTES

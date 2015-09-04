@@ -1,4 +1,4 @@
-package src.card.pokemon.base_set
+package src.card.pokemon.jungle
 
 import src.card.Card
 import src.card.condition._
@@ -35,10 +35,6 @@ class Venomoth extends StageOnePokemon(
 	energyType = EnergyType.GRASS,
 	weakness = Some(EnergyType.FIRE),
 	retreatCost = 1) {
-
-	var currEnergyType : EnergyType.Value = EnergyType.GRASS
-
-	override def energyType = currEnergyType
 
 	override def updateCardOnTurnSwap(owner : Player, opp : Player, isActive : Boolean) {
 		super.updateCardOnTurnSwap(owner, opp, isActive)

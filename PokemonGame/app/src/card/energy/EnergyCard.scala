@@ -13,6 +13,17 @@ object EnergyType extends Enumeration {
   val FIRE, WATER, GRASS, THUNDER, FIGHTING, PSYCHIC, COLORLESS = Value
 }
 
+object EnergyCard {
+    val energyList : Seq[EnergyCard] = List(
+        new FireEnergy(),
+        new WaterEnergy(),
+        new ThunderEnergy(),
+        new FightingEnergy(),
+        new PsychicEnergy(),
+        new GrassEnergy(),
+        new DoubleColorlessEnergy())
+}
+
 abstract class EnergyCard(
     displayName : String,
     imgName : String,
