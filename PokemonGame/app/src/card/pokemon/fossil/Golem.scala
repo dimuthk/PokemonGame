@@ -27,8 +27,8 @@ class Golem extends StageTwoPokemon(
       }),
     secondMove = Some(new Move(
       "Selfdestruct",
-      0,
-      Map(EnergyType.FIGHTING -> 0)) {
+      4,
+      Map(EnergyType.FIGHTING -> 4)) {
         def perform = (owner, opp, args) => selfDestruct(owner, opp, 100, 100, 20)
       }),
     energyType = EnergyType.FIGHTING,

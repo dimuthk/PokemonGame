@@ -22,7 +22,9 @@ class Whirlwind(
 	val dmg : Int,
     totalEnergyReq : Int,
 	specialEnergyReq : Map[EnergyType.Value, Int] = Map(),
-    val onFlip : Boolean = false) extends Move(
+    val onFlip : Boolean = false,
+    val switchOwner : Boolean = false,
+    val selfDmg : Int = 0) extends Move(
     	name,
     	totalEnergyReq,
     	specialEnergyReq) {
@@ -40,22 +42,24 @@ class Whirlwind(
     def perform = (owner, opp, args) => args.length match {
         case 0 => (onFlip && !flippedHeads()) match {
             // Failed the bench swap attempt. Do the damage and return
-            case true => standardAttack(owner, opp, dmg)
+            case true => attackAndHurtSelf(owner, opp, dmg, selfDmg)
             case false => {
-                val benchCards = opp.bench.toList.flatten
+                val benchCards = if (switchOwner) owner.bench.toList.flatten else opp.bench.toList.flatten
                 benchCards.length match {
                     // No cards to swap. Just do the damage
-                    case 0 => standardAttack(owner, opp, dmg)
+                    case 0 => attackAndHurtSelf(owner, opp, dmg, selfDmg)
                     // Only one bench card. Do the damage and swap
                     case 1 => {
-                        standardAttack(owner, opp, dmg)
-                        opp.swapActiveAndBench(opp.bench.indexOf(Some(benchCards(0))))
+                        attackAndHurtSelf(owner, opp, dmg, selfDmg)
+                        val p = if (switchOwner) owner else opp
+                        p.swapActiveAndBench(p.bench.indexOf(Some(benchCards(0))))
                         None
                     }
                     // Ambiguous. Have the player choose and come back
-                    case _ => ownerChooses match {
-                        case true => Some(new NextActiveSpecification(owner, owner.active.get.displayName, benchCards))
-                        case false => Some(new NextActiveSpecification(opp, owner.active.get.displayName, benchCards))
+                    case _ => (ownerChooses, switchOwner) match {
+                        case (true, _) => Some(new NextActiveSpecification(owner, owner.active.get.displayName, benchCards))
+                        case (false, false) => Some(new NextActiveSpecification(opp, owner.active.get.displayName, benchCards))
+                        case _ => throw new Exception("unsupported")
                     }
                 }
             }
@@ -64,7 +68,7 @@ class Whirlwind(
             val rawIndex : Int = args.head.toInt
             var matcher : Int = -1
             val realIndex = getRealIndexFor(rawIndex, opp.bench)
-            standardAttack(owner, opp, dmg)
+            attackAndHurtSelf(owner, opp, dmg, selfDmg)
             opp.swapActiveAndBench(realIndex)
             None
         }

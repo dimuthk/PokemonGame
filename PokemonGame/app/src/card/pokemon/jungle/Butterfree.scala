@@ -13,7 +13,7 @@ import src.card.Deck
 
 import play.api.Logger
 
-class Butterfree extends BasicPokemon(
+class Butterfree extends StageTwoPokemon(
     "Butterfree",
     "Butterfree-Jungle-33.jpg",
     Deck.JUNGLE,
