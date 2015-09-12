@@ -47,14 +47,15 @@ class HyperBeam(
             case _ => hasMultipleEnergyTypes(opp.active.get.energyCards) match {
                 case true => Some(new DiscardEnergySpecification(owner, opp.active.get.energyCards))
                 case false => {
-                    opp.active.get.energyCards = opp.active.get.energyCards.tail
+                    opp.discardEnergyFromCard(opp.active.get)
                     standardAttack(owner, opp, dmg)
                 }
             }
         }
         case _ => {
-            val energyIndex = args(0).toInt
-            opp.active.get.energyCards = opp.active.get.energyCards diff List(opp.active.get.energyCards(energyIndex))
+            val eCard = List(opp.active.get.energyCards(args(0).toInt))
+            opp.active.get.discardSpecificEnergy(eCard)
+            opp.garbage = opp.garbage ++ eCard
             standardAttack(owner, opp, dmg)
         }
     }

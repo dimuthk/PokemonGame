@@ -54,14 +54,6 @@ object DefaultDragInterpreter extends DragInterpreter {
     return false;
   }
 
-  private def attachEnergyToPokemon(p : Player, ec : EnergyCard, handIndex : Int, pc : PokemonCard) {
-    if (!p.addedEnergy || !restrictEnergyAttach) {
-      pc.energyCards = pc.energyCards ++ List(ec)
-      p.removeCardFromHand(handIndex)
-      p.addedEnergy = true
-    }
-  }
-
   /**
    * Corresponds to a specification on which energy cards to discard when retreating an active pokemon
    * to the bench.
@@ -103,7 +95,7 @@ object DefaultDragInterpreter extends DragInterpreter {
     private def chargeRetreat(p : Player, benchIndex : Int) : Boolean = {
       val active = p.active.get
       if (active.getTotalEnergy() >= retreatCost(p)) {
-        active.energyCards = active.energyCards.dropRight(retreatCost(p))
+        p.discardEnergyFromCard(active, cnt = retreatCost(p))
         return true
       } else {
         return false
@@ -115,7 +107,7 @@ object DefaultDragInterpreter extends DragInterpreter {
       // Moving basic pokemon from hand to active slot.
       case (bp : BasicPokemon, None) => p.moveHandToActive(handIndex)
       // Attaching energy card to active pokemon.
-      case (ec : EnergyCard, Some(active)) => attachEnergyToPokemon(p, ec, handIndex, active)
+      case (ec : EnergyCard, Some(active)) => p.attachEnergyFromHand(active, handIndex)
       // Evolving active pokemon.
       case (ep : EvolvedPokemon, Some(active)) => p.evolveActiveCard(handIndex)
       case _ => ()
@@ -128,7 +120,7 @@ object DefaultDragInterpreter extends DragInterpreter {
       // Moving basic pokemon to empty bench slot.
       case (bp : BasicPokemon, None) => p.moveHandToBench(handIndex, benchIndex)
       // Attaching energy card to bench pokemon.
-      case (ec : EnergyCard, Some(bc)) => attachEnergyToPokemon(p, ec, handIndex, bc)
+      case (ec : EnergyCard, Some(bc)) => p.attachEnergyFromHand(bc, handIndex)
       // Evolving this bench pokemon.
       case (ep : EvolvedPokemon, Some(bc)) => p.evolveBenchCard(handIndex, benchIndex)
       case _ => ()

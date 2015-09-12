@@ -48,7 +48,13 @@ abstract class PokemonCard(
 
   def energyType = currEnergyType
 
-  var energyCards : Seq[EnergyCard] = List()
+  var _energyCards : Seq[EnergyCard] = List()
+
+  def energyCards = _energyCards
+
+  def attachEnergy(e : EnergyCard) = _energyCards = _energyCards ++ List(e)
+
+  def attachEnergy(es : Seq[EnergyCard]) = _energyCards = _energyCards ++ es
 
   var preEvolution : Option[PokemonCard] = None
 
@@ -156,8 +162,7 @@ abstract class PokemonCard(
   }
 
   def evolveOver(pc : PokemonCard) {
-    energyCards = pc.energyCards
-    pc.energyCards = Nil
+    _energyCards = pc.discardAllEnergy()
     preEvolution = Some(pc)
   }
 
@@ -165,8 +170,7 @@ abstract class PokemonCard(
     _currHp = maxHp
     poisonStatus = None
     statusCondition = None
-    var res : Seq[Card] = energyCards
-    energyCards = Nil
+    var res : Seq[Card] = discardAllEnergy()
     res = res ++ preEvolutions(this)
     preEvolution = None
     lastAttack = -1
@@ -186,12 +190,23 @@ abstract class PokemonCard(
     case Some(preEvolution) => List(preEvolution) ++ preEvolutions(preEvolution)
   }
 
-  def discardEnergy(eType : EnergyType.Value, cnt : Int = 1) : Seq[EnergyCard] = {
+  def discardAllEnergy() : Seq[EnergyCard] = {
+    val cards = _energyCards
+    _energyCards = Nil
+    return cards
+  }
+
+  def discardSpecificEnergy(eCards : Seq[EnergyCard]) : Seq[EnergyCard] = {
+    _energyCards = _energyCards diff eCards
+    return eCards
+  }
+
+  def discardEnergy(eType : EnergyType.Value = EnergyType.COLORLESS, cnt : Int = 1) : Seq[EnergyCard] = {
     val matchingEnergy : Seq[EnergyCard] = (() => eType match {
       case EnergyType.COLORLESS => energyCards.slice(0, cnt)
       case other => energyCards.filter(_.eType == other).slice(0, cnt)
     })()
-    energyCards = energyCards diff matchingEnergy
+    _energyCards = _energyCards diff matchingEnergy
     return matchingEnergy
   }
 

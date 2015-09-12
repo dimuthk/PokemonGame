@@ -12,6 +12,10 @@ import src.player.Player
 
 object DefaultMoveInterpreter extends MoveInterpreter {
 
+  def doSomething : Unit = {}
+
+    def f : (Player, Player) => Unit => Int = (owner, opp) => doSomething => 3
+
     def attackFromActive = (owner, opp, _, moveNum, args) => moveNum match {
       case 1 => useMove(owner, opp, owner.active.get.firstMove.get, args)
       case 2 => useMove(owner, opp, owner.active.get.secondMove.get, args)

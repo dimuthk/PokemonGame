@@ -4,6 +4,8 @@ import src.card.pokemon.EvolvedPokemon
 import scala.util.Random
 import src.card.CardUI
 import src.card.Card
+import src.card.energy.EnergyCard
+import src.card.energy.EnergyType
 import src.move._
 import src.card.Placeholder
 import src.card.pokemon.PokemonCard
@@ -81,6 +83,23 @@ class Player extends Jsonable {
   def ownerOfMove(m : Move) : Option[PokemonCard] = existingActiveAndBenchCards.find(_.ownsMove(m))
 
   def existingActiveAndBenchCards : Seq[PokemonCard] = return (List(active) ++ bench.toList).flatten
+
+  def attachEnergyFromHand(pc : PokemonCard, hIndex : Int) : Unit = _hand(hIndex) match {
+    case ec : EnergyCard => {
+      pc.attachEnergy(ec)
+      removeCardFromHand(hIndex)
+      addedEnergy = true
+    }
+    case _ => throw new Exception("Tried to attach non-energy card from hand")
+  }
+
+  def discardEnergyFromCard(
+      pc : PokemonCard,
+      eType : EnergyType.Value = EnergyType.COLORLESS,
+      cnt : Int = 1) {
+    val eCards = pc.discardEnergy(eType, cnt)
+    garbage = garbage ++ eCards
+  }
 
   def moveActiveToHand() {
     if (active.isDefined && !active.get.agility) {

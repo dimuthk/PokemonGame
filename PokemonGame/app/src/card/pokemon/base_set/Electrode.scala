@@ -115,7 +115,7 @@ private class BuzzapDrag extends CustomDragInterpreter {
         }
         case _ => {
             val buzzap = discardCards(owner)
-            owner.bench(benchIndex2).get.energyCards = owner.bench(benchIndex2).get.energyCards ++ List(buzzap)
+            owner.bench(benchIndex2).get.attachEnergy(buzzap)
             assignBuzzapType(owner.bench(benchIndex2).get, args)
         }
     }
@@ -129,7 +129,7 @@ private class BuzzapDrag extends CustomDragInterpreter {
         }
         case _ => {
             val buzzap = discardCards(owner)
-            owner.active.get.energyCards = owner.active.get.energyCards ++ List(buzzap)
+            owner.active.get.attachEnergy(buzzap)
             assignBuzzapType(owner.active.get, args)
         }
     }
@@ -143,7 +143,7 @@ private class BuzzapDrag extends CustomDragInterpreter {
         }
         case _ => {
             val buzzap = discardCards(owner)
-            owner.bench(benchIndex).get.energyCards = owner.bench(benchIndex).get.energyCards ++ List(buzzap)
+            owner.bench(benchIndex).get.attachEnergy(buzzap)
             assignBuzzapType(owner.bench(benchIndex).get, args)
         }
     }

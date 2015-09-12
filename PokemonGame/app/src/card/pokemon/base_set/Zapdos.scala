@@ -26,7 +26,8 @@ class Zapdos extends BasicPokemon(
 		4,
 		Map(EnergyType.THUNDER -> 4)) {
 			def perform = (owner, opp, args) => {
-				owner.active.get.energyCards = Nil
+				val active = owner.active.get
+				owner.discardEnergyFromCard(active, cnt = active.energyCards.length)
 				standardAttack(owner, opp, 100)
 			}
 		}),

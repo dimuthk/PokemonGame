@@ -12,4 +12,17 @@ abstract class CustomMoveInterpreter extends MoveInterpreter {
 
 	var isActive : Boolean = false
 
+	/*private var intermediary : Option[IntermediaryRequest] = None
+
+	def requestIntermediary(i : IntermediaryRequest) : Unit = intermediary = Some(i)
+
+	def attackFromActiveImpl : (Player, Player, Boolean, Int, Seq[String]) => Unit
+
+
+
+	def attackFromActive = (owner, opp, isOwner, moveNum, args) = {
+		attackFromActiveImpl(owner, opp, isOwner, moveNum, args)
+		return intermediary
+	}*/
+
 }

@@ -58,11 +58,8 @@ private class RainDanceDrag extends CustomDragInterpreter {
   def benchToBench = (_, _, _, _, _, _) => None 
 
   private def attachWaterEnergy(p : Player, pc : PokemonCard, handIndex : Int) : Unit = p.hand(handIndex) match {
-    case ec : EnergyCard => {
-      if (ec.eType == EnergyType.WATER) {
-        pc.energyCards = pc.energyCards ++ List(ec)
-        p.removeCardFromHand(handIndex)
-      }
+    case ec : EnergyCard => if (ec.eType == EnergyType.WATER) {
+      p.attachEnergyFromHand(pc, handIndex)
     }
     case _ => ()
   }

@@ -88,16 +88,8 @@ private class EnergyTransDrag extends CustomDragInterpreter {
 
   def handToBench = (_, _, _, _, _, _) => None
 
-  private def transferLeafEnergy(drag : PokemonCard, drop : PokemonCard) {
-    for (i <- 0 until drag.energyCards.length) {
-      if (drag.energyCards(i).eType == EnergyType.GRASS) {
-        val ec : EnergyCard = drag.energyCards(i)
-        drop.energyCards = drop.energyCards ++ List(ec)
-        drag.energyCards = drag.energyCards.slice(0, i) ++ drag.energyCards.slice(i + 1, drag.energyCards.size)
-        return
-      }
-    }
-  }
+  private def transferLeafEnergy(drag : PokemonCard, drop : PokemonCard) : Unit 
+    = drop.attachEnergy(drag.discardEnergy(eType = EnergyType.GRASS))
 
 }
 
