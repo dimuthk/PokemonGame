@@ -119,7 +119,7 @@ class Player extends Jsonable {
     _bench(benchIndex) = tmp
   }
 
-  def swapBenchCards(benchIndex1 : Int, benchIndex2 : Int) {
+  def swapBenchCards(benchIndex1 : Int, benchIndex2 : Int) : Unit = {
     val tmp = _bench(benchIndex1)
     _bench(benchIndex1) = _bench(benchIndex2)
     _bench(benchIndex2) = tmp

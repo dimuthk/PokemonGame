@@ -16,6 +16,8 @@ abstract class DragInterpreter {
 
     def benchToBench : (Player, Player, Boolean, Int, Int, Seq[String]) => Option[IntermediaryRequest]
 
+    def request()(req : Option[IntermediaryRequest] = None) : Option[IntermediaryRequest] = req
+
     /**
      * Notifies that bench card positioned at index is attempting to be moved to active slot. Assumes
      * that benchIndex points to a non-null bench card.
