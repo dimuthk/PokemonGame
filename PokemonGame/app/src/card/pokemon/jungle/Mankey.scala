@@ -2,7 +2,7 @@ package src.card.pokemon.base_set
 
 import src.json.Identifier
 import src.board.intermediary.SingleDisplay
-import src.board.move.CustomMoveInterpreter
+import src.board.move._
 import src.board.state.CustomStateGenerator
 import src.move._
 import src.move.Status._
@@ -118,7 +118,6 @@ class PeekStateGenerator extends CustomStateGenerator(true, false) {
     return list.foldRight(new JsArray())((m, curr) => curr.prepend(m))
   }
 
-
 }
 
 class PeekMoveInterpreter extends CustomMoveInterpreter {
@@ -136,26 +135,24 @@ class PeekMoveInterpreter extends CustomMoveInterpreter {
     case _ => throw new Exception("Did not find Mankey as the activated card")
   }
 
-	def attackFromActive = (_, _, _, _, _) => throw new Exception("unsupported")
+  override def requestAdditional = (pData, moveCmd, _) => moveCmd match {
+    case AttackFromHand(hIndex, _) => {
+      getPeekMove(pData.owner).togglePower()
+      Some(new SingleDisplay("Result Card", "Here is the card", pData.owner, pData.opp.hand(hIndex)))
+    }
+    case AttackFromPrize(pIndex, _) => {
+      val p = if (pData.isOwner) pData.owner else pData.opp
+      getPeekMove(pData.owner).togglePower()
+      Some(new SingleDisplay("Result Card", "Here is the card", pData.owner, p.prizes(pIndex).get))
+    }
+    case AttackFromDeck(_) => {
+      val p = if (pData.isOwner) pData.owner else pData.opp
+      getPeekMove(pData.owner).togglePower()
+      Some(new SingleDisplay("Result Card", "Here is the card", pData.owner, p.deck(0)))
+    }
+    case _ => throw new Exception("Unrecognized move action for peek")
+  }
 
-	def attackFromBench = (_, _, _, _, _, _) => throw new Exception("unsupported")
-
-	def attackFromHand = (owner, opp, _, handIndex, _, _) => {
-		getPeekMove(owner).togglePower()
-		Some(new SingleDisplay("Result Card", "Here is the card", owner, opp.hand(handIndex)))
-	}
-
-	def attackFromPrize = (owner, opp, isOwner, prizeIndex, _, _) => {
-		val p = if (isOwner) owner else opp
-		getPeekMove(owner).togglePower()
-		Some(new SingleDisplay("Result Card", "Here is the card", owner, p.prizes(prizeIndex).get))
-	}
-
-	def attackFromDeck = (owner, opp, isOwner, _, _) => {
-		val p = if (isOwner) owner else opp
-		getPeekMove(owner).togglePower()
-		Some(new SingleDisplay("Result Card", "Here is the card", owner, p.deck(0)))
-	}
-
+  override def handleMove = (pData, moveCmd, _) => ()
 
 }

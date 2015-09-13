@@ -101,11 +101,6 @@ abstract class PokemonCard(
   }
 
   /**
-   * Flag marking that this card cannot be moved from its current spot.
-   */
-  //var stuck : Boolean = false
-
-  /**
    * 50% chance the move will work.
    */
   var smokescreen : Boolean = false

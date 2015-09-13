@@ -31,9 +31,14 @@ object DefaultDragInterpreter extends DragInterpreter {
   }
 
   private def checkForAmbiguity(p : Player): Option[RetreatEnergySpecification] = p.active match {
-    case Some(active) => retreatCost(p) > 0 && hasMultipleEnergyTypes(active.energyCards) match {
-      case true => Some(new RetreatEnergySpecification(p, retreatCost(p), active.energyCards))
-      case false => None
+    case Some(active) => {
+      if (retreatCost(p) > 0
+        && active.energyCards.length >= retreatCost(p)
+        && hasMultipleEnergyTypes(active.energyCards)) {
+        return Some(new RetreatEnergySpecification(p, retreatCost(p), active.energyCards))
+      } else {
+        return None
+      }
     }
     case None => None
   }
@@ -66,6 +71,7 @@ object DefaultDragInterpreter extends DragInterpreter {
   }
 
   def handleDrag = (pData, dragCmd, args) => dragCmd match {
+
     case BenchToBench(bIndex1, bIndex2) => pData.owner.swapBenchCards(bIndex1, bIndex2)
 
     case BenchToActive(bIndex) => pData.owner.active match {
@@ -87,7 +93,9 @@ object DefaultDragInterpreter extends DragInterpreter {
       // Attaching energy card to active pokemon.
       case (ec : EnergyCard, Some(active)) => pData.owner.attachEnergyFromHand(active, hIndex)
       // Evolving active pokemon.
-      case (ep : EvolvedPokemon, Some(active)) => pData.owner.evolveActiveCard(hIndex)
+      case (ep : EvolvedPokemon, Some(active)) => if (ep.isEvolutionOf(active)) {
+        pData.owner.evolveActiveCard(hIndex)
+      }
       case _ => ()
     }
 
@@ -97,7 +105,9 @@ object DefaultDragInterpreter extends DragInterpreter {
       // Attaching energy card to bench pokemon.
       case (ec : EnergyCard, Some(bc)) => pData.owner.attachEnergyFromHand(bc, hIndex)
       // Evolving this bench pokemon.
-      case (ep : EvolvedPokemon, Some(bc)) => pData.owner.evolveBenchCard(hIndex, bIndex)
+      case (ep : EvolvedPokemon, Some(bc)) => if (ep.isEvolutionOf(bc)) {
+        pData.owner.evolveBenchCard(hIndex, bIndex)
+      }
       case _ => ()
     }
 
@@ -112,6 +122,7 @@ object DefaultDragInterpreter extends DragInterpreter {
       case 0 => checkForAmbiguity(pData.owner)
       case _ => None
     }
+    case _ => None
   }
 
 }

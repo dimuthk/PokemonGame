@@ -5,7 +5,7 @@ import src.move._
 import src.move.Status._
 import src.board.intermediary.IntermediaryRequest
 import src.board.intermediary.IntermediaryRequest._
-import src.board.move.CustomMoveInterpreter
+import src.board.move._
 import src.board.state.CustomStateGenerator
 import src.board.intermediary.ClickableCardRequest
 import src.card.CardUI
@@ -20,7 +20,7 @@ import play.api.Logger
 import src.card.Placeholder
 import play.api.libs.json._
 
-class Vileplume extends BasicPokemon(
+class Vileplume extends StageTwoPokemon(
 	"Vileplume",
 	"Vileplume-Jungle-15.jpg",
 	Deck.JUNGLE,
@@ -80,49 +80,23 @@ class HealMoveInterpreter extends CustomMoveInterpreter {
     case _ => throw new Exception("Did not find Vileplume as the activated card")
   }
 
-  def attackFromActive = (owner, opp, _, moveNum, args) => {
-    val active = owner.active.get
-    val ap = getHealMove(owner)
+  private def handleHeal(pc : PokemonCard, p : Player, moveNum : Int) {
+    val ap = getHealMove(p)   
     moveNum match {
-      case 1 => owner.cardWithActivatedPower.get == active match {
-        case true => ap.togglePower()
-        case false => {
-          active.heal(10)
-          ap.togglePower()
-        }
+      case 1 => if (pc != p.cardWithActivatedPower.get) {
+        pc.heal(10)
       }
-      case 2 => {
-        active.heal(10)
-        ap.togglePower()
-      }
+      case 2 => pc.heal(10)
       case _ => throw new Exception("Unexpected move num for Vileplume heal")
     }
+    ap.togglePower()
   }
 
-  def attackFromBench = (owner, opp, _, benchIndex, moveNum, args) => {
-    val bc = owner.bench(benchIndex).get
-    val ap = getHealMove(owner)
-    moveNum match {
-      case 1 => owner.cardWithActivatedPower.get == bc match {
-        case true => ap.togglePower()
-        case false => {
-          bc.heal(10)
-          ap.togglePower()
-        }
-      }
-      case 2 => {
-        bc.heal(10)
-        ap.togglePower()
-      }
-      case _ => throw new Exception("Unexpected move num for Vileplume heal")
-    }
+  override def handleMove = (pData, moveCmd, args) => moveCmd match {
+    case AttackFromActive(moveNum) => handleHeal(pData.owner.active.get, pData.owner, moveNum)
+    case AttackFromBench(bIndex, moveNum) => handleHeal(pData.owner.bench(bIndex).get, pData.owner, moveNum)
+    case _ => throw new Exception("Unsupported move command for heal")
   }
-
-  def attackFromHand = (_, _, _, _, _, _) => throw new Exception("unsupported")
-
-  def attackFromPrize = (_, _, _, _, _, _) => throw new Exception("unsupported")
-
-  def attackFromDeck = (_, _, _, _, _) => throw new Exception("unsupported") 
 
 }
 

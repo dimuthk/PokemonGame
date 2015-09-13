@@ -72,7 +72,10 @@ abstract class Move(
       }
     }
 
-  def perform : (Player, Player, Seq[String]) => Option[IntermediaryRequest]
+  def perform : (Player, Player, Seq[String]) => Unit
+
+  def requestAdditional : (Player, Player, Seq[String]) => Option[IntermediaryRequest]
+    = (_, _, _) => None
 
   override def toJsonImpl() = Json.obj(
     Identifier.MOVE_NAME.toString -> name,

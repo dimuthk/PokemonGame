@@ -9,6 +9,12 @@ import src.player.Player
 
 sealed abstract class MoveCommand
 
-case class AttackFromActive(moveNum : Int, additional : Seq[String]) extends MoveCommand
+case class AttackFromActive(moveNum : Int) extends MoveCommand
 
-case class AttackFromBench(benchIndex : Int, moveNum : Int, additional : Seq[String]) extends MoveCommand
+case class AttackFromBench(bIndex : Int, moveNum : Int) extends MoveCommand
+
+case class AttackFromHand(hIndex : Int, moveNum : Int) extends MoveCommand
+
+case class AttackFromDeck(moveNum : Int) extends MoveCommand
+
+case class AttackFromPrize(pIndex : Int, moveNum : Int) extends MoveCommand
