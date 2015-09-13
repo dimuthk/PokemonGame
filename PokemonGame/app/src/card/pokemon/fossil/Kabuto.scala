@@ -27,8 +27,13 @@ class Kabuto extends StageOnePokemon(
 	weakness = Some(EnergyType.GRASS),
 	retreatCost = 1) {
 
-	override def takeDamage(attacker : Option[PokemonCard], dmg : Int) {
-		// TODO
-		super.takeDamage(attacker, dmg)
+	override def takeDamage(
+      attacker : Option[PokemonCard],
+      baseAmount : Int,
+      useModifiers : Boolean = true,
+      ignoreTypes : Boolean = false) : Int = {
+      	// TODO
+      	return super.takeDamage(attacker, baseAmount, useModifiers, ignoreTypes)
 	}
+
 }

@@ -23,19 +23,9 @@ class Tentacool extends BasicPokemon(
       "Cowardice") {
         def perform = (owner, opp, args) => {
           val tenta = owner.ownerOfMove(this).get
-          val cards = tenta.pickUp() diff List(tenta)
-          if (owner.active == Some(tenta)) {
-            owner.clearActive()
-          } else {
-            for (i <- 0 until 5) {
-              if (owner.bench(i) == Some(tenta)) {
-                owner.bench(i) = None
-              }
-            }
-          }
-          owner.garbage = owner.garbage ++ cards
+          val cards = owner.pickUpCard(tenta) diff List(tenta)
+          owner.discardCards(cards)
           owner.addCardToHand(tenta)
-          None
         }
       }),
     secondMove = Some(new Move(

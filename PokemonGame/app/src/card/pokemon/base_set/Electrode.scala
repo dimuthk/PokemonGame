@@ -74,21 +74,9 @@ private class BuzzapDrag extends CustomDragInterpreter {
 
     def discardCards(owner : Player) : EnergyMasquerade = {
         val electrode = findElectrode(owner)
-        val cards = electrode.pickUp() diff List(electrode)
-        if (owner.active == Some(electrode)) {
-            owner.clearActive()
-        } else {
-            for (i <- 0 until 5) {
-              if (owner.bench(i) == Some(electrode)) {
-                owner.bench(i) = None
-              }
-            }
-        }
-        owner.garbage = owner.garbage ++ cards
-        return new BuzzapMasquerade(
-            "",
-            2,
-            electrode)
+        val cards = owner.pickUpCard(electrode) diff List(electrode)
+        owner.discardCards(cards)
+        return new BuzzapMasquerade("", 2, electrode)
     }
 
     def assignBuzzapType(pc : PokemonCard, args : Seq[String]) : Option[IntermediaryRequest] = {

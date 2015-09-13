@@ -64,9 +64,7 @@ object DefaultDragInterpreter extends DragInterpreter {
   }
 
   private def chargeSpecificRetreatAndSwap(p : Player, bIndex : Int, args : Seq[String]) {
-    val active = p.active.get
-    val eCards : Seq[EnergyCard] = args(0).split(",").map(i => active.energyCards(i.toInt))
-    p.discardSpecificEnergyFromCard(active, eCards)
+    p.discardSpecificEnergyFromCard(p.active.get, args.map(_.toInt))
     p.swapActiveAndBench(bIndex)
   }
 

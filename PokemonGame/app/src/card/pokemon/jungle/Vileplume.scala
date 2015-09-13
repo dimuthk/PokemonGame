@@ -30,20 +30,16 @@ class Vileplume extends StageTwoPokemon(
 	firstMove = Some(new Heal()),
 	secondMove = Some(new Move(
 		"Petal Dance",
-        3,
-        Map(EnergyType.GRASS -> 3)) {
+    3,
+    Map(EnergyType.GRASS -> 3)) {
       def perform = (owner, opp, args) => {
         multipleHitAttack(owner, opp, 40, 3)
-				owner.active.get.statusCondition = Some(StatusCondition.CONFUSED)
-        None
-			}
-        }),
+        owner.active.get.inflictStatus(StatusCondition.CONFUSED)
+	    }
+  }),
 	energyType = EnergyType.GRASS,
 	weakness = Some(EnergyType.FIRE),
-	retreatCost = 2) {
-
-
-}
+	retreatCost = 2)
 
 private class Heal extends ActivePokemonPower(
   "Heal",

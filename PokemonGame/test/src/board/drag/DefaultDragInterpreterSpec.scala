@@ -92,6 +92,14 @@ class DefaultDragInterpreterSpec extends Specification with Mockito {
 			there was one(pData.owner).swapActiveAndBench(0)
 			there was one(pData.owner).discardEnergyFromCard(active, cnt = 0)
 		}
+		"retreat specific if args" in {
+			val active = new Venusaur()
+			active.attachEnergy(List(new FireEnergy(), new PsychicEnergy(), new PsychicEnergy()))
+			val pData = setUpPlayer(active = Some(active), bench = List(new Machop()))
+			handleDrag(pData, BenchToActive(0), List("0", "2"))
+			there was one(pData.owner).swapActiveAndBench(0)
+			there was one(pData.owner).discardSpecificEnergyFromCard(active, List(0, 2))
+		}
 	}
 
 	"benchToActive additional" should {
@@ -100,6 +108,12 @@ class DefaultDragInterpreterSpec extends Specification with Mockito {
 			active.attachEnergy(List(new FireEnergy(), new PsychicEnergy()))
 			val pData = setUpPlayer(active = Some(active), bench = List(new Rattata()))
 			requestAdditional(pData, BenchToActive(0), Nil).isDefined must beTrue
+		}
+		"not request if args exist" in {
+			val active = new Machop()
+			active.attachEnergy(List(new FireEnergy(), new PsychicEnergy()))
+			val pData = setUpPlayer(active = Some(active), bench = List(new Rattata()))
+			requestAdditional(pData, BenchToActive(0), List("0")).isDefined must beFalse
 		}
 		"not request if multiple but not enough energy overall" in {
 			val active = new Charizard()
@@ -160,6 +174,14 @@ class DefaultDragInterpreterSpec extends Specification with Mockito {
 			there was one(pData.owner).swapActiveAndBench(0)
 			there was one(pData.owner).discardEnergyFromCard(active, cnt = 0)
 		}
+		"retreat specific if args" in {
+			val active = new Venusaur()
+			active.attachEnergy(List(new FireEnergy(), new PsychicEnergy(), new PsychicEnergy()))
+			val pData = setUpPlayer(active = Some(active), bench = List(new Machop()))
+			handleDrag(pData, ActiveToBench(0), List("0", "2"))
+			there was one(pData.owner).swapActiveAndBench(0)
+			there was one(pData.owner).discardSpecificEnergyFromCard(active, List(0, 2))
+		}
 	}
 
 	"activeToBench additional" should {
@@ -168,6 +190,12 @@ class DefaultDragInterpreterSpec extends Specification with Mockito {
 			active.attachEnergy(List(new FireEnergy(), new PsychicEnergy()))
 			val pData = setUpPlayer(active = Some(active), bench = List(new Rattata()))
 			requestAdditional(pData, ActiveToBench(0), Nil).isDefined must beTrue
+		}
+		"not request if args exist" in {
+			val active = new Machop()
+			active.attachEnergy(List(new FireEnergy(), new PsychicEnergy()))
+			val pData = setUpPlayer(active = Some(active), bench = List(new Rattata()))
+			requestAdditional(pData, ActiveToBench(0), List("0")).isDefined must beFalse
 		}
 		"not request if multiple but not enough energy overall" in {
 			val active = new Charizard()

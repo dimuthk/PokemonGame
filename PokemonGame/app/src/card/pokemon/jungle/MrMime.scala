@@ -26,8 +26,13 @@ class MrMime extends BasicPokemon(
 	weakness = Some(EnergyType.PSYCHIC),
 	retreatCost = 1) {
 
-	override def takeDamage(attacker : Option[PokemonCard], amount : Int) : Unit = amount match {
-		case x : Int if x >= 30 => ()
-		case _ => super.takeDamage(attacker, amount)
+	override def takeDamage(
+      attacker : Option[PokemonCard],
+      baseAmount : Int,
+      useModifiers : Boolean = true,
+      ignoreTypes : Boolean = false) : Int = baseAmount match {
+		case x : Int if x >= 30 => 0
+		case _ => super.takeDamage(attacker, baseAmount, useModifiers, ignoreTypes)
 	}
+
 }

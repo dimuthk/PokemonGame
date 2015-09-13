@@ -29,8 +29,7 @@ class Gloom extends StageOnePokemon(
         Map(EnergyType.GRASS -> 2)) {
 			def perform = (owner, opp, args) => {
 				confuseAttack(owner, opp, 20)
-				owner.active.get.statusCondition = Some(StatusCondition.CONFUSED)
-				None
+				owner.active.get.inflictStatus(StatusCondition.CONFUSED)
 			}
         }),
 	energyType = EnergyType.GRASS,

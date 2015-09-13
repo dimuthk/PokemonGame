@@ -58,9 +58,17 @@ abstract class PokemonCard(
 
   var preEvolution : Option[PokemonCard] = None
 
-  var poisonStatus : Option[PoisonStatus.Value] = None
+  var _poisonStatus : Option[PoisonStatus.Value] = None
 
-  var statusCondition : Option[StatusCondition.Value] = None
+  def poisonStatus = _poisonStatus
+
+  def poison(status : PoisonStatus.Value = PoisonStatus.POISONED) : Unit = _poisonStatus = Some(status)
+
+  var _statusCondition : Option[StatusCondition.Value] = None
+
+  def statusCondition = _statusCondition
+
+  def inflictStatus(status : StatusCondition.Value) : Unit = _statusCondition = Some(status)
 
   var generalCondition : Option[String] = None
 
@@ -163,8 +171,8 @@ abstract class PokemonCard(
 
   def pickUp() : Seq[Card] = {
     _currHp = maxHp
-    poisonStatus = None
-    statusCondition = None
+    _poisonStatus = None
+    _statusCondition = None
     var res : Seq[Card] = discardAllEnergy()
     res = res ++ preEvolutions(this)
     preEvolution = None
@@ -191,7 +199,8 @@ abstract class PokemonCard(
     return cards
   }
 
-  def discardSpecificEnergy(eCards : Seq[EnergyCard]) : Seq[EnergyCard] = {
+  def discardSpecificEnergy(eIndices : Seq[Int]) : Seq[EnergyCard] = {
+    val eCards = eIndices.map(i => _energyCards(i))
     _energyCards = _energyCards diff eCards
     return eCards
   }
@@ -231,13 +240,13 @@ abstract class PokemonCard(
     }
     case false => {
       lastAttack = -1
-      statusCondition = None
+      _statusCondition = None
       pounced = false
       harden = false
       destinyBond = false
       minimize = false
       swordsDance = false
-      poisonStatus = None
+      _poisonStatus = None
       withdrawn = false
       agility = false
       smokescreen = false
@@ -271,46 +280,44 @@ abstract class PokemonCard(
     generalCondition = Some(cond)
   }
 
-  def calculateDmg(attacker : PokemonCard, dmg : Int, ignoreTypes : Boolean = false) : Int = {
+	def takeDamage(
+      attacker : Option[PokemonCard],
+      baseAmount : Int,
+      useModifiers : Boolean = true,
+      ignoreTypes : Boolean = false) : Int = {
+    var dmg = baseAmount
     if (withdrawn || agility) {
       return 0
     }
-    var modifiedDmg = dmg
-    
-    // Resistance / weakness modifier
-    if (!ignoreTypes && weakness.exists { eType => eType == attacker.energyType }) {
-      modifiedDmg *= 2
-    }
-    
-    if (!ignoreTypes && resistance.exists { eType => eType == attacker.energyType }) {
-      modifiedDmg -= 30
+    if (useModifiers) {
+      if (!ignoreTypes && weakness.exists { eType => eType == attacker.get.energyType }) {
+        dmg *= 2
+      }
+      if (!ignoreTypes && resistance.exists { eType => eType == attacker.get.energyType }) {
+        dmg -= 30
+      }
     }
 
-    if (harden && modifiedDmg <= 30) {
-      modifiedDmg = 0
+    if (pounced && dmg > 0) {
+      dmg -= 10
+      pounced = false
+    }
+
+    if (harden && dmg <= 30) {
+      dmg = 0
     }
 
     if (minimize) {
-      modifiedDmg -= 20
+      dmg -= 20
     }
 
-    return math.max(modifiedDmg, 0)
-  }
-
-	def takeDamage(attacker : Option[PokemonCard], amount : Int) : Unit = {
-    var dmg = amount
-    if (withdrawn || agility) {
-      return
-    }
-    if (pounced && dmg > 0) {
-      dmg = dmg - 10
-      pounced = false
-    }
     lastAttack = dmg
-    _currHp = math.max(_currHp - dmg, 0)
+    val finalDmg = math.min(_currHp, dmg)
+    _currHp -= finalDmg
     if (destinyBond && _currHp <= 0 && attacker.isDefined) {
       attacker.get.takeDamage(attacker, attacker.get.maxHp)
     }
+    return finalDmg
   }
 
   def heal(amount : Int) : Unit = (amount <= 0) match {

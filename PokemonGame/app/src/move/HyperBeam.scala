@@ -53,9 +53,7 @@ class HyperBeam(
             }
         }
         case _ => {
-            val eCard = List(opp.active.get.energyCards(args(0).toInt))
-            opp.active.get.discardSpecificEnergy(eCard)
-            opp.garbage = opp.garbage ++ eCard
+            opp.discardSpecificEnergyFromCard(opp.active.get, List(0))
             standardAttack(owner, opp, dmg)
         }
     }

@@ -24,12 +24,9 @@ class Venomoth extends StageOnePokemon(
 		"Venom Powder",
         2,
         Map(EnergyType.GRASS -> 2)) {
-			def perform = (owner, opp, args) => {
-				if (flippedHeads()) {
-					opp.active.get.statusCondition = Some(StatusCondition.CONFUSED)
-					opp.active.get.poisonStatus = Some(PoisonStatus.POISONED)
-				}
-				None
+			def perform = (owner, opp, args) => if (flippedHeads()) {
+				opp.active.get.inflictStatus(StatusCondition.CONFUSED)
+				opp.active.get.poison()
 			}
         }),
 	energyType = EnergyType.GRASS,

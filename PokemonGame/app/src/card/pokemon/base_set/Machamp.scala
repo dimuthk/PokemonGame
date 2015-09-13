@@ -26,11 +26,15 @@ class Machamp extends StageTwoPokemon(
 	weakness = Some(EnergyType.PSYCHIC),
 	retreatCost = 3) {
 
-	override def takeDamage(attacker : Option[PokemonCard], amount : Int) : Unit = {
-		super.takeDamage(attacker, amount)
+	override def takeDamage(
+      attacker : Option[PokemonCard],
+      baseAmount : Int,
+      useModifiers : Boolean = true,
+      ignoreTypes : Boolean = false) : Int = {
 		if (attacker.isDefined) {
 			attacker.get.takeDamage(Some(this), 10)
 		}
+		return super.takeDamage(attacker, baseAmount, useModifiers, ignoreTypes)
   	}
 
 }

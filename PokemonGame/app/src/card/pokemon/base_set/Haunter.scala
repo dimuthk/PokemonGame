@@ -43,14 +43,6 @@ class Haunter extends StageOnePokemon(
 	resistance = Some(EnergyType.FIGHTING),
 	retreatCost = 1) {
 
-	override def takeDamage(attacker : Option[PokemonCard], amount : Int) : Unit = {
-		if (flippedHeads()) {
-			return
-		} else {
-			takeDamage(attacker, amount)
-		}
-	}
-
 	// TODO: do the same for status conditions
 
 }

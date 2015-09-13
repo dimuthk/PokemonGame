@@ -30,9 +30,8 @@ class Butterfree extends StageTwoPokemon(
       4,
       Map(EnergyType.GRASS -> 4)) {
         def perform = (owner, opp, args) => {
-          val dmg = opp.active.get.calculateDmg(owner.active.get, 40)
+          val dmg = opp.active.get.takeDamage(owner.active, 40)
           owner.active.get.heal(roundUp(dmg / 2))
-          standardAttack(owner, opp, 40)
         }
     }),
     energyType = EnergyType.GRASS,

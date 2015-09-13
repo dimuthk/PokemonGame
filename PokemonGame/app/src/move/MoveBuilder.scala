@@ -24,15 +24,11 @@ object MoveBuilder {
   /**
    * Standard attack which deals damage without any side effects.
    */
-  def standardAttack(owner : Player, opp : Player, baseDmg : Int) {
-    var dmg = opp.active.get.calculateDmg(owner.active.get, baseDmg)
-    opp.active.get.takeDamage(owner.active, dmg)
-  }
+  def standardAttack(owner : Player, opp : Player, dmg : Int) : Unit
+    = opp.active.get.takeDamage(owner.active, dmg)
 
-  def ignoreTypesAttack(owner : Player, opp : Player, baseDmg : Int) {
-    var dmg = opp.active.get.calculateDmg(owner.active.get, baseDmg, ignoreTypes = true)
-    opp.active.get.takeDamage(owner.active, dmg)
-  }
+  def ignoreTypesAttack(owner : Player, opp : Player, dmg : Int) : Unit
+    = opp.active.get.takeDamage(owner.active, dmg, useModifiers = false)
 
   def standardAttackPlusExtra(
       owner : Player,
@@ -56,9 +52,9 @@ object MoveBuilder {
     }
   }
 
-  def healthDrainAttack(owner : Player, opp : Player, baseDmg : Int) {
-    owner.active.get.heal(opp.active.get.calculateDmg(owner.active.get, baseDmg))
-    standardAttack(owner, opp, baseDmg)
+  def healthDrainAttack(owner : Player, opp : Player, dmg : Int) {
+    val dealtDmg = opp.active.get.takeDamage(owner.active, dmg)
+    owner.active.get.heal(dealtDmg)
   }
 
   def attackAndHurtSelf(owner : Player, opp : Player, baseDmg : Int, selfDmg : Int) {
@@ -66,11 +62,12 @@ object MoveBuilder {
     owner.active.get.takeDamage(None, selfDmg)
   }
 
-  def extraDamageOrHurtSelf(owner : Player, opp : Player, baseDmg : Int, extraDmg : Int) {
-    standardAttack(owner, opp, baseDmg)
-    flippedHeads() match {
-      case true => standardAttack(owner, opp, extraDmg)
-      case false => owner.active.get.takeDamage(None, extraDmg)
+  def extraDamageOrHurtSelf(
+      owner : Player, opp : Player, baseDmg : Int, extraDmg : Int) : Unit = flippedHeads() match {
+    case true => standardAttack(owner, opp, baseDmg + extraDmg)
+    case false => {
+      owner.active.get.takeDamage(None, extraDmg)
+      standardAttack(owner, opp, baseDmg)
     }
   }
 
@@ -113,7 +110,7 @@ object MoveBuilder {
     baseDmg : Int,
     shouldFlip : Boolean) {
     if (!shouldFlip || flippedHeads()) {
-      owner.active.get.statusCondition = Some(statusCondition)
+      owner.active.get.inflictStatus(statusCondition)
     }
     standardAttack(owner, opp, baseDmg)
   }
@@ -125,7 +122,7 @@ object MoveBuilder {
     baseDmg : Int,
     shouldFlip : Boolean) {
     if (!shouldFlip || flippedHeads()) {
-      owner.active.get.poisonStatus = Some(poisonStatus)
+      owner.active.get.poison(poisonStatus)
     }
     standardAttack(owner, opp, baseDmg)
   }
@@ -136,14 +133,13 @@ object MoveBuilder {
         baseDmg : Int,
         eType : EnergyType.Value,
         cnt : Int = 1) {
-    val discardedCards = owner.active.get.discardEnergy(eType, cnt)
-    owner.garbage = owner.garbage ++ discardedCards
+    owner.discardEnergyFromCard(owner.active.get, eType, cnt)
     standardAttack(owner, opp, baseDmg)
   }
 
   def discardAndRecover(owner : Player, eType : EnergyType.Value) {
     val discardedCards = owner.active.get.discardEnergy(eType, 1)
-    owner.garbage = owner.garbage ++ discardedCards
+    owner.discardCards(discardedCards)
     owner.active.get.heal(owner.active.get.maxHp)
   }
 

@@ -75,6 +75,7 @@ private class StrangeBehaviorDrag extends CustomDragInterpreter {
         case Some(slowbro) => swapDamage(p.active.get, slowbro)
         case _ => ()
       }
+      case _ => ()
     }
   }
 

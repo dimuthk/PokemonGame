@@ -31,9 +31,8 @@ class Tauros extends BasicPokemon(
 				val dmg = 20 + owner.active.get.maxHp - owner.active.get.currHp
 				standardAttack(owner, opp, dmg)
 				if (!flippedHeads()) {
-					owner.active.get.statusCondition = Some(StatusCondition.CONFUSED)
+					owner.active.get.inflictStatus(StatusCondition.CONFUSED)
 				}
-				None
 			}
         }),
 	energyType = EnergyType.COLORLESS,

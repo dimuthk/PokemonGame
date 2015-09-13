@@ -39,9 +39,8 @@ class Primeape extends StageOnePokemon(
 			def perform = (owner, opp, args) => {
         standardAttack(owner, opp, 50)
         if (!flippedHeads()) {
-          owner.active.get.statusCondition = Some(StatusCondition.CONFUSED)
+          owner.active.get.inflictStatus(StatusCondition.CONFUSED)
         }
-        None
       }
     }),
 	energyType = EnergyType.FIGHTING,

@@ -26,10 +26,8 @@ class Gastly extends BasicPokemon(
 		2,
 		Map(EnergyType.PSYCHIC -> 1)) {
 			def perform = (owner, opp, args) => {
-				val discardedCards = owner.active.get.discardEnergy(EnergyType.PSYCHIC, 1)
-    			owner.garbage = owner.garbage ++ discardedCards
+				owner.discardEnergyFromCard(owner.active.get, eType = EnergyType.PSYCHIC)
     			owner.active.get.destinyBond = true
-    			None
 			}
 		}),
 	energyType = EnergyType.PSYCHIC,

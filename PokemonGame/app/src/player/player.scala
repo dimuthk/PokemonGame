@@ -47,7 +47,9 @@ class Player extends Jsonable {
 
   def hand = _hand
 
-  var garbage : Seq[Card] = List()
+  var _garbage : Seq[Card] = List()
+
+  def garbage = _garbage
 
   private val _bench : Array[Option[PokemonCard]] = Array.fill(5) { None }
 
@@ -59,7 +61,9 @@ class Player extends Jsonable {
 
   def benchIsFull = _bench.length == _bench.toList.flatten.length
 
-  val prizes : Array[Option[Card]] = Array.fill(6) { None }
+  val _prizes : Array[Option[Card]] = Array.fill(6) { None }
+
+  def prizes = _prizes
 
   private var _active : Option[PokemonCard] = None
 
@@ -102,21 +106,33 @@ class Player extends Jsonable {
       eType : EnergyType.Value = EnergyType.COLORLESS,
       cnt : Int = 1) {
     val eCards = pc.discardEnergy(eType, cnt)
-    garbage = garbage ++ eCards
+    _garbage = _garbage ++ eCards
   }
 
   def discardSpecificEnergyFromCard(
     pc : PokemonCard,
-    eCards : Seq[EnergyCard]) {
-    val tossedCards = pc.discardSpecificEnergy(eCards)
-    garbage = garbage ++ tossedCards 
+    eIndices : Seq[Int]) {
+    val tossedCards = pc.discardSpecificEnergy(eIndices)
+    _garbage = _garbage ++ tossedCards 
   }
 
-  def moveActiveToHand() {
-    if (active.isDefined && !active.get.agility) {
-      _hand = _hand ++ active.get.pickUp()
-      _active = None
+  def moveActiveToHand() : Unit = if (active.isDefined && !active.get.agility) {
+    _hand = _hand ++ active.get.pickUp()
+    _active = None
+  }
+
+  def pickUpCard(pc : PokemonCard) : Seq[Card] = {
+    if (_active == Some(pc)) {
+      clearActive()
+      return pc.pickUp()
     }
+    for (i <- 0 until 5) {
+      if (_bench(i) == Some(pc)) {
+        _bench(i) = None
+        return pc.pickUp()
+      }
+    }
+    throw new Exception("Could not find card to pick up")
   }
 
   def swapActiveAndBench(benchIndex : Int) {
@@ -130,36 +146,28 @@ class Player extends Jsonable {
     _bench(benchIndex) = tmp
   }
 
-  def swapBenchCards(benchIndex1 : Int, benchIndex2 : Int) : Unit = {
-    val tmp = _bench(benchIndex1)
-    _bench(benchIndex1) = _bench(benchIndex2)
-    _bench(benchIndex2) = tmp
+  def swapBenchCards(bIndex1 : Int, bIndex2 : Int) : Unit = {
+    val tmp = _bench(bIndex1)
+    _bench(bIndex1) = _bench(bIndex2)
+    _bench(bIndex2) = tmp
   }
 
-  def evolveActiveCard(handIndex : Int) {
-    hand(handIndex) match {
-      case ep : EvolvedPokemon => {
-        if (ep.isEvolutionOf(active.get)) {
-          ep.evolveOver(active.get)
-          _active = Some(ep)
-          removeCardFromHand(handIndex)
-        }
-      }
-      case _ => ()
+  def evolveActiveCard(hIndex : Int) : Unit = hand(hIndex) match {
+    case ep : EvolvedPokemon => if (ep.isEvolutionOf(active.get)) {
+      ep.evolveOver(active.get)
+      _active = Some(ep)
+      removeCardFromHand(hIndex)
     }
+    case _ => throw new Exception("Tried to evolve active with non-evolved pokemon")
   }
 
-  def evolveBenchCard(handIndex : Int, benchIndex : Int) {
-    hand(handIndex) match {
-      case ep : EvolvedPokemon => {
-        if (ep.isEvolutionOf(bench(benchIndex).get)) {
-          ep.evolveOver(bench(benchIndex).get)
-          _bench(benchIndex) = Some(ep)
-          removeCardFromHand(handIndex)
-        }
-      }
-      case _ => ()
+  def evolveBenchCard(hIndex : Int, bIndex : Int) : Unit = hand(hIndex) match {
+    case ep : EvolvedPokemon => if (ep.isEvolutionOf(bench(bIndex).get)) {
+      ep.evolveOver(bench(bIndex).get)
+      _bench(bIndex) = Some(ep)
+      removeCardFromHand(hIndex)
     }
+    case _ => throw new Exception("Tried to evolve bench with non-evolved pokemon")
   }
 
   def moveDeckToBench(deckIndex : Int, benchIndex : Int) : Unit = _deck(deckIndex) match {
@@ -173,6 +181,8 @@ class Player extends Jsonable {
   def removeCardFromDeck(deckIndex : Int) {
     _deck = _deck.slice(0, deckIndex) ++ _deck.slice(deckIndex + 1, _deck.size)
   }
+
+  def discardCards(cards : Seq[Card]) : Unit = _garbage = _garbage ++ cards
 
   def moveHandToActive(handIndex : Int) {
     if (active.isDefined) {

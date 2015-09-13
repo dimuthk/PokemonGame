@@ -28,7 +28,7 @@ class Nidoking extends StageTwoPokemon(
         3,
         Map(EnergyType.GRASS -> 3)) {
             def perform = (owner, opp, args) => {
-                opp.active.get.poisonStatus = Some(PoisonStatus.TOXIC)
+                opp.active.get.poison(status = PoisonStatus.TOXIC)
                 standardAttack(owner, opp, 20)
             }
     }),
