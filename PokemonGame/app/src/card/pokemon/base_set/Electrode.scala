@@ -3,7 +3,7 @@ package src.card.pokemon.base_set
 import src.json.Identifier
 import src.move._
 import src.card.Card
-import src.board.drag.CustomDragInterpreter
+import src.board.drag._
 import src.board.intermediary._
 import src.move.MoveBuilder._
 import src.player.Player
@@ -106,50 +106,31 @@ private class BuzzapDrag extends CustomDragInterpreter {
         return None
     }
 
-    def benchToBench = (owner, _, _, benchIndex1, benchIndex2, args) => args.length match {
-        case 0 => {
-            owner.bench(benchIndex1).get == findElectrode(owner) && owner.bench(benchIndex2).isDefined match {
-                case true => Some(new BuzzapSpecification(owner, eTypes))
-                case false => None
-            }
-        }
-        case _ => {
-            val buzzap = discardCards(owner)
-            owner.bench(benchIndex2).get.attachEnergy(buzzap)
-            assignBuzzapType(owner.bench(benchIndex2).get, args)
-        }
+    private def checkNotAdditional(owner : Player, drag : Option[PokemonCard], drop : Option[PokemonCard]) : Unit =
+        if (drag.get == findElectrode(owner) && drop.isDefined) {
+            throw new Exception("Got a buzzap request without additional info")
     }
 
-    def benchToActive = (owner, _, _, benchIndex, args) => args.length match {
-        case 0 => {
-            owner.bench(benchIndex).get == findElectrode(owner) && owner.active.isDefined match {
-                case true => Some(new BuzzapSpecification(owner, eTypes))
-                case false => None
-            }
-        }
-        case _ => {
-            val buzzap = discardCards(owner)
-            owner.active.get.attachEnergy(buzzap)
-            assignBuzzapType(owner.active.get, args)
-        }
+    private def attachElectrode(owner : Player, drop : Option[PokemonCard], args : Seq[String]) : Unit = {
+        val buzzap = discardCards(owner)
+        drop.get.attachEnergy(buzzap)
+        assignBuzzapType(drop.get, args)
     }
 
-    def activeToBench = (owner, _, _, benchIndex, args) => args.length match {
-        case 0 => {
-            owner.active.get == findElectrode(owner) && owner.bench(benchIndex).isDefined match {
-                case true => Some(new BuzzapSpecification(owner, eTypes))
-                case false => None
-            }
+    override def handleDrag = (pData, dragCmd, args) => dragCmd match {
+        case BenchToBench(bIndex1, bIndex2) => (pData.owner, args.length) match {
+            case (p, 0) => checkNotAdditional(p, p.bench(bIndex1), p.bench(bIndex2))
+            case (p, _) => attachElectrode(p, p.bench(bIndex2), args)
         }
-        case _ => {
-            val buzzap = discardCards(owner)
-            owner.bench(benchIndex).get.attachEnergy(buzzap)
-            assignBuzzapType(owner.bench(benchIndex).get, args)
+        case BenchToActive(bIndex) => (pData.owner, args.length) match {
+            case (p, 0) => checkNotAdditional(p, p.bench(bIndex), p.active)
+            case (p, _) => attachElectrode(p, p.active, args) 
         }
+        case ActiveToBench(bIndex) => (pData.owner, args.length) match {
+            case (p, 0) => checkNotAdditional(p, p.active, p.bench(bIndex))
+            case (p, _) => attachElectrode(p, p.bench(bIndex), args)
+        }
+        case _ => ()
     }
-
-    def handToActive = (_, _, _, _, _) => None
-
-    def handToBench = (_, _, _, _, _, _) => None
 
 }

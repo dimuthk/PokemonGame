@@ -6,7 +6,7 @@ import src.json.Identifier
 import src.move.Move
 import src.move.MoveBuilder._
 import src.move.ActivePokemonPower
-import src.board.drag.CustomDragInterpreter
+import src.board.drag._
 import src.player.Player
 import src.card.energy.EnergyCard
 import src.card.energy.EnergyType
@@ -37,25 +37,17 @@ class Blastoise extends StageTwoPokemon(
 
 private class RainDanceDrag extends CustomDragInterpreter {
 
-  def handToActive = (p, _, _, handIndex, _) => {
-    if (p.active.isDefined) {
-      attachWaterEnergy(p, p.active.get, handIndex)
+  override def handleDrag = (pData, dragCmd, args) => dragCmd match {
+    case HandToActive(hIndex) => pData.owner.active match {
+      case Some(active) => attachWaterEnergy(pData.owner, active, hIndex)
+      case None => ()
     }
-    None
-  }
-
-  def  handToBench = (p, _, _, handIndex, benchIndex, _) => {
-    if (p.bench(benchIndex).isDefined) {
-      attachWaterEnergy(p, p.bench(benchIndex).get, handIndex)
+    case HandToBench(hIndex, bIndex) => pData.owner.bench(bIndex) match {
+      case Some(bc) => attachWaterEnergy(pData.owner, bc, hIndex)
+      case None => ()
     }
-    None
+    case _ => ()
   }
-
-  def activeToBench = (_, _, _, _, _) => None
-
-  def benchToActive = (_, _, _, _, _) => None
-
-  def benchToBench = (_, _, _, _, _, _) => None 
 
   private def attachWaterEnergy(p : Player, pc : PokemonCard, handIndex : Int) : Unit = p.hand(handIndex) match {
     case ec : EnergyCard => if (ec.eType == EnergyType.WATER) {

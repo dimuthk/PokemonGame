@@ -1,5 +1,6 @@
 package src.board.drag
 
+import src.board.PlayerData
 import src.move.Move
 import src.card.pokemon.PokemonCard
 import src.player.Player
@@ -12,24 +13,35 @@ object DragDirector {
 		owner : Player, opp : Player, contents : Seq[String]) : Option[IntermediaryRequest] = {
 		val isOwner = contents(1) == "1"
 		val interpreter = selectDragInterpreter(owner, opp)
-
-		val maybeIntermediaryReq : Option[IntermediaryRequest] = contents(0) match {
-			case "HAND_TO_ACTIVE" => interpreter.handToActive(owner, opp, isOwner, contents(2).toInt, contents.drop(3))
-			case "HAND_TO_BENCH" => interpreter.handToBench(owner, opp, isOwner, contents(2).toInt, contents(3).toInt -1, contents.drop(4))
-			case "ACTIVE_TO_BENCH" => interpreter.activeToBench(owner, opp, isOwner, contents(2).toInt - 1, contents.drop(3))
-			case "BENCH_TO_ACTIVE" => interpreter.benchToActive(owner, opp, isOwner, contents(2).toInt - 1, contents.drop(3))
-			case "BENCH_TO_BENCH" => interpreter.benchToBench(owner, opp, isOwner, contents(2).toInt - 1, contents(3).toInt - 1, contents.drop(4))
-			case _ => throw new Exception("Unrecognized drag request: " + contents)
+		val pData = PlayerData(owner, opp, isOwner)
+		val dragCmd : DragCommand = contents(0) match {
+			case "HAND_TO_ACTIVE" => HandToActive(contents(2).toInt)
+			case "HAND_TO_BENCH" => HandToBench(contents(2).toInt, contents(3).toInt - 1)
+			case "ACTIVE_TO_BENCH" => ActiveToBench(contents(2).toInt - 1)
+			case "BENCH_TO_ACTIVE" => BenchToActive(contents(2).toInt - 1)
+			case "BENCH_TO_BENCH" => BenchToBench(contents(2).toInt - 1, contents(3).toInt - 1)
 		}
+		val args = if (contents(0) == "HAND_TO_BENCH" || contents(0) == "BENCH_TO_BENCH")
+			contents.drop(4) else contents.drop(3)
 
-		if (maybeIntermediaryReq.isDefined) {
-      		val flip : String = if (maybeIntermediaryReq.get.p == owner) "" else "FLIP<>"
-      		maybeIntermediaryReq.get.serverTag = flip + "DRAG<>" + contents.mkString("<>") + "<>"
-      		if (maybeIntermediaryReq.get.additionalTag.isDefined) {
-        		maybeIntermediaryReq.get.serverTag = maybeIntermediaryReq.get.serverTag + maybeIntermediaryReq.get.additionalTag.get + "<>"
-      		}
+		interpreter.requestAdditional(pData, dragCmd, args) match {
+			case Some(intermediary) => return processIntermediary(intermediary, owner, contents)
+			case None => interpreter.handleDrag(pData, dragCmd, args)
+		}
+		return None
+    }
+
+    def processIntermediary(
+    		intermediary : IntermediaryRequest,
+    		owner : Player,
+    		contents : Seq[String]) : Option[IntermediaryRequest] = {
+    	var processed = intermediary
+    	val flip : String = if (processed.p == owner) "" else "FLIP<>"
+      	processed.serverTag = flip + "DRAG<>" + contents.mkString("<>") + "<>"
+      	if (processed.additionalTag.isDefined) {
+        	processed.serverTag = processed.serverTag + processed.additionalTag.get + "<>"
       	}
-      	return maybeIntermediaryReq
+      	return Some(processed)
     }
 
 	/**

@@ -4,7 +4,7 @@ import src.card.Deck
 import src.card.pokemon._
 import src.json.Identifier
 import src.move.Move
-import src.board.drag.CustomDragInterpreter
+import src.board.drag._
 import src.board.state.CustomStateGenerator
 import src.move.MoveBuilder._
 import src.move.ActivePokemonPower
@@ -59,36 +59,24 @@ private class StrangeBehaviorState extends CustomStateGenerator(true, false) {
 
 private class StrangeBehaviorDrag extends CustomDragInterpreter {
 
-  def benchToBench = (p, _, _, benchIndex1, benchIndex2, _) => {
-    val card = p.cardWithActivatedPower
-    p.bench(benchIndex2) match {
-      case Some(card) => swapDamage(p.bench(benchIndex1).get, card)
-      case _ => ()
+  override def handleDrag = (pData, dragCmd, _) => {
+    val p = pData.owner
+    val slowbro = p.cardWithActivatedPower
+    dragCmd match {
+      case BenchToBench(bIndex1, bIndex2) => p.bench(bIndex2) match {
+        case Some(slowbro) => swapDamage(p.bench(bIndex1).get, slowbro)
+        case _ => ()
+      }
+      case BenchToActive(bIndex) => p.active match {
+        case Some(slowbro) => swapDamage(p.bench(bIndex).get, slowbro)
+        case _ => ()
+      }
+      case ActiveToBench(bIndex) => p.bench(bIndex) match {
+        case Some(slowbro) => swapDamage(p.active.get, slowbro)
+        case _ => ()
+      }
     }
-    None
   }
-
-  def benchToActive = (p, _, _, benchIndex, _) => {
-    val card = p.cardWithActivatedPower
-    p.active match {
-      case Some(card) => swapDamage(p.bench(benchIndex).get, card)
-      case _ => ()
-    }
-    None
-  }
-
-  def activeToBench = (p, _, _, benchIndex, _) => {
-    val card = p.cardWithActivatedPower
-    p.bench(benchIndex) match {
-      case Some(card) => swapDamage(p.active.get, card)
-      case _ => ()
-    }
-    None
-  }
-
-  def handToActive = (_, _, _, _, _) => None
-
-  def handToBench = (_, _, _, _, _, _) => None
 
   private def swapDamage(drag : PokemonCard, drop : PokemonCard) : Unit = {
     if (drop.currHp > 10 && drag.currHp < drag.maxHp) {

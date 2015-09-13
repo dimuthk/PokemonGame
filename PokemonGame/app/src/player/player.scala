@@ -53,6 +53,10 @@ class Player extends Jsonable {
 
   def bench = _bench
 
+  def setBench(pc : PokemonCard, i : Int) : Unit = {
+    _bench(i) = Some(pc)
+  }
+
   def benchIsFull = _bench.length == _bench.toList.flatten.length
 
   val prizes : Array[Option[Card]] = Array.fill(6) { None }
@@ -99,6 +103,13 @@ class Player extends Jsonable {
       cnt : Int = 1) {
     val eCards = pc.discardEnergy(eType, cnt)
     garbage = garbage ++ eCards
+  }
+
+  def discardSpecificEnergyFromCard(
+    pc : PokemonCard,
+    eCards : Seq[EnergyCard]) {
+    val tossedCards = pc.discardSpecificEnergy(eCards)
+    garbage = garbage ++ tossedCards 
   }
 
   def moveActiveToHand() {

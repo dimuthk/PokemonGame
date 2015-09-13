@@ -5,7 +5,7 @@ import src.move.Move
 import src.move.MoveBuilder._
 import src.move.ActivePokemonPower
 import src.board.intermediary.IntermediaryRequest
-import src.board.drag.CustomDragInterpreter
+import src.board.drag._
 import src.board.state.CustomStateGenerator
 import src.player.Player
 import src.card.energy.EnergyCard
@@ -63,30 +63,18 @@ private class EnergyTransState extends CustomStateGenerator(true, false) {
 
 private class EnergyTransDrag extends CustomDragInterpreter {
 
-  def benchToBench = (p, _, _, benchIndex1, benchIndex2, _) => {
-    if (p.bench(benchIndex2).isDefined) {
-      transferLeafEnergy(p.bench(benchIndex1).get, p.bench(benchIndex2).get)
+  override def handleDrag = (pData, dragCmd, args) => dragCmd match {
+    case BenchToBench(bIndex1, bIndex2) => if (pData.owner.bench(bIndex2).isDefined) {
+      transferLeafEnergy(pData.owner.bench(bIndex1).get, pData.owner.bench(bIndex2).get)
     }
-    None
-  }
-
-  def benchToActive = (p, _, _, benchIndex, _) => {
-    if (p.active.isDefined) {
-      transferLeafEnergy(p.bench(benchIndex).get, p.active.get)
+    case BenchToActive(bIndex) => if (pData.owner.active.isDefined) {
+      transferLeafEnergy(pData.owner.bench(bIndex).get, pData.owner.active.get)
     }
-    None
-  }
-
-  def activeToBench = (p, _, _, benchIndex, _) => {
-    if (p.bench(benchIndex).isDefined) {
-      transferLeafEnergy(p.active.get, p.bench(benchIndex).get)
+    case ActiveToBench(bIndex) => if (pData.owner.bench(bIndex).isDefined) {
+      transferLeafEnergy(pData.owner.active.get, pData.owner.bench(bIndex).get)
     }
-    None
+    case _ => ()
   }
-
-  def handToActive = (_, _, _, _, _) => None
-
-  def handToBench = (_, _, _, _, _, _) => None
 
   private def transferLeafEnergy(drag : PokemonCard, drop : PokemonCard) : Unit 
     = drop.attachEnergy(drag.discardEnergy(eType = EnergyType.GRASS))

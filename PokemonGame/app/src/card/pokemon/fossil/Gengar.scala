@@ -2,7 +2,7 @@ package src.card.pokemon.base_set
 
 import src.card.condition.StatusCondition
 import src.json.Identifier
-import src.board.drag.CustomDragInterpreter
+import src.board.drag._
 import src.board.state.CustomStateGenerator
 import src.move._
 import src.move.MoveBuilder._
@@ -86,33 +86,21 @@ private class CurseDrag extends CustomDragInterpreter {
       case _ => throw new Exception("Couldn't find curse")
     }
 
-	def benchToBench = (owner, opp, _, benchIndex1, benchIndex2, _) => {
-		if (opp.bench(benchIndex2).isDefined) {
-      swapDamage(opp.bench(benchIndex1).get, opp.bench(benchIndex2).get)
-      findCurse(owner).togglePower()
+  override def handleDrag = (pData, dragCmd, _) => dragCmd match {
+    case BenchToBench(bIndex1, bIndex2) => if (pData.opp.bench(bIndex2).isDefined) {
+      swapDamage(pData.opp.bench(bIndex1).get, pData.opp.bench(bIndex2).get)
+      findCurse(pData.owner).togglePower()
     }
-    None
-	}
-
-	def benchToActive = (owner, opp, _, benchIndex, _) => {
-		if (opp.active.isDefined) {
-      		swapDamage(opp.bench(benchIndex).get, opp.active.get)
-          findCurse(owner).togglePower()
-    	}
-    	None
-	}
-
-	def activeToBench = (owner, opp, _, benchIndex, _) => {
-		if (opp.bench(benchIndex).isDefined) {
-      		swapDamage(opp.active.get, opp.bench(benchIndex).get)
-          findCurse(owner).togglePower()
-    	}
-    	None
-	}
-
-	def handToActive = (_, _, _, _, _) => None
-
-	def handToBench = (_, _, _, _, _, _) => None
+    case BenchToActive(bIndex) => if (pData.opp.active.isDefined) {
+      swapDamage(pData.opp.bench(bIndex).get, pData.opp.active.get)
+      findCurse(pData.owner).togglePower()
+    }
+    case ActiveToBench(bIndex) => if (pData.opp.bench(bIndex).isDefined) {
+      swapDamage(pData.opp.active.get, pData.opp.bench(bIndex).get)
+      findCurse(pData.owner).togglePower()
+    }
+    case _ => ()
+  }
 
   private def swapDamage(drag : PokemonCard, drop : PokemonCard) : Unit = {
     if (drop.currHp > 10 && drag.currHp < drag.maxHp) {
