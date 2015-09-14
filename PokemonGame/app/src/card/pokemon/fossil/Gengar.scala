@@ -86,7 +86,7 @@ private class CurseDrag extends CustomDragInterpreter {
       case _ => throw new Exception("Couldn't find curse")
     }
 
-  override def handleDrag = (pData, dragCmd, _) => dragCmd match {
+  override def handleCommand = (pData, dragCmd, _) => dragCmd match {
     case BenchToBench(bIndex1, bIndex2) => if (pData.opp.bench(bIndex2).isDefined) {
       swapDamage(pData.opp.bench(bIndex1).get, pData.opp.bench(bIndex2).get)
       findCurse(pData.owner).togglePower()

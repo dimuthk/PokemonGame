@@ -21,6 +21,8 @@ class Player extends Jsonable {
 
   var trainerBan : Boolean = false
 
+  var prizesToAward : Int = 0
+
   def deck = _deck
 
   def setDeck(cards : Seq[Card]) = _deck = cards

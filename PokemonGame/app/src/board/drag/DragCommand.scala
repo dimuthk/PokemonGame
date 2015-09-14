@@ -1,6 +1,8 @@
 package src.board.drag
 
-sealed abstract class DragCommand
+import src.board.InterpreterCommand
+
+sealed abstract class DragCommand extends InterpreterCommand
 
 case class HandToActive(hIndex : Int) extends DragCommand
 

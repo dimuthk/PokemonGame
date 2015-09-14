@@ -63,7 +63,7 @@ private class EnergyTransState extends CustomStateGenerator(true, false) {
 
 private class EnergyTransDrag extends CustomDragInterpreter {
 
-  override def handleDrag = (pData, dragCmd, args) => dragCmd match {
+  override def handleCommand = (pData, dragCmd, args) => dragCmd match {
     case BenchToBench(bIndex1, bIndex2) => if (pData.owner.bench(bIndex2).isDefined) {
       transferLeafEnergy(pData.owner.bench(bIndex1).get, pData.owner.bench(bIndex2).get)
     }

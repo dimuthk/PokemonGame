@@ -237,6 +237,11 @@ abstract class PokemonCard(
         lastAttack = -1
         acid = false
       }
+      _poisonStatus match {
+        case Some(PoisonStatus.POISONED) => takeDamage(None, 10)
+        case Some(PoisonStatus.TOXIC) => takeDamage(None, 20)
+        case _ => ()
+      }
     }
     case false => {
       lastAttack = -1
@@ -311,8 +316,8 @@ abstract class PokemonCard(
       dmg -= 20
     }
 
-    lastAttack = dmg
-    val finalDmg = math.min(_currHp, dmg)
+    val finalDmg = math.max(math.min(_currHp, dmg), 0)
+    lastAttack = finalDmg
     _currHp -= finalDmg
     if (destinyBond && _currHp <= 0 && attacker.isDefined) {
       attacker.get.takeDamage(attacker, attacker.get.maxHp)

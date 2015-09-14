@@ -88,7 +88,7 @@ class HealMoveInterpreter extends CustomMoveInterpreter {
     ap.togglePower()
   }
 
-  override def handleMove = (pData, moveCmd, args) => moveCmd match {
+  override def handleCommand = (pData, moveCmd, args) => moveCmd match {
     case AttackFromActive(moveNum) => handleHeal(pData.owner.active.get, pData.owner, moveNum)
     case AttackFromBench(bIndex, moveNum) => handleHeal(pData.owner.bench(bIndex).get, pData.owner, moveNum)
     case _ => throw new Exception("Unsupported move command for heal")

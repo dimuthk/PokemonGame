@@ -37,7 +37,7 @@ class Blastoise extends StageTwoPokemon(
 
 private class RainDanceDrag extends CustomDragInterpreter {
 
-  override def handleDrag = (pData, dragCmd, args) => dragCmd match {
+  override def handleCommand = (pData, dragCmd, args) => dragCmd match {
     case HandToActive(hIndex) => pData.owner.active match {
       case Some(active) => attachWaterEnergy(pData.owner, active, hIndex)
       case None => ()

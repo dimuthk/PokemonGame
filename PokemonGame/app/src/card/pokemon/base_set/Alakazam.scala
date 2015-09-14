@@ -64,7 +64,7 @@ private class DamageSwapState extends CustomStateGenerator(true, false) {
 
 private class DamageSwapDrag extends CustomDragInterpreter {
 
-  override def handleDrag = (pData, dragCmd, _) => dragCmd match {
+  override def handleCommand = (pData, dragCmd, _) => dragCmd match {
     case ActiveToBench(bIndex) => swapDamage(pData.owner.active.get, pData.owner.bench(bIndex))
     case BenchToActive(bIndex) => swapDamage(pData.owner.bench(bIndex).get, pData.owner.active)
     case BenchToBench(bIndex1, bIndex2) => swapDamage(pData.owner.bench(bIndex1).get, pData.owner.bench(bIndex2))

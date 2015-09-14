@@ -38,9 +38,11 @@ class PlayerActor(out : ActorRef, var correspondent : Correspondent) extends Act
       contents.head match {
         case "DRAG" => correspondent.handleDrag(contents.tail)
         case "MOVE" => correspondent.handleMove(contents.tail)
+        case "UPDATE" => correspondent.handleUpdate(contents.tail)
         case "FLIP" => contents(1) match {
           case "DRAG" => correspondent.other.handleDrag(contents.tail.tail)
           case "MOVE" => correspondent.other.handleMove(contents.tail.tail)
+          case "UPDATE" => correspondent.handleUpdate(contents.tail.tail)
         }
       }
     }

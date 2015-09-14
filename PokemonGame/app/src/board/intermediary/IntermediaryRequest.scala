@@ -28,8 +28,7 @@ abstract class IntermediaryRequest(
 	val requestTitle : String,
 	val requestMsg : String,
 	val p : Player,
-	val additionalTag : Option[String] = None,
-	val shouldContinue : Boolean = false) extends Jsonable {
+	val additionalTag : Option[String] = None) extends Jsonable {
 
 	var serverTag : String = ""
 
@@ -89,11 +88,13 @@ class ShuffleCardRequest(
 		Identifier.CARD_LIST.toString -> cardListToJsArray(cardList))
 }
 
+// TODO: have a button for SingleDisplay which just says "Okay" instead of forcing a
+// move status update on intermediaries.
 class SingleDisplay(
 	requestTitle : String,
 	requestMsg : String,
 	p : Player,
-	c : Card) extends IntermediaryRequest(requestTitle, requestMsg, p, None, shouldContinue = true) {
+	c : Card) extends IntermediaryRequest(requestTitle, requestMsg, p, None) {
 
 	override def getIdentifier() = Identifier.SINGLE_DISPLAY
 

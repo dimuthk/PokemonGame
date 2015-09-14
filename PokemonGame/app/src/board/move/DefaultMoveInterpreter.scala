@@ -26,7 +26,7 @@ object DefaultMoveInterpreter extends MoveInterpreter {
   }
   
 
-  override def handleMove = (pData, moveCmd, args) => moveCmd match {
+  override def handleCommand = (pData, moveCmd, args) => moveCmd match {
     case AttackFromActive(moveNum) => moveNum match {
       case 1 => useMove(pData.owner, pData.opp, pData.owner.active.get.firstMove.get, args)
       case 2 => useMove(pData.owner, pData.opp, pData.owner.active.get.secondMove.get, args)

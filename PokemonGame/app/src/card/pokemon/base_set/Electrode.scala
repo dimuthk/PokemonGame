@@ -105,7 +105,7 @@ private class BuzzapDrag extends CustomDragInterpreter {
         assignBuzzapType(drop.get, args)
     }
 
-    override def handleDrag = (pData, dragCmd, args) => dragCmd match {
+    override def handleCommand = (pData, dragCmd, args) => dragCmd match {
         case BenchToBench(bIndex1, bIndex2) => (pData.owner, args.length) match {
             case (p, 0) => checkNotAdditional(p, p.bench(bIndex1), p.bench(bIndex2))
             case (p, _) => attachElectrode(p, p.bench(bIndex2), args)

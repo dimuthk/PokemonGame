@@ -59,7 +59,7 @@ private class StrangeBehaviorState extends CustomStateGenerator(true, false) {
 
 private class StrangeBehaviorDrag extends CustomDragInterpreter {
 
-  override def handleDrag = (pData, dragCmd, _) => {
+  override def handleCommand = (pData, dragCmd, _) => {
     val p = pData.owner
     val slowbro = p.cardWithActivatedPower
     dragCmd match {

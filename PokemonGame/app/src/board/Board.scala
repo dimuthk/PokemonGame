@@ -7,7 +7,7 @@ import src.card.Placeholder
 import src.json.Identifier
 import src.board.intermediary.IntermediaryRequest
 import src.board.state.StateGeneratorDirector
-import src.board.BoardCleaner
+import src.board.update.UpdateDirector
 import src.board.move.MoveDirector
 import src.board.drag._
 import src.board.state.DefaultStateGenerator
@@ -104,49 +104,27 @@ object Board {
 
     def other : Correspondent = if (c1.get == this) c2.get else c1.get
 
-    def handleMove(contents : Seq[String]) {
-      val intermediary = MoveDirector.handleMoveCommand(p, getOpponent(p), contents)
-      if (intermediary.isDefined) {
-        Logger.debug("intermediary: " + intermediary.get)
-        if (intermediary.get.shouldContinue) {
-          sendIntermediaryWithCleanedUpBoard(intermediary.get)
-        } else {
-          rebroadcastStateWithIntermediary(intermediary.get)
-        }
-      } else {
-         cleanupBoardAndPassBackState()
-      }
+    def handleMove(args : Seq[String]) : Unit =
+      MoveDirector.handleCommand(p, getOpponent(p), args) match {
+        case Some(intermediary) => passBackState(Some(intermediary))
+        case None => handleUpdate(Nil)
     }
 
-    def handleDrag(contents : Seq[String]) {
-      val intermediary = DragDirector.handleDragCommand(p, getOpponent(p), contents)
-      if (intermediary.isDefined) {
-        Logger.debug("intermediary: " + intermediary.get)
-        if (intermediary.get.shouldContinue) {
-          sendIntermediaryWithCleanedUpBoard(intermediary.get)
-        } else {
-          rebroadcastStateWithIntermediary(intermediary.get)
-        }
-      } else {
-         cleanupBoardAndPassBackState()
-      }
+    def handleDrag(args : Seq[String]) : Unit =
+      DragDirector.handleCommand(p, getOpponent(p), args) match {
+        case Some(intermediary) => passBackState(Some(intermediary))
+        case None => handleUpdate(Nil)
     }
 
-    def sendIntermediaryWithCleanedUpBoard(intermediary : IntermediaryRequest) {
-      BoardCleaner.cleanUpBoardState(p, getOpponent(p))
+    def handleUpdate(args : Seq[String]) : Unit =
+      UpdateDirector.handleCommand(p, getOpponent(p), args) match {
+        case Some(intermediary) => passBackState(Some(intermediary))
+        case None => passBackState()
+    }
+
+    def passBackState(maybeIntermediary : Option[IntermediaryRequest] = None) {
       val state = StateGeneratorDirector.generateState(c1.get.p, c2.get.p, isPlayer1(p))
-      broadcastState(state._1, state._2, Some(intermediary))
-    }
-
-    def rebroadcastStateWithIntermediary(intermediary : IntermediaryRequest) {
-      val state = StateGeneratorDirector.generateState(c1.get.p, c2.get.p, isPlayer1(p))
-      broadcastState(state._1, state._2, Some(intermediary))
-    }
-
-    def cleanupBoardAndPassBackState() {
-      BoardCleaner.cleanUpBoardState(p, getOpponent(p))
-      val state = StateGeneratorDirector.generateState(c1.get.p, c2.get.p, isPlayer1(p))
-      broadcastState(state._1, state._2)
+      broadcastState(state._1, state._2, maybeIntermediary)
     }
 
     /**

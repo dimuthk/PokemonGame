@@ -153,6 +153,6 @@ class PeekMoveInterpreter extends CustomMoveInterpreter {
     case _ => throw new Exception("Unrecognized move action for peek")
   }
 
-  override def handleMove = (pData, moveCmd, _) => ()
+  override def handleCommand = (pData, moveCmd, _) => ()
 
 }

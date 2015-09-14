@@ -68,7 +68,7 @@ object DefaultDragInterpreter extends DragInterpreter {
     p.swapActiveAndBench(bIndex)
   }
 
-  def handleDrag = (pData, dragCmd, args) => dragCmd match {
+  def handleCommand = (pData, dragCmd, args) => dragCmd match {
 
     case BenchToBench(bIndex1, bIndex2) => pData.owner.swapBenchCards(bIndex1, bIndex2)
 
