@@ -54,7 +54,7 @@ object DefaultMoveInterpreter extends MoveInterpreter {
       if (!owner.active.get.smokescreen || flippedHeads()) {
         move.perform(owner, opp, args)
       }
-      flipTurn(owner, opp)
+      owner.performedMove = true
     }
   }
 

@@ -80,11 +80,10 @@ object Board {
         p.setDeck(List.fill(20)(new Rattata()))
         p.shuffleDeck()
         p.setActive(new Electrode())
-        p.isTurn = false
       } else {
         p.setDeck(List.fill(20)(new Machop()))
         p.shuffleDeck()
-        p.isTurn = true
+        p.flipTurn()
       }
 
       distributeInitialCards()
@@ -141,11 +140,6 @@ object Board {
   }
 
   def isPlayer1(p : Player) : Boolean = return c1.get.p == p
-
-  def flipTurn() : Unit = {
-    c1.get.p.isTurn = !c1.get.p.isTurn
-    c2.get.p.isTurn = !c2.get.p.isTurn
-  }
 
   def bothCorrespondentsReady =
       !c1.isEmpty && !c2.isEmpty && c1.get.ready && c2.get.ready

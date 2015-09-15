@@ -84,7 +84,13 @@ class Player extends Jsonable {
 
   var notification : Option[String] = None
 
-  var isTurn : Boolean = false
+  private var _isTurn : Boolean = false
+
+  def isTurn = _isTurn
+
+  def flipTurn() = _isTurn = !_isTurn
+
+  var performedMove : Boolean = false
 
   var addedEnergy : Boolean = false
 

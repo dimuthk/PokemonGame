@@ -5,6 +5,8 @@ import src.card.pokemon.PokemonCard
 import src.card.energy.EnergyCard
 import src.player.Player
 import play.api.libs.json._
+import src.card.CardUI
+import src.card.CardUI._
 
 /**
  * Generates a json container to send to clients, with the ui settings set according to the
@@ -20,32 +22,33 @@ object DefaultStateGenerator extends StateGenerator {
    * Update any UI specifications for this player. The specification hinges on whether
    * this is the south or north side of the board, and whether it's this player's turn.
    */
-  private def orientStateForPlayer(p : Player, yourTurn : Boolean) : JsObject = {
-    val yourCards = p.isTurn == yourTurn
-    // You should only ever be able to click on the other player's cards.
-    for (pc : PokemonCard <- p.existingActiveAndBenchCards) {
-      // active and bench cards are always face up
-      pc.isFaceUp = true
-      pc.isDraggable = yourCards && yourTurn
-      pc.isClickable = true
-      pc.isDisplayable = true
-      pc.isUsable = yourCards && yourTurn
+  private def orientStateForPlayer(p : Player, yourTurn : Boolean) : JsObject = p.prizesToAward match {
+    case 0 => {
+      val yourCards = p.isTurn == yourTurn
+      // You should only ever be able to click on the other player's cards.
+      for (pc : PokemonCard <- p.existingActiveAndBenchCards) {
+        // active and bench cards are always face up
+        p.setUIOrientationForActiveAndBench(
+          Set(FACE_UP, CLICKABLE, DISPLAYABLE)
+            ++ (if (yourCards && yourTurn) Set(DRAGGABLE, USABLE) else Nil))
+      }
+      for (c : Card <- p.hand) {
+        p.setUiOrientationForHand(
+          (if (yourCards) Set(FACE_UP) else Set())
+            ++ (if (yourCards && yourTurn) Set(DRAGGABLE, CLICKABLE) else Nil))
+      }
+      for (c : Card <- p.prizes.toList.flatten) {
+        p.setUiOrientationForPrize(Set())
+      }
+      return p.toJson
     }
-    for (c : Card <- p.hand) {
-      c.isFaceUp = yourCards
-      c.isDraggable = yourCards && yourTurn
-      c.isClickable = yourCards && yourTurn
-      c.isDisplayable = false
-      c.isUsable = false
+    case _ => {
+      val yourCards = p.isTurn == yourTurn
+      for (pc : PokemonCard <- p.existingActiveAndBenchCards) {
+        p.setUIOrientationForActiveAndBench(Set())
+      }
+      return p.toJson
     }
-    for (c : Card <- p.prizes.toList.flatten) {
-      c.isFaceUp = false
-      c.isDraggable = false
-      c.isClickable = false
-      c.isDisplayable = false
-      c.isUsable = false
-    }
-    return p.toJson
   }
 
 }

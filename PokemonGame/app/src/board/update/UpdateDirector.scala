@@ -14,10 +14,7 @@ import src.move._
  */
 object UpdateDirector extends Director[UpdateCommand, UpdateInterpreter]("UPDATE") {
 
-  def buildCommand = (args) => args.length match {
-    case 0 => Update()
-    case _ => throw new Exception("unsupported right now")
-  }
+  def buildCommand = (args) => Update()
 
   def selectInterpreterArgs = (args) => args
 
