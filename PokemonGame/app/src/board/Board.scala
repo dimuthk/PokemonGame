@@ -106,13 +106,13 @@ object Board {
     def handleMove(args : Seq[String]) : Unit =
       MoveDirector.handleCommand(p, getOpponent(p), args) match {
         case Some(intermediary) => passBackState(Some(intermediary))
-        case None => handleUpdate(Nil)
+        case None => handleUpdate(List("", "1"))
     }
 
     def handleDrag(args : Seq[String]) : Unit =
       DragDirector.handleCommand(p, getOpponent(p), args) match {
         case Some(intermediary) => passBackState(Some(intermediary))
-        case None => handleUpdate(Nil)
+        case None => handleUpdate(List("", "1"))
     }
 
     def handleUpdate(args : Seq[String]) : Unit =

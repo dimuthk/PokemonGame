@@ -16,7 +16,15 @@ abstract class CustomStateGenerator extends StateGenerator {
 
   var isActive : Boolean = false
 
-  def uiForActivatedCard = (Player) => Set[CardUI.Value]
+  override def orientStateForPlayer(p : Player, isSouthTurn : Boolean) : JsObject = {
+    val isSouth = isSouthTurn && p.isTurn
+    p.setUIOrientationForActive(uiForActive(p, isSouth))
+    p.cardWithActivatedPower match {
+      case Some(card) => card.setUiOrientation(uiForActivatedCard(p))
+      case None => ()
+    }
+    return p.toJson
+  }
 
   def uiForActive = (p, isSouth) => if (isSouth) uiForActiveSouth(p) else uiForActiveNorth(p)
 
@@ -41,5 +49,7 @@ abstract class CustomStateGenerator extends StateGenerator {
   def uiForPrizeNorth : (Player) => Set[CardUI.Value] = (p) => DefaultStateGenerator.uiForPrize(p, false)
 
   def uiForPrizeSouth : (Player) => Set[CardUI.Value]
+
+  def uiForActivatedCard : (Player) => Set[CardUI.Value]
 
 }

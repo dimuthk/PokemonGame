@@ -45,6 +45,8 @@ class Alakazam extends BasicPokemon(
 
 private class DamageSwapState extends CustomStateGenerator {
 
+  def uiForActivatedCard = (p) => Set(FACE_UP, CLICKABLE, DISPLAYABLE, DRAGGABLE, USABLE)
+
   def uiForActiveSouth = (p) => p.isTurn match {
     case true => Set(FACE_UP, DRAGGABLE)
     case false => Set(FACE_UP)
