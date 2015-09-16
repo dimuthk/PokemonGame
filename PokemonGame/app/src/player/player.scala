@@ -223,6 +223,8 @@ class Player extends Jsonable {
     }
   }
 
+  def setUIOrientationForActive(uiSet : Set[CardUI.Value]) = if (active.isDefined) active.get.setUiOrientation(uiSet)
+
   def setUiOrientationForPrize(uiSet : Set[CardUI.Value]) = setUiOrientationForList(uiSet, prizes.toList.flatten)
 
   def setUiOrientationForDeck(uiSet : Set[CardUI.Value]) = setUiOrientationForList(uiSet, deck)

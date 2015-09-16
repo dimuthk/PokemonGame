@@ -2,6 +2,7 @@ package src.board.state
 
 import src.card.pokemon.PokemonCard
 import src.player.Player
+import src.card.CardUI
 import play.api.libs.json._
 
 /**
@@ -11,56 +12,34 @@ import play.api.libs.json._
  * bind the absolute orientation to the relative one which can be interpreted
  * by the hinge class.
  */
-abstract class CustomStateGenerator(
-  val willOverrideOwnerState : Boolean,
-  val willOverrideOppState : Boolean) {
-
-  final def generateForPlayer1(p1 : Player, p2: Player, hinge : PokemonCard) : (JsObject, JsObject) = {
-  	if (cardBelongsToPlayer(hinge, p1)) {
-      if (willOverrideOwnerState) {
-        return generateForOwner(p1, p2, hinge)
-      } else {
-        return DefaultStateGenerator.generateForPlayer1(p1, p2)
-      }
-
-  	} else {
-      if (willOverrideOppState) {
-        return generateForOpp(p1, p2, hinge)
-      } else {
-        return DefaultStateGenerator.generateForPlayer1(p1, p2)
-      }
-  	}
-  }
-
-  final def generateForPlayer2(p1 : Player, p2: Player, hinge : PokemonCard) : (JsObject, JsObject) = {
-  	if (cardBelongsToPlayer(hinge, p2)) {
-      if (willOverrideOwnerState) {
-        return generateForOwner(p2, p1, hinge)
-      } else {
-        return DefaultStateGenerator.generateForPlayer2(p1, p2)
-      }
-  	} else {
-      if (willOverrideOppState) {
-        return generateForOpp(p2, p1, hinge)
-        } else {
-          return DefaultStateGenerator.generateForPlayer2(p1, p2)
-        }
-  	}
-  }
-
-  private def cardBelongsToPlayer(pc : PokemonCard, p : Player) : Boolean = {
-  	for (oc : Option[PokemonCard] <- p.bench ++ List(p.active)) {
-  		if (oc.isDefined && oc.get == pc) {
-  			return true
-  		}
-  	}
-  	return false
-  }
+abstract class CustomStateGenerator extends StateGenerator {
 
   var isActive : Boolean = false
 
-  def generateForOwner : (Player, Player, PokemonCard) => (JsObject, JsObject) = (_,_,_) => (null, null)
+  def uiForActivatedCard = (Player) => Set[CardUI.Value]
 
-  def generateForOpp : (Player, Player, PokemonCard) => (JsObject, JsObject) = (_,_,_) => (null, null)
+  def uiForActive = (p, isSouth) => if (isSouth) uiForActiveSouth(p) else uiForActiveNorth(p)
+
+  def uiForActiveNorth : (Player) => Set[CardUI.Value] = (p) => DefaultStateGenerator.uiForActive(p, false)
+
+  def uiForActiveSouth : (Player) => Set[CardUI.Value]
+
+  def uiForBench = (p, isSouth) => if (isSouth) uiForBenchSouth(p) else uiForBenchNorth(p)
+
+  def uiForBenchNorth : (Player) => Set[CardUI.Value] = (p) => DefaultStateGenerator.uiForBench(p, false)
+
+  def uiForBenchSouth : (Player) => Set[CardUI.Value]
+
+  def uiForHand = (p, isSouth) => if (isSouth) uiForHandSouth(p) else uiForHandNorth(p)
+
+  def uiForHandNorth : (Player) => Set[CardUI.Value] = (p) => DefaultStateGenerator.uiForHand(p, false)
+
+  def uiForHandSouth : (Player) => Set[CardUI.Value]
+
+  def uiForPrize = (p, isSouth) => if (isSouth) uiForPrizeSouth(p) else uiForPrizeNorth(p)
+
+  def uiForPrizeNorth : (Player) => Set[CardUI.Value] = (p) => DefaultStateGenerator.uiForPrize(p, false)
+
+  def uiForPrizeSouth : (Player) => Set[CardUI.Value]
 
 }
