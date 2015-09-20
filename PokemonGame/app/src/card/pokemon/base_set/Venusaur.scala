@@ -7,6 +7,7 @@ import src.move.ActivePokemonPower
 import src.board.intermediary.IntermediaryRequest
 import src.board.drag._
 import src.board.state.CustomStateGenerator
+import src.board.state.DefaultStateGenerator
 import src.player.Player
 import src.card.energy.EnergyCard
 import src.card.energy.EnergyType
@@ -42,21 +43,18 @@ class Venusaur extends BasicPokemon(
     retreatCost = 2)
 
 
-private class EnergyTransState extends CustomStateGenerator(true, false) {
+private class EnergyTransState extends CustomStateGenerator{
 
-  override def generateForOwner = (owner, opp, interceptor) => {
-    // Active and bench cards are visible and draggable to allow energy transfer.
-    owner.setUIOrientationForActiveAndBench(Set(FACE_UP, DRAGGABLE))
-    // Hand is deactivated.
-    owner.setUiOrientationForHand(Set())
+  def uiForActivatedCard = (p) => Set(FACE_UP, CLICKABLE, DISPLAYABLE, DRAGGABLE, USABLE)
 
-    // Opponent active and bench cards are visible but not clickable.
-    opp.setUIOrientationForActiveAndBench(Set(FACE_UP))
-    opp.setUiOrientationForHand(Set())
+  override def uiForActive = (p, isSouth) => isSouth match {
+    case true => Set(FACE_UP, DRAGGABLE)
+    case false => DefaultStateGenerator.uiForActive(p, isSouth) 
+  }
 
-    // Venusaur must still be usable to deactivate power.
-    owner.setUIOrientationForActiveAndBench(Set(FACE_UP, CLICKABLE, DISPLAYABLE, DRAGGABLE, USABLE))
-    (owner.toJson, opp.toJson)
+  override def uiForBench = (p, isSouth) => isSouth match {
+    case true => Set(FACE_UP, DRAGGABLE)
+    case false => DefaultStateGenerator.uiForBench(p, isSouth)  
   }
 
 }

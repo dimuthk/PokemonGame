@@ -10,16 +10,25 @@ import src.card.CardUI
  */
 abstract class StateGenerator {
 
-  def generateForPlayer1(p1 : Player, p2 : Player) : (JsObject, JsObject) =
-  	(orientStateForPlayer(p1, p1.isTurn), orientStateForPlayer(p2, p1.isTurn))
+  def generateForPlayer1(p1 : Player, p2 : Player) : (JsObject, JsObject) = {
+    orientStateForPlayer(p1, p1.isTurn)
+    val p1Json = p1.toJson
+    orientStateForPlayer(p2, p1.isTurn)
+    val p2Json = p2.toJson
+    return (p1Json, p2Json)
+  }
 
-  def generateForPlayer2(p1 : Player, p2 : Player) : (JsObject, JsObject) =
-  	(orientStateForPlayer(p2, p2.isTurn), orientStateForPlayer(p1, p2.isTurn))
+  def generateForPlayer2(p1 : Player, p2 : Player) : (JsObject, JsObject) = {
+    orientStateForPlayer(p2, p2.isTurn)
+    val p2Json = p2.toJson
+    orientStateForPlayer(p1, p2.isTurn)
+    val p1Json = p1.toJson
+    return (p2Json, p1Json)
+  }
 
-  def orientStateForPlayer(p : Player, isSouthTurn : Boolean) : JsObject = {
+  def orientStateForPlayer(p : Player, isSouthTurn : Boolean) : Unit = {
   	val isSouth = isSouthTurn && p.isTurn
   	p.setUIOrientationForActive(uiForActive(p, isSouth))
-  	return p.toJson
   }
 
   def uiForActive : (Player, Boolean) => Set[CardUI.Value]
@@ -29,5 +38,7 @@ abstract class StateGenerator {
   def uiForHand : (Player, Boolean) => Set[CardUI.Value]
 
   def uiForPrize : (Player, Boolean) => Set[CardUI.Value]
+
+  def uiForDeck : (Player, Boolean) => Set[CardUI.Value]
 
 }

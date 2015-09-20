@@ -16,30 +16,24 @@ abstract class CustomStateGenerator extends StateGenerator {
 
   var isActive : Boolean = false
 
+  override def orientStateForPlayer(p : Player, isSouthTurn : Boolean) : Unit = {
+    super.orientStateForPlayer(p, isSouthTurn)
+    p.cardWithActivatedPower match {
+      case Some(card) => card.setUiOrientation(uiForActivatedCard(p))
+      case None => ()
+    }
+  }
+
+  def uiForActive = (p, isSouth) => DefaultStateGenerator.uiForActive(p, isSouth)
+
+  def uiForBench = (p, isSouth) => DefaultStateGenerator.uiForBench(p, isSouth)
+
+  def uiForHand = (p, isSouth) => DefaultStateGenerator.uiForHand(p, isSouth)
+
+  def uiForPrize = (p, isSouth) => DefaultStateGenerator.uiForPrize(p, isSouth)
+
+  def uiForDeck = (p, isSouth) => DefaultStateGenerator.uiForDeck(p, isSouth)
+
   def uiForActivatedCard : (Player) => Set[CardUI.Value]
-
-  def uiForActive = (p, isSouth) => if (isSouth) uiForActiveSouth(p) else uiForActiveNorth(p)
-
-  def uiForActiveNorth : (Player) => Set[CardUI.Value] = (p) => DefaultStateGenerator.uiForActive(p, false)
-
-  def uiForActiveSouth : (Player) => Set[CardUI.Value]
-
-  def uiForBench = (p, isSouth) => if (isSouth) uiForBenchSouth(p) else uiForBenchNorth(p)
-
-  def uiForBenchNorth : (Player) => Set[CardUI.Value] = (p) => DefaultStateGenerator.uiForBench(p, false)
-
-  def uiForBenchSouth : (Player) => Set[CardUI.Value]
-
-  def uiForHand = (p, isSouth) => if (isSouth) uiForHandSouth(p) else uiForHandNorth(p)
-
-  def uiForHandNorth : (Player) => Set[CardUI.Value] = (p) => DefaultStateGenerator.uiForHand(p, false)
-
-  def uiForHandSouth : (Player) => Set[CardUI.Value]
-
-  def uiForPrize = (p, isSouth) => if (isSouth) uiForPrizeSouth(p) else uiForPrizeNorth(p)
-
-  def uiForPrizeNorth : (Player) => Set[CardUI.Value] = (p) => DefaultStateGenerator.uiForPrize(p, false)
-
-  def uiForPrizeSouth : (Player) => Set[CardUI.Value]
 
 }

@@ -33,22 +33,21 @@ class Gengar extends StageTwoPokemon(
 	resistance = Some(EnergyType.FIGHTING),
 	retreatCost = 1)
 
-private class CurseState extends CustomStateGenerator(true, false) {
+private class CurseState extends CustomStateGenerator {
 
-  override def generateForOwner = (owner, opp, interceptor) => {
-  	// All of owner's stuff is deactivated.
-    owner.setUIOrientationForActiveAndBench(Set(FACE_UP))
-    owner.setUiOrientationForHand(Set())
+  // Gengar must still be usable to deactivate power.
+  def uiForActivatedCard = (p) => Set(FACE_UP, CLICKABLE, DISPLAYABLE, USABLE)
 
-    // Opponent's active and bench are draggable
-    opp.setUIOrientationForActiveAndBench(Set(FACE_UP, DRAGGABLE))
-    opp.setUiOrientationForHand(Set())
+  // Opponent's active and bench are draggable. user's stuff
+  // is deactivated.
+  override def uiForActive = (p, isSouth) => isSouth match {
+    case true => Set(FACE_UP)
+    case false => Set(FACE_UP, DRAGGABLE) 
+  }
 
-    // Gengar must still be usable to deactivate power.
-    interceptor.setUiOrientation(Set(FACE_UP, CLICKABLE, DISPLAYABLE, USABLE))
-    interceptor.firstMove.get.status = Status.ACTIVATED
-    interceptor.secondMove.get.status = Status.DISABLED
-    (owner.toJson, opp.toJson)
+  override def uiForBench = (p, isSouth) => isSouth match {
+    case true => Set(FACE_UP)
+    case false => Set(FACE_UP, DRAGGABLE)  
   }
 
 }

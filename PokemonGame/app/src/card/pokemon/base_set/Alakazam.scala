@@ -7,6 +7,7 @@ import src.move.ActivePokemonPower
 import src.board.intermediary._
 import src.board.drag._
 import src.board.drag.CustomDragInterpreter
+import src.board.state.DefaultStateGenerator
 import src.board.state.CustomStateGenerator
 import src.player.Player
 import src.card.energy.EnergyCard
@@ -45,19 +46,17 @@ class Alakazam extends BasicPokemon(
 
 private class DamageSwapState extends CustomStateGenerator {
 
-  def uiForActiveSouth = (p) => p.isTurn match {
+  def uiForActivatedCard = (p) => Set(FACE_UP, CLICKABLE, DISPLAYABLE, DRAGGABLE, USABLE)
+
+  override def uiForActive = (p, isSouth) => isSouth match {
     case true => Set(FACE_UP, DRAGGABLE)
-    case false => Set(FACE_UP)
+    case false => DefaultStateGenerator.uiForActive(p, isSouth) 
   }
 
-  def uiForBenchSouth = (p) => p.isTurn match {
+  override def uiForBench = (p, isSouth) => isSouth match {
     case true => Set(FACE_UP, DRAGGABLE)
-    case false => Set(FACE_UP) 
+    case false => DefaultStateGenerator.uiForBench(p, isSouth) 
   }
-
-  def uiForHandSouth = (p) => Set()
-
-  def uiForPrizeSouth = (p) => Set()
 
 }
 

@@ -64,26 +64,22 @@ private class Peek extends ActivePokemonPower(
 
 class PeekStateGenerator extends CustomStateGenerator(true, false) {
 
+  // Active, bench and handcards are visible but not interactable.
+  override def uiForActive = (p, isSouth) => Set(FACE_UP)
+
+  override def uiForBench = (p, isSouth) => Set(FACE_UP)
+  
+  override def uiForHand = (p, isSouth) => isSouth match {
+    case true => Set(FACE_UP)
+    case false => Set(CLICKABLE, USABLE)
+  }
+
+  override def uiForPrize = (p, isSouth) => Set(CLICKABLE, USABLE)
+
+  override def uiForDeck = (p, isSouth) => Set(CLICKABLE, USABLE)
+
+
   override def generateForOwner = (owner, opp, interceptor) => {
-    // Active, bench and handcards are visible but not interactable.
-    owner.setUIOrientationForActiveAndBench(Set(FACE_UP))
-    owner.setUiOrientationForHand(Set(FACE_UP))
-
-    // Opponent active and bench cards are visible but not clickable.
-    opp.setUIOrientationForActiveAndBench(Set(FACE_UP))
-
-    // Opponent's hand must be interactable to allow for peek
-    opp.setUiOrientationForHand(Set(CLICKABLE, USABLE))
-
-    // Decks are peekable as well
-    owner.setUiOrientationForDeck(Set(CLICKABLE, USABLE))
-    opp.setUiOrientationForDeck(Set(CLICKABLE, USABLE))
-
-    // Prizes too!
-    owner.setUiOrientationForPrize(Set(CLICKABLE, USABLE))
-    opp.setUiOrientationForPrize(Set(CLICKABLE, USABLE))
-
-    interceptor.firstMove.get.status = Status.ACTIVATED
 
     val oppHandJson = for (_ <- opp.hand) yield jsonForCard
 

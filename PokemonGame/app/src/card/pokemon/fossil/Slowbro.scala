@@ -6,6 +6,7 @@ import src.json.Identifier
 import src.move.Move
 import src.board.drag._
 import src.board.state.CustomStateGenerator
+import src.board.state.DefaultStateGenerator
 import src.move.MoveBuilder._
 import src.move.ActivePokemonPower
 import src.player.Player
@@ -38,22 +39,19 @@ class Slowbro extends StageOnePokemon(
     weakness = Some(EnergyType.PSYCHIC),
     retreatCost = 1)
 
-private class StrangeBehaviorState extends CustomStateGenerator(true, false) {
+private class StrangeBehaviorState extends CustomStateGenerator {
 
-  override def generateForOwner = (owner, opp, interceptor) => {
-    // Active and bench cards are visible and draggable to allow energy transfer.
-    owner.setUIOrientationForActiveAndBench(Set(FACE_UP, DRAGGABLE))
-    // Hand is deactivated.
-    owner.setUiOrientationForHand(Set())
-
-    // Opponent active and bench cards are visible but not clickable.
-    opp.setUIOrientationForActiveAndBench(Set(FACE_UP))
-    opp.setUiOrientationForHand(Set())
-
-    // Venusaur must still be usable to deactivate power.
-    owner.setUIOrientationForActiveAndBench(Set(FACE_UP, CLICKABLE, DISPLAYABLE, DRAGGABLE, USABLE))
-    (owner.toJson, opp.toJson)
+  override def uiForActive = (p, isSouth) => isSouth match {
+    case true => Set(FACE_UP, DRAGGABLE)
+    case false => DefaultStateGenerator.uiForActive(p, isSouth)  
   }
+
+  override def uiForBench = (p, isSouth) => isSouth match {
+    case true => Set(FACE_UP, DRAGGABLE)
+    case false => DefaultStateGenerator.uiForBench(p, isSouth)  
+  }
+  
+  def uiForActivatedCard = (p) => Set(FACE_UP, CLICKABLE, DISPLAYABLE, DRAGGABLE, USABLE)
 
 }
 

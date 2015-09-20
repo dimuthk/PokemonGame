@@ -32,4 +32,6 @@ object DefaultStateGenerator extends StateGenerator {
 
   def uiForPrize = (p, isSouth) => Set()
 
+  def uiForDeck = (p, isSouth) => Set()
+
 }
