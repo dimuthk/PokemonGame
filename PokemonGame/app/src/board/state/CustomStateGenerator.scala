@@ -16,7 +16,7 @@ abstract class CustomStateGenerator extends StateGenerator {
 
   var isActive : Boolean = false
 
-  def uiForActivatedCard = (Player) => Set[CardUI.Value]
+  def uiForActivatedCard : (Player) => Set[CardUI.Value]
 
   def uiForActive = (p, isSouth) => if (isSouth) uiForActiveSouth(p) else uiForActiveNorth(p)
 
