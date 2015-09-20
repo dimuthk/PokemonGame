@@ -1,5 +1,6 @@
 package src.board.state
 
+import src.board.state.StateCommand
 import src.player.Player
 import play.api.libs.json._
 import src.card.CardUI
@@ -28,17 +29,9 @@ abstract class StateGenerator {
 
   def orientStateForPlayer(p : Player, isSouthTurn : Boolean) : Unit = {
   	val isSouth = isSouthTurn && p.isTurn
-  	p.setUIOrientationForActive(uiForActive(p, isSouth))
+    p.setUIOrientationForActive(generateUiFor(p, Active(), isSouth))
   }
 
-  def uiForActive : (Player, Boolean) => Set[CardUI.Value]
-
-  def uiForBench : (Player, Boolean) => Set[CardUI.Value]
-
-  def uiForHand : (Player, Boolean) => Set[CardUI.Value]
-
-  def uiForPrize : (Player, Boolean) => Set[CardUI.Value]
-
-  def uiForDeck : (Player, Boolean) => Set[CardUI.Value]
+  def generateUiFor : (Player, StateCommand, Boolean) => Set[CardUI.Value]
 
 }

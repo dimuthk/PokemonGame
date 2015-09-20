@@ -3,6 +3,7 @@ package src.card.pokemon.base_set
 import src.card.condition.StatusCondition
 import src.json.Identifier
 import src.board.drag._
+import src.board.state._
 import src.board.state.CustomStateGenerator
 import src.move._
 import src.move.MoveBuilder._
@@ -38,16 +39,14 @@ private class CurseState extends CustomStateGenerator {
   // Gengar must still be usable to deactivate power.
   def uiForActivatedCard = (p) => Set(FACE_UP, CLICKABLE, DISPLAYABLE, USABLE)
 
-  // Opponent's active and bench are draggable. user's stuff
-  // is deactivated.
-  override def uiForActive = (p, isSouth) => isSouth match {
-    case true => Set(FACE_UP)
-    case false => Set(FACE_UP, DRAGGABLE) 
-  }
-
-  override def uiForBench = (p, isSouth) => isSouth match {
-    case true => Set(FACE_UP)
-    case false => Set(FACE_UP, DRAGGABLE)  
+  def generateUiFor = (p, cmd, isSouth) => cmd match {
+    // Opponent's active and bench are draggable. user's stuff
+    // is deactivated.
+    case _ : ActiveOrBench => isSouth match {
+      case true => Set(FACE_UP)
+      case false => Set(FACE_UP, DRAGGABLE) 
+    }
+    case _ => DefaultStateGenerator.generateUiFor(p, cmd, isSouth)
   }
 
 }

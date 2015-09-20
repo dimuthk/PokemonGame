@@ -96,17 +96,30 @@ class HealMoveInterpreter extends CustomMoveInterpreter {
 
 }
 
-class HealStateGenerator extends CustomStateGenerator(true, false) {
+class HealStateGenerator extends CustomStateGenerator {
+
+  def generateUiFor = (p, cmd, isSouth) => (cmd, isSouth) match {
+    // Active and bench cards are visible to allow heal selection.
+    case (_ : ActiveOrBench, true) => Set(FACE_UP, CLICKABLE, DISPLAYABLE, USABLE)
+    // Hand is deactivated.
+    case Hand() => Set()
+    case _ => DefaultStateGenerator.generateUiFor(p, cmd, isSouth)
+  }
+
+  def uiForActivatedCard = (p) => Set(FACE_UP, CLICKABLE, DISPLAYABLE, DRAGGABLE, USABLE)
+
+  override def setCustomMoveFor = (p, cmd, isSouth) => (cmd, isSouth) match {
+    case (_ : ActiveOrBench, true) => otherCard()
+    case Hand() => isSouth match {
+      case true => None
+      case false => Some(jsonForCard)
+    }
+    case Prize() => Some(jsonForCard)
+    case Deck() => Some(jsonForCard)
+    case _ => None
+  }
 
   override def generateForOwner = (owner, opp, interceptor) => {
-    // Active and bench cards are visible to allow heal selection.
-    owner.setUIOrientationForActiveAndBench(Set(FACE_UP, CLICKABLE, DISPLAYABLE, USABLE))
-    // Hand is deactivated.
-    owner.setUiOrientationForHand(Set())
-
-    // Opponent active and bench cards are visible but not clickable.
-    opp.setUIOrientationForActiveAndBench(Set(FACE_UP))
-    opp.setUiOrientationForHand(Set())
 
     val activeJson = jsonForCard(owner, owner.active, interceptor)
     val benchJson = for (obc <- owner.bench) yield jsonForCard(owner, obc, interceptor)

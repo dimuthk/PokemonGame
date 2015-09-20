@@ -6,6 +6,7 @@ import src.move.MoveBuilder._
 import src.move.ActivePokemonPower
 import src.board.intermediary.IntermediaryRequest
 import src.board.drag._
+import src.board.state._
 import src.board.state.CustomStateGenerator
 import src.board.state.DefaultStateGenerator
 import src.player.Player
@@ -47,14 +48,9 @@ private class EnergyTransState extends CustomStateGenerator{
 
   def uiForActivatedCard = (p) => Set(FACE_UP, CLICKABLE, DISPLAYABLE, DRAGGABLE, USABLE)
 
-  override def uiForActive = (p, isSouth) => isSouth match {
-    case true => Set(FACE_UP, DRAGGABLE)
-    case false => DefaultStateGenerator.uiForActive(p, isSouth) 
-  }
-
-  override def uiForBench = (p, isSouth) => isSouth match {
-    case true => Set(FACE_UP, DRAGGABLE)
-    case false => DefaultStateGenerator.uiForBench(p, isSouth)  
+  def generateUiFor = (p, cmd, isSouth) => (cmd, isSouth) match {
+    case (_ : ActiveOrBench, true) => Set(FACE_UP, DRAGGABLE)
+    case _ => DefaultStateGenerator.generateUiFor(p, cmd, isSouth)
   }
 
 }

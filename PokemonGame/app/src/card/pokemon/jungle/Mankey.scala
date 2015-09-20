@@ -3,7 +3,7 @@ package src.card.pokemon.base_set
 import src.json.Identifier
 import src.board.intermediary.SingleDisplay
 import src.board.move._
-import src.board.state.CustomStateGenerator
+import src.board.state._
 import src.move._
 import src.move.Status._
 import src.card.Card
@@ -13,7 +13,7 @@ import src.move.MoveBuilder._
 import src.player.Player
 import src.card.energy.EnergyType
 import src.card.pokemon._
-import src.card.Deck
+import src.card.Deck._
 import src.card.Placeholder
 import play.api.libs.json._
 import play.api.Logger
@@ -21,7 +21,7 @@ import play.api.Logger
 class Mankey extends BasicPokemon(
 	"Mankey",
 	"Mankey-Jungle-55.jpg",
-	Deck.JUNGLE,
+	JUNGLE,
 	Identifier.MANKEY,
 	id = 56,
 	maxHp = 30,
@@ -62,43 +62,27 @@ private class Peek extends ActivePokemonPower(
 
 }
 
-class PeekStateGenerator extends CustomStateGenerator(true, false) {
+class PeekStateGenerator extends CustomStateGenerator {
 
-  // Active, bench and handcards are visible but not interactable.
-  override def uiForActive = (p, isSouth) => Set(FACE_UP)
+  def uiForActivatedCard = (p) => Set(FACE_UP, CLICKABLE, DISPLAYABLE, DRAGGABLE, USABLE)
 
-  override def uiForBench = (p, isSouth) => Set(FACE_UP)
-  
-  override def uiForHand = (p, isSouth) => isSouth match {
-    case true => Set(FACE_UP)
-    case false => Set(CLICKABLE, USABLE)
+  def generateUiFor = (p, cmd, isSouth) => cmd match {
+    case _ : ActiveOrBench => Set(FACE_UP)
+    case Hand() => isSouth match {
+      case true => Set(FACE_UP, CLICKABLE)
+      case false => Set(CLICKABLE, USABLE)
+    }
+    case _ => Set(CLICKABLE, USABLE)
   }
 
-  override def uiForPrize = (p, isSouth) => Set(CLICKABLE, USABLE)
-
-  override def uiForDeck = (p, isSouth) => Set(CLICKABLE, USABLE)
-
-
-  override def generateForOwner = (owner, opp, interceptor) => {
-
-    val oppHandJson = for (_ <- opp.hand) yield jsonForCard
-
-    val ownerDeckJson = for (_ <- owner.deck) yield jsonForCard
-    val oppDeckJson = for (_ <- opp.deck) yield jsonForCard
-
-    val ownerPrizeJson = for (op <- owner.prizes) yield optionJsonForCard(op)
-    val oppPrizeJson = for (op <- opp.prizes) yield optionJsonForCard(op)
-
-    val ownerJson = owner.customJson(
-    	deckMoves = Some(ownerDeckJson),
-    	prizeMoves = Some(ownerPrizeJson))
-
-    val oppJson = opp.customJson(
-    	deckMoves = Some(oppDeckJson),
-    	prizeMoves = Some(oppPrizeJson),
-    	handMoves = Some(oppHandJson))
-
-    (ownerJson, oppJson)
+  override def setCustomMoveFor = (p, cmd, isSouth) => cmd match {
+    case Hand() => isSouth match {
+      case true => None
+      case false => Some(jsonForCard)
+    }
+    case Prize() => Some(jsonForCard)
+    case Deck() => Some(jsonForCard)
+    case _ => None
   }
 
   def optionJsonForCard(oc : Option[Card]): JsArray = oc match {

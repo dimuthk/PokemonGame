@@ -1,5 +1,6 @@
 package src.board.state
 
+import src.board.state._
 import src.card.Card
 import src.card.pokemon.PokemonCard
 import src.card.energy.EnergyCard
@@ -14,24 +15,17 @@ import src.card.CardUI._
  */
 object DefaultStateGenerator extends StateGenerator {
 
-  def uiForActive = (p, isSouth) => (p.isTurn, isSouth) match {
-    case (true, true) => Set(FACE_UP, CLICKABLE, DISPLAYABLE, DRAGGABLE, USABLE)
-    case _ => Set(FACE_UP, CLICKABLE, DISPLAYABLE)
-  }
-
-  def uiForBench = (p, isSouth) => (p.isTurn, isSouth) match {
-    case (true, true) => Set(FACE_UP, CLICKABLE, DISPLAYABLE, DRAGGABLE, USABLE)
-    case _ => Set(FACE_UP, CLICKABLE, DISPLAYABLE)
-  }
-
-  def uiForHand = (p, isSouth) => (p.isTurn, isSouth) match {
-    case (true, true) => Set(FACE_UP, DRAGGABLE, CLICKABLE)
-    case (false, true) => Set(FACE_UP)
+  def generateUiFor = (p, cmd, isSouth) => cmd match {
+    case _ : ActiveOrBench => (p.isTurn, isSouth) match {
+      case (true, true) => Set(FACE_UP, CLICKABLE, DISPLAYABLE, DRAGGABLE, USABLE)
+      case _ => Set(FACE_UP, CLICKABLE, DISPLAYABLE)
+    }
+    case Hand() => (p.isTurn, isSouth) match {
+      case (true, true) => Set(FACE_UP, DRAGGABLE, CLICKABLE)
+      case (false, true) => Set(FACE_UP)
+      case _ => Set()
+    }
     case _ => Set()
   }
-
-  def uiForPrize = (p, isSouth) => Set()
-
-  def uiForDeck = (p, isSouth) => Set()
 
 }

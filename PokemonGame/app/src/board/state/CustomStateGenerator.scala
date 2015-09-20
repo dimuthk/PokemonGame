@@ -24,16 +24,11 @@ abstract class CustomStateGenerator extends StateGenerator {
     }
   }
 
-  def uiForActive = (p, isSouth) => DefaultStateGenerator.uiForActive(p, isSouth)
-
-  def uiForBench = (p, isSouth) => DefaultStateGenerator.uiForBench(p, isSouth)
-
-  def uiForHand = (p, isSouth) => DefaultStateGenerator.uiForHand(p, isSouth)
-
-  def uiForPrize = (p, isSouth) => DefaultStateGenerator.uiForPrize(p, isSouth)
-
-  def uiForDeck = (p, isSouth) => DefaultStateGenerator.uiForDeck(p, isSouth)
-
   def uiForActivatedCard : (Player) => Set[CardUI.Value]
+
+  def setCustomMoveFor : (Player, StateCommand, Boolean) => Option[JsArray]
+    = (_, _, _) => None
+
+  def customMoveForActivatedCard : (Player) => Option[JsArray] = (_) => None
 
 }
