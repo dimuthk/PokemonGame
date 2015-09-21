@@ -20,7 +20,7 @@ object DefaultStateGenerator extends StateGenerator {
       case (true, true) => Set(FACE_UP, CLICKABLE, DISPLAYABLE, DRAGGABLE, USABLE)
       case _ => Set(FACE_UP, CLICKABLE, DISPLAYABLE)
     }
-    case Hand() => (p.isTurn, isSouth) match {
+    case Hand(_) => (p.isTurn, isSouth) match {
       case (true, true) => Set(FACE_UP, DRAGGABLE, CLICKABLE)
       case (false, true) => Set(FACE_UP)
       case _ => Set()

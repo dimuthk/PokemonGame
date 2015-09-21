@@ -6,7 +6,7 @@ import src.move.Status._
 import src.board.intermediary.IntermediaryRequest
 import src.board.intermediary.IntermediaryRequest._
 import src.board.move._
-import src.board.state.CustomStateGenerator
+import src.board.state._
 import src.board.intermediary.ClickableCardRequest
 import src.card.CardUI
 import src.card.CardUI._
@@ -102,39 +102,21 @@ class HealStateGenerator extends CustomStateGenerator {
     // Active and bench cards are visible to allow heal selection.
     case (_ : ActiveOrBench, true) => Set(FACE_UP, CLICKABLE, DISPLAYABLE, USABLE)
     // Hand is deactivated.
-    case Hand() => Set()
+    case (Hand(_), true) => Set()
     case _ => DefaultStateGenerator.generateUiFor(p, cmd, isSouth)
   }
 
   def uiForActivatedCard = (p) => Set(FACE_UP, CLICKABLE, DISPLAYABLE, DRAGGABLE, USABLE)
 
   override def setCustomMoveFor = (p, cmd, isSouth) => (cmd, isSouth) match {
-    case (_ : ActiveOrBench, true) => otherCard()
-    case Hand() => isSouth match {
-      case true => None
-      case false => Some(jsonForCard)
-    }
-    case Prize() => Some(jsonForCard)
-    case Deck() => Some(jsonForCard)
+    case (Active(pc), true) => Some(moveListToJsArray(List(otherCard(pc))))
+    case (Bench(pc), true) => Some(moveListToJsArray(List(otherCard(pc))))
     case _ => None
   }
 
-  override def generateForOwner = (owner, opp, interceptor) => {
-
-    val activeJson = jsonForCard(owner, owner.active, interceptor)
-    val benchJson = for (obc <- owner.bench) yield jsonForCard(owner, obc, interceptor)
-
-    val ownerJson = owner.customJson(activeMoves = Some(activeJson), benchMoves = Some(benchJson))
-    Logger.debug("VILEPLUME " + ownerJson \ "ACTIVE" \ "MOVES" + "")
-    (ownerJson, opp.toJson)
-  }
-
-  def jsonForCard(owner : Player, opc : Option[PokemonCard], interceptor : PokemonCard) : JsArray = opc match {
-    case Some(pc) => pc == interceptor match {
-      case true => moveListToJsArray(List(mainCard(pc), otherCard(pc)))
-      case false => moveListToJsArray(List(otherCard(pc)))
-    }
-    case None => moveListToJsArray(List(Placeholder.toJson))
+  override def customMoveForActivatedCard = (p) => p.cardWithActivatedPower match {
+    case Some(pc) => Some(moveListToJsArray(List(mainCard(pc), otherCard(pc))))
+    case None => None
   }
 
   def otherCard(pc : PokemonCard) : JsObject = Json.obj(
@@ -144,14 +126,5 @@ class HealStateGenerator extends CustomStateGenerator {
   def mainCard(pc : PokemonCard) : JsObject = Json.obj(
     Identifier.MOVE_NAME.toString -> "Heal",
     Identifier.MOVE_STATUS.toString -> ACTIVATED)
-
-  def moveListToJsArray(list : Seq[JsObject]) : JsArray = {
-    return list.foldRight(new JsArray())((m, curr) => curr.prepend(m))
-  }
-
-  def optionMoveToJson(om : Option[Move]) : JsObject = om match {
-    case Some(m) => m.toJson
-    case None => Placeholder.toJson
-  }
 
 }

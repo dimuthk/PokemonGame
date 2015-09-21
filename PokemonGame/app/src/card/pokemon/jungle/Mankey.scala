@@ -68,7 +68,7 @@ class PeekStateGenerator extends CustomStateGenerator {
 
   def generateUiFor = (p, cmd, isSouth) => cmd match {
     case _ : ActiveOrBench => Set(FACE_UP)
-    case Hand() => isSouth match {
+    case Hand(_) => isSouth match {
       case true => Set(FACE_UP, CLICKABLE)
       case false => Set(CLICKABLE, USABLE)
     }
@@ -76,27 +76,18 @@ class PeekStateGenerator extends CustomStateGenerator {
   }
 
   override def setCustomMoveFor = (p, cmd, isSouth) => cmd match {
-    case Hand() => isSouth match {
+    case Hand(_) => isSouth match {
       case true => None
       case false => Some(jsonForCard)
     }
-    case Prize() => Some(jsonForCard)
-    case Deck() => Some(jsonForCard)
+    case Prize(_) => Some(jsonForCard)
+    case Deck(_) => Some(jsonForCard)
     case _ => None
-  }
-
-  def optionJsonForCard(oc : Option[Card]): JsArray = oc match {
-  	case Some(c) => jsonForCard
-  	case None => moveListToJsArray(List(Placeholder.toJson))
   }
 
   def jsonForCard : JsArray = moveListToJsArray(List(Json.obj(
   	Identifier.MOVE_NAME.toString -> "Peek",
   	Identifier.MOVE_STATUS.toString -> ENABLED)))
-
-  def moveListToJsArray(list : Seq[JsObject]) : JsArray = {
-    return list.foldRight(new JsArray())((m, curr) => curr.prepend(m))
-  }
 
 }
 

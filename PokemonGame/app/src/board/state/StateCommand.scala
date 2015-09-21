@@ -1,18 +1,20 @@
 package src.board.state
 
+import src.card.Card
+import src.card.pokemon.PokemonCard
 import src.player.Player
 import src.board.InterpreterCommand
 
 sealed abstract class StateCommand extends InterpreterCommand
 
-abstract class ActiveOrBench extends StateCommand
+abstract class ActiveOrBench(pc : PokemonCard) extends StateCommand
 
-case class Active() extends ActiveOrBench
+case class Active(pc : PokemonCard) extends ActiveOrBench(pc)
 
-case class Bench(i : Integer) extends ActiveOrBench
+case class Bench(pc : PokemonCard) extends ActiveOrBench(pc)
 
-case class Hand(i : Integer) extends StateCommand
+case class Hand(pc : Card) extends StateCommand
 
-case class Prize(i : Integer) extends StateCommand
+case class Prize(pc : Card) extends StateCommand
 
-case class Deck() extends StateCommand
+case class Deck(pc : Card) extends StateCommand

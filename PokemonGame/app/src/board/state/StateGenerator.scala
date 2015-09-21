@@ -1,5 +1,7 @@
 package src.board.state
 
+import src.card.Card
+import src.card.pokemon.PokemonCard
 import src.board.state.StateCommand
 import src.player.Player
 import play.api.libs.json._
@@ -29,7 +31,23 @@ abstract class StateGenerator {
 
   def orientStateForPlayer(p : Player, isSouthTurn : Boolean) : Unit = {
   	val isSouth = isSouthTurn && p.isTurn
-    p.setUIOrientationForActive(generateUiFor(p, Active(), isSouth))
+    p.active match {
+      case Some(a) => a.setUiOrientation(generateUiFor(p, Active(a), isSouth))
+      case None => ()
+    }
+    for (bc : PokemonCard <- p.bench.toList.flatten) {
+      bc.setUiOrientation(generateUiFor(p, Bench(bc), isSouth))
+    }
+    for (hc : Card <- p.hand) {
+      hc.setUiOrientation(generateUiFor(p, Hand(hc), isSouth))
+    }
+    for (pc : Card <- p.prizes.toList.flatten) {
+      pc.setUiOrientation(generateUiFor(p, Prize(pc), isSouth))
+    }
+    if (p.deck.length > 0) {
+      val dc = p.deck(0)
+      dc.setUiOrientation(generateUiFor(p, Deck(dc), isSouth))
+    }
   }
 
   def generateUiFor : (Player, StateCommand, Boolean) => Set[CardUI.Value]

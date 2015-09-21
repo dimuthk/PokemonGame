@@ -18,9 +18,9 @@ abstract class CustomStateGenerator extends StateGenerator {
 
   override def orientStateForPlayer(p : Player, isSouthTurn : Boolean) : Unit = {
     super.orientStateForPlayer(p, isSouthTurn)
-    p.cardWithActivatedPower match {
-      case Some(card) => card.setUiOrientation(uiForActivatedCard(p))
-      case None => ()
+    (p.isTurn, p.cardWithActivatedPower) match {
+      case (true, Some(card)) => card.setUiOrientation(uiForActivatedCard(p))
+      case _ => ()
     }
   }
 
@@ -30,5 +30,9 @@ abstract class CustomStateGenerator extends StateGenerator {
     = (_, _, _) => None
 
   def customMoveForActivatedCard : (Player) => Option[JsArray] = (_) => None
+
+  def moveListToJsArray(list : Seq[JsObject]) : JsArray = {
+    return list.foldRight(new JsArray())((m, curr) => curr.prepend(m))
+  }
 
 }
